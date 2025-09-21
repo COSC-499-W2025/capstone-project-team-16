@@ -1,10 +1,10 @@
 # Personal Log - Ethan Sturek
 
-## [Date Range]  
-2025-SEP-15 to 2025-SEP-21
+## 2025-SEP-15 to 2025-SEP-21
+
 
 ### Type of Tasks Worked On
-- ![Screenshot](/screenshots/Ethan/Week%201.png)
+- ![Screenshot](<screenshots/Ethan/Week 1.png>)
 
 ### Recap of Week's Goals
 - Create functional and non-functional requirements for project

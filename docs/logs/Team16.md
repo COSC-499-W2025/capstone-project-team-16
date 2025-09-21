@@ -1,7 +1,7 @@
 # Team Log - Team 16
 
-## Milestone: [Start Date] to [End Date]
-2025-SEP-15 to 2025-SEP-21
+## Milestone: 2025-SEP-15 to 2025-SEP-21
+
 
 ### Milestone Goals Recap
 - Create functional and non-functional requirements for project
@@ -13,7 +13,7 @@
 
 ### Tasks from Project Board
 | Feature | Task | Assigned To (Username) | Notes |
-|---------|------|----------------------|
+| --------- | ------ | ---------------------- | ------ |
 | Requirments sheet | Functional requirements | ethansturek | … |
 | Requirments sheet | Non-functional requirements | ethansturek | … |
 | Requirments sheet | In-class discussion notes | ethansturek | … |
