@@ -1,28 +1,40 @@
 # Personal Log - Ethan Sturek
 
 ## [Date Range]  
-YYYY-MM-DD to YYYY-MM-DD
+2025-SEP-15 to 2025-SEP-21
 
 ### Type of Tasks Worked On
-- [Screenshot from Peer Eval question]
+- ![Screenshot](/screenshots/Ethan/Week%201.png)
 
 ### Recap of Week's Goals
-- Goal 1
-- Goal 2
+- Create functional and non-functional requirements for project
+- Organize repo branches and file structure
+
 
 ### Features Assigned (Project Plan)
-- Feature 1
-- Feature 2
+- Requirments sheet 
+- Repo organization 
 
 ### Tasks from Project Board
-| Task | Status (Completed/In Progress) | Notes |
-|------|-------------------------------|-------|
-| Task 1 | Completed | … |
-| Task 2 | In Progress | … |
+| Feature | Task | Status (Completed/In Progress) | Notes |
+|------|------|-------------------------------|-------|
+| Requirments sheet | Functional requirements | Completed | … |
+| Requirments sheet | Non-Functional requirements| Completed | … |
+| Requirments sheet | In-class discussion notes| Completed | … |
+| Repo organization | Repo file structure| Completed | … |
+| Repo organization | Repo branch creation| Completed | … |
+| Repo organization | Git project creation| Completed | … |
 
-### Completed/In-Progress Tasks (Last 2 Weeks)
-- Task 1 ✅
-- Task 2 🔄
+### Completed Tasks (Last 2 Weeks)
+- Functional requirements 
+- Non-Functional requirements 
+- Repo file structure 
+- Repo branch creation 
+- In-class discussion notes 
+- Git project creation 
+
+### In-Progress Tasks (Last 2 Weeks)
+
 
 ### Additional Context (Optional)
-- Any notes or blockers
+- NA
