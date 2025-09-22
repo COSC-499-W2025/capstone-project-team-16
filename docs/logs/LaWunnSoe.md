@@ -1,28 +1,32 @@
 # Personal Log - La Wunn Soe
 
-## [Date Range]  
-YYYY-MM-DD to YYYY-MM-DD
+## 2025-SEP-15 to 2025-SEP-21
 
 ### Type of Tasks Worked On
-- [Screenshot from Peer Eval question]
+
+<img width="1095" height="616" alt="Screenshot 2025-09-21 at 10 03 26 PM" src="https://github.com/user-attachments/assets/1608f184-d73b-445c-b3d5-f6a1cb0e1014" />
 
 ### Recap of Week's Goals
-- Goal 1
-- Goal 2
+- Project Requirement document
+- Team repo
 
 ### Features Assigned (Project Plan)
-- Feature 1
-- Feature 2
+- Project Requirement doc
+
 
 ### Tasks from Project Board
-| Task | Status (Completed/In Progress) | Notes |
-|------|-------------------------------|-------|
-| Task 1 | Completed | … |
-| Task 2 | In Progress | … |
+| Feature | Task | Status (Completed/In Progress) | Notes |
+|------|------|-------------------------------|-------|
+| Project Requirments sheet | Target Users | Completed | … |
+| Project Requirments sheet | Usage Scenarios| Completed | … |
+| Project Requirments sheet | Requirements needed to satisfy scenarios| Completed | … |
+| Project Requirments sheet | How to test each requirement| Completed | … |
 
 ### Completed/In-Progress Tasks (Last 2 Weeks)
-- Task 1 ✅
-- Task 2 🔄
+- Target Users ✅
+- Usage Scenarios ✅
+- Requirements needed to satisfy scenarios ✅
+- How to test each requirement ✅
 
 ### Additional Context (Optional)
-- Any notes or blockers
+- N/A
