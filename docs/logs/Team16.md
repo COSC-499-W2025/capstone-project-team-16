@@ -51,3 +51,60 @@
 ### Additional Context (Optional)
 - Notes or blockers
 
+## Milestone: 2025-SEP-22 to 2025-SEP-28
+
+
+### Milestone Goals Recap
+- project proposal
+- architecture diagram
+
+### Features in Project Plan
+- Requirments sheet 
+- Repo organization 
+
+### Tasks from Project Board
+| Feature | Task | Assigned To (Username) | Notes |
+| --------- | ------ | ---------------------- | ------ |
+| project proposal | Scope, Usage Scenario, Proposed Solution | LaWunn | … |
+| project proposal | Use Cases | ethansturek | … |
+| project proposal | System Architecture Diagram | ethansturek | … |
+| project proposal | Functional Requirements | lugger33 | … |
+| project proposal | Requirements Verification | lugger33 | … |
+| architecture diagram | diagram | ethansturek | … |
+
+### Burnup Chart
+| Name | Username |
+|----------------|----------------|
+| Ethan Sturek | ethansturek |
+| La Wunn| LaWunn|
+| Amani |lugger33 |
+| | |
+
+
+### Completed Tasks Table
+| Task | Assigned To (Username) | 
+|------|----------------------|
+| Functional requirements | ethansturek |
+| Non-functional requirements | ethansturek | 
+| In-class discussion notes | ethansturek |
+| File structure | ethansturek |
+| Branch creation | ethansturek |
+| Git project creation | ethansturek |
+
+| Scope, Usage Scenario, Proposed Solution | La Wunn |
+| Use Cases | ethansturek |
+| System Architecture Diagram | ethansturek |
+| Functional Requirements | Amani |
+| Requirements Verification | Amani |
+| diagram | ethansturek |
+
+### In Progress Tasks Table
+| Task | Assigned To (Username) |
+|------|----------------------|
+
+### Test Report
+- Summary of tests run this milestone
+
+### Additional Context (Optional)
+- Notes or blockers
+
