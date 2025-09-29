@@ -59,8 +59,8 @@
 - architecture diagram
 
 ### Features in Project Plan
-- Requirments sheet 
-- Repo organization 
+- proposal
+- diagram
 
 ### Tasks from Project Board
 | Feature | Task | Assigned To (Username) | Notes |
