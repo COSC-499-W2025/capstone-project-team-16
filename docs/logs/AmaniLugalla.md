@@ -1,28 +1,25 @@
 # Personal Log - Amani Lugalla
 
 ## [Date Range]  
-YYYY-MM-DD to YYYY-MM-DD
+2025-09-21 to 2025-09-28
 
 ### Type of Tasks Worked On
-- [Screenshot from Peer Eval question]
+- ![Screenshot](<screenshots/Amani/Week 4.png>)
 
 ### Recap of Week's Goals
-- Goal 1
-- Goal 2
+- Finalize Project Proposal
+- Finalize System Architecture Diagram
 
 ### Features Assigned (Project Plan)
-- Feature 1
-- Feature 2
+- Task 4; Requirements, Testing, Requirement Verification.
 
 ### Tasks from Project Board
 | Task | Status (Completed/In Progress) | Notes |
 |------|-------------------------------|-------|
-| Task 1 | Completed | … |
-| Task 2 | In Progress | … |
+| Task 4 | Completed | … |
 
 ### Completed/In-Progress Tasks (Last 2 Weeks)
-- Task 1 ✅
-- Task 2 🔄
+- Task 4 ✅
 
 ### Additional Context (Optional)
-- Any notes or blockers
+- N/a
