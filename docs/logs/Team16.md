@@ -84,7 +84,6 @@
 ### Completed Tasks Table
 | Task | Assigned To (Username) | 
 |------|----------------------|
-
 | Scope, Usage Scenario, Proposed Solution | La Wunn |
 | Use Cases | ethansturek |
 | System Architecture Diagram | ethansturek |
