@@ -1,10 +1,40 @@
 # Personal Log - Ethan Sturek
+## 2025-SEP-22 to 2025-SEP-28
+
+
+### Type of Tasks Worked On
+![Screenshot](<screenshots/Ethan/Week 2.png>)
+
+### Recap of Week's Goals
+- Create system architecture
+- Project proposal
+
+
+### Features Assigned (Project Plan)
+- System Architecture
+- Project Plan
+
+### Tasks from Project Board
+| Feature | Task | Status (Completed/In Progress) | Notes |
+|------|------|-------------------------------|-------|
+| System Architecture | System Architecture Diagram | Completed | … |
+| Project Plan | Use Cases | Completed | … |
+
+### Completed Tasks (Last 2 Weeks)
+- System Architecture Diagram
+- Use Cases
+
+### In-Progress Tasks (Last 2 Weeks)
+
+
+### Additional Context (Optional)
+- NA
 
 ## 2025-SEP-15 to 2025-SEP-21
 
 
 ### Type of Tasks Worked On
-- ![Screenshot](<screenshots/Ethan/Week 1.png>)
+![Screenshot](<screenshots/Ethan/Week 1.png>)
 
 ### Recap of Week's Goals
 - Create functional and non-functional requirements for project
