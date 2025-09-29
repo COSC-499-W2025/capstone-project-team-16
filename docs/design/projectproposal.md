@@ -1,6 +1,6 @@
 ## **Features Proposal for Project Option XX**
 Team Number: 16
-Team Members: Ethan Sturek 21282611, Lastname SN1234567, Firstname Lastname SN1234567, Firstname Lastname SN1234567,
+Team Members: Ethan Sturek 21282611, La Wunn Soe 69493971, Firstname Lastname SN1234567, Firstname Lastname SN1234567,
 Firstname Lastname SN1234567, Firstname Lastname SN1234567
 
 ## **1 Project Scope and Usage Scenario**
@@ -8,11 +8,17 @@ Firstname Lastname SN1234567, Firstname Lastname SN1234567
 multiple user groups – be sure to clearly identify them (for example, an educational app may have
 students, instructors, and administrators as three different user groups.**
 
+The basic usage scenario for this project is to provide people, specifically programmers, creatives (such as artists, designers, and photographers), and data analysts with a way to mine and analyze their own digital works and to better understand and present their contributions. A programmer might scan their repositories to generate a timeline of commits and code growth for use in interviews, while a creative could collect images, sketches, and media drafts into an automatically organized portfolio. Similarly, a data analyst could trace the evolution of datasets, notebooks, and reports to demonstrate methodology and reproducibility. In all cases, the system will allow users to scan selected files, extract meaningful metadata, and generate visual dashboards or exportable reports, helping them showcase their productivity, reflect on their processes, and organize their work histories while respecting privacy.
+
 ## **2 Proposed Solution**
 **Explain in one to two paragraphs what your solution is. Highlight special features, or special
 technologies, that you are using. What is your value proposition? What do you think you will do
 better in comparison to other teams? State your main points here clearly. Be concise and catch
 your reader’s attention immediately.**
+
+Our solution is a system for mining and analyzing personal digital works including code repositories, documents, notes, design files, and media. The system scans user-selected locations, extracts meaningful data, and organizes results into a structured database. An analysis engine then generates insights such as timelines, productivity trends, and project evolution, which are presented back to the user through an interactive dashboard. Users can also export professional-looking portfolios or reports directly from there. Privacy rules will also be applied at every step to make sure that sensitive files are never exposed.
+
+What makes our approach unique is the combination of automation, visualization, and privacy control. Unlike a simple file organizer, our system not only collects and classifies files but also transforms them into interpretable insights and exportable outputs that highlight a user’s contributions. Key features include an integrated Privacy Manager, visual dashboards, and a flexible exporter that can produce shareable reports. Our value proposition is to give users a tool that helps them showcase their work, reflect on their growth, and stay in control of their data. Compared to other teams, we believe our strength lies in balancing technical depth (data extraction, analysis, visualization) with usability and ethical awareness, making the system both practical and trustworthy.
 
 ## **3 Use Cases**
 **Based on the usage scenario, describe all the use cases in detail. Do this by providing a UML use
