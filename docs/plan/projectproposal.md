@@ -12,7 +12,7 @@ What makes our approach unique is the combination of automation, visualization, 
 
 ## **3 Use Cases**
 
-![Screenshot](<Use Case UML.jpg>)
+![Screenshot](<UML.jpg>)
 ### **For Programmers**
 
 #### Use Case: Generate Commit Timeline
