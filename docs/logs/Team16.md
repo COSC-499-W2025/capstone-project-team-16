@@ -84,12 +84,6 @@
 ### Completed Tasks Table
 | Task | Assigned To (Username) | 
 |------|----------------------|
-| Functional requirements | ethansturek |
-| Non-functional requirements | ethansturek | 
-| In-class discussion notes | ethansturek |
-| File structure | ethansturek |
-| Branch creation | ethansturek |
-| Git project creation | ethansturek |
 
 | Scope, Usage Scenario, Proposed Solution | La Wunn |
 | Use Cases | ethansturek |
