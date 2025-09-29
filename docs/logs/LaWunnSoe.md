@@ -52,7 +52,7 @@
 | Feature | Task | Status (Completed/In Progress) | Notes |
 |------|------|-------------------------------|-------|
 | Project Proposal | Project Scope and Usage Scenario | Completed | … |
-| Project Requirments sheet | Proposed Solution | Completed | … |
+| Project Proposal | Proposed Solution | Completed | … |
 | Architecture Diagram | Security & Observability | Completed | … |
 | Architecture Diagram | Privacy & Security Manager | Completed | … |
 | Architecture Diagram | Transparency Log | Completed | … |
