@@ -25,8 +25,8 @@
 | Name | Username |
 |----------------|----------------|
 | Ethan Sturek | ethansturek |
-| | |
-| | |
+| La Wunn| LaWunn|
+| Amani |lugger33 |
 | | |
 
 - Insert image or link here
