@@ -30,3 +30,43 @@
 
 ### Additional Context (Optional)
 - N/A
+
+## 2025-SEP-22 to 2025-SEP-28
+
+### Type of Tasks Worked On
+
+<img width="934" height="554" alt="Screenshot 2025-09-28 at 11 07 17 PM" src="https://github.com/user-attachments/assets/24106ab0-2adf-4971-b5da-d8dbce43b8af" />
+
+
+### Recap of Week's Goals
+- project proposal
+- architecture diagram
+
+### Features Assigned (Project Plan)
+- Project Scope and Usage Scenario
+- Proposed Solution
+- Security & Observability
+
+
+### Tasks from Project Board
+| Feature | Task | Status (Completed/In Progress) | Notes |
+|------|------|-------------------------------|-------|
+| Project Proposal | Project Scope and Usage Scenario | Completed | … |
+| Project Requirments sheet | Proposed Solution | Completed | … |
+| Architecture Diagram | Security & Observability | Completed | … |
+| Architecture Diagram | Privacy & Security Manager | Completed | … |
+| Architecture Diagram | Transparency Log | Completed | … |
+
+### Completed/In-Progress Tasks (Last 2 Weeks)
+- Target Users ✅
+- Usage Scenarios ✅
+- Requirements needed to satisfy scenarios ✅
+- How to test each requirement ✅
+- Project Scope and Usage Scenario ✅
+- Proposed Solution ✅
+- Security & Observability ✅
+- Privacy & Security Manager ✅
+- Transparency Log ✅
+
+### Additional Context (Optional)
+- N/A
