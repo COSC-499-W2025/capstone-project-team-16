@@ -1,6 +1,6 @@
 ## **Features Proposal for Project Option XX**
 Team Number: 16
-Team Members: Ethan Sturek 21282611, La Wunn Soe 69493971
+Team Members: Ethan Sturek 21282611, La Wunn Soe 69493971, Amani Lugalla 84244425
 
 ## **1 Project Scope and Usage Scenario**
 The basic usage scenario for this project is to provide people, specifically programmers, creatives (such as artists, designers, and photographers), and data analysts with a way to mine and analyze their own digital works and to better understand and present their contributions. A programmer might scan their repositories to generate a timeline of commits and code growth for use in interviews, while a creative could collect images, sketches, and media drafts into an automatically organized portfolio. Similarly, a data analyst could trace the evolution of datasets, notebooks, and reports to demonstrate methodology and reproducibility. In all cases, the system will allow users to scan selected files, extract meaningful metadata, and generate visual dashboards or exportable reports, helping them showcase their productivity, reflect on their processes, and organize their work histories while respecting privacy.
@@ -160,16 +160,12 @@ What makes our approach unique is the combination of automation, visualization, 
 
 
 ## 4 Requirements, Testing, Requirement Verification
-**Start by mentioning your technology stack and test framework. Then use the example table below
-to identify the requirements, test cases, and people assigned to work on those requirements.**
-- Based on your use cases above, flush out the necessary requirements. These use cases will only identify
-functional requirements. You will want to think about the usage scenario and the client’s needs to identify
-non-functional requirements also.
-- For each requirement, develop test cases - positive and negative cases - that can be written in the code base
-and automated. While non-functional requirements such as “usability” will require manual testing (not by
-your team), most of the requirements should have automatable test cases.
-- Discuss with your teams the difficulty of each requirement and who wants to be assigned to them. Choose
-one of: hard, medium, or easy and put it in the column for “H/D/E”.
+
+## Technology Stack and Testing Framework
+
+The app uses **Electron** for the desktop shell and **React.js** with **TailwindCSS** for the UI. The backend is in **Python**, handling file scanning, metadata extraction, and analysis, with storage in **SQLite**. Libraries include **Pandas**, **OpenCV**, and **GitPython**, while visualizations use **Plotly.js** and **Recharts**.  
+
+Testing is done with **pytest** (Python backend) and **Jest/Mocha** (React frontend). **Manual testing** covers usability, privacy, and other non-functional requirements.
 
 | Requirement | Description | Test Cases | Who | H/M/E |
 | ----- | ----- | ----- | ----- | ----- |
