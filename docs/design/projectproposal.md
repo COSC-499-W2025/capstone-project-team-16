@@ -11,6 +11,8 @@ Our solution is a system for mining and analyzing personal digital works includi
 What makes our approach unique is the combination of automation, visualization, and privacy control. Unlike a simple file organizer, our system not only collects and classifies files but also transforms them into interpretable insights and exportable outputs that highlight a user’s contributions. Key features include an integrated Privacy Manager, visual dashboards, and a flexible exporter that can produce shareable reports. Our value proposition is to give users a tool that helps them showcase their work, reflect on their growth, and stay in control of their data. Compared to other teams, we believe our strength lies in balancing technical depth (data extraction, analysis, visualization) with usability and ethical awareness, making the system both practical and trustworthy.
 
 ## **3 Use Cases**
+
+![Screenshot](<Use Case UML.jpg>)
 ### **For Programmers**
 
 #### Use Case: Generate Commit Timeline
