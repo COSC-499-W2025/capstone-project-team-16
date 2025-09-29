@@ -1,6 +1,6 @@
 ## **Features Proposal for Project Option XX**
 Team Number: 16
-Team Members: Ethan Sturek 21282611, La Wunn Soe 69493971
+Team Members: Ethan Sturek 21282611, La Wunn Soe 69493971, Amani Lugalla 84244425
 
 ## **1 Project Scope and Usage Scenario**
 The basic usage scenario for this project is to provide people, specifically programmers, creatives (such as artists, designers, and photographers), and data analysts with a way to mine and analyze their own digital works and to better understand and present their contributions. A programmer might scan their repositories to generate a timeline of commits and code growth for use in interviews, while a creative could collect images, sketches, and media drafts into an automatically organized portfolio. Similarly, a data analyst could trace the evolution of datasets, notebooks, and reports to demonstrate methodology and reproducibility. In all cases, the system will allow users to scan selected files, extract meaningful metadata, and generate visual dashboards or exportable reports, helping them showcase their productivity, reflect on their processes, and organize their work histories while respecting privacy.
