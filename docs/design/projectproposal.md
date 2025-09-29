@@ -173,6 +173,15 @@ one of: hard, medium, or easy and put it in the column for “H/D/E”.
 
 | Requirement | Description | Test Cases | Who | H/M/E |
 | ----- | ----- | ----- | ----- | ----- |
-| Short phrase or sentence | Description of the feature, the steps involved, the complexity of it, potential difficulties | <ul> <li>test case 1</li> <li>test case 2 </li> <li> · · · </li></ul> | Bob | Hard |
-| ... | | | | |
-| etc. | | | | |
+| File/Repo selection | User selects files/folders/repos for scanning | - Select valid folder → stored in system<br>- Select invalid path → error shown<br>- Cancel selection → no files added | La | Easy |
+| Run Scan | System scans selected files, extracts metadata | - Scan folder with mixed files → metadata stored<br>- Resume after interruption<br>- Access denied file → logged & skipped | Ethan | Medium |
+| Generate commit timeline | For repos, system extracts commit history & visualizes timeline | - Timeline generated for repo with commits<br>- Private/inaccessible repo → alert shown<br>- Large repo → progress updates, partial results | Dan | Hard |
+| Build image portfolio | System extracts thumbnails/metadata & organizes portfolio | - Generate thumbnails for .jpg/.png<br>- Unsupported format → skipped & notify<br>- Export portfolio to PDF | Amani | Hard |
+| Trace dataset evolution | Track datasets, notebooks, reports across versions | - Timeline shows dataset + linked notebooks<br>- Corrupted dataset → error logged, continue<br>- Export reproducibility report | Ethan | Hard |
+| Dashboard visualization | Display timelines, stats, filters in React dashboard | - Results display after scan<br>- No data → prompt user to scan<br>- Filters update charts dynamically | La | Medium |
+| Export report | Generate report in PDF/HTML/portfolio format | - PDF generated correctly<br>- Storage error → retry or fail gracefully<br>- User cancels export → nothing generated | Amani | Medium |
+| Apply privacy rules | Users define & enforce privacy filters | - Define valid rule → applied in scans<br>- Invalid rule → error prompt<br>- Disable privacy → scans all files | Dan | Medium |
+| Data persistence | SQLite stores metadata, history, rules | - Restart app → history preserved<br>- Corrupt DB → new DB created<br>- Query returns correct metadata | Ethan | Medium |
+| Performance (non-functional) | Handle large repos/folders without major slowdown | - Scan 10k files under X minutes<br>- System doesn’t hang indefinitely<br>- Memory usage within threshold | La | Hard |
+| Usability (non-functional) | UI must be intuitive, styled, and responsive | - Manual: user completes scan → view results<br>- Resizes gracefully on different screens<br>- Component error handled gracefully | Dan | Easy |
+| Privacy (non-functional) | No file content stored, only metadata | - DB only contains metadata<br>- User can clear data on request<br>- Manual: verify logs contain no sensitive data | Amani | Medium |
