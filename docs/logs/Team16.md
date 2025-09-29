@@ -17,9 +17,8 @@
 | Name | Username |
 |----------------|----------------|
 | Ethan Sturek | ethansturek |
-| | |
-| | |
-| | |
+| La Wunn| LaWunn|
+| Amani |lugger33 |
 
 ![Screenshot](<screenshots/Team16/BurnupW2.png>)
 
@@ -60,9 +59,9 @@
 | Name | Username |
 |----------------|----------------|
 | Ethan Sturek | ethansturek |
-| | |
-| | |
-| | |
+|  La Wunn| LaWunn|
+| Amani |lugger33 |
+
 
 
 ### Completed Tasks Table
