@@ -160,16 +160,12 @@ What makes our approach unique is the combination of automation, visualization, 
 
 
 ## 4 Requirements, Testing, Requirement Verification
-**Start by mentioning your technology stack and test framework. Then use the example table below
-to identify the requirements, test cases, and people assigned to work on those requirements.**
-- Based on your use cases above, flush out the necessary requirements. These use cases will only identify
-functional requirements. You will want to think about the usage scenario and the client’s needs to identify
-non-functional requirements also.
-- For each requirement, develop test cases - positive and negative cases - that can be written in the code base
-and automated. While non-functional requirements such as “usability” will require manual testing (not by
-your team), most of the requirements should have automatable test cases.
-- Discuss with your teams the difficulty of each requirement and who wants to be assigned to them. Choose
-one of: hard, medium, or easy and put it in the column for “H/D/E”.
+
+## Technology Stack and Testing Framework
+
+The app uses **Electron** for the desktop shell and **React.js** with **TailwindCSS** for the UI. The backend is in **Python**, handling file scanning, metadata extraction, and analysis, with storage in **SQLite**. Libraries include **Pandas**, **OpenCV**, and **GitPython**, while visualizations use **Plotly.js** and **Recharts**.  
+
+Testing is done with **pytest** (Python backend) and **Jest/Mocha** (React frontend). **Manual testing** covers usability, privacy, and other non-functional requirements.
 
 | Requirement | Description | Test Cases | Who | H/M/E |
 | ----- | ----- | ----- | ----- | ----- |
