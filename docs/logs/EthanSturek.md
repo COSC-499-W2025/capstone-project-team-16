@@ -1,4 +1,35 @@
 # Personal Log - Ethan Sturek
+## 2025-SEP-8 to 2025-OCT-5
+
+
+### Type of Tasks Worked On
+![Screenshot](<screenshots/Ethan/Week 3.png>)
+
+### Recap of Week's Goals
+- Clean up repo
+- DFD Level 0
+- DFD Level 1
+
+
+### Features Assigned (Project Plan)
+- Clean up repo
+- DFD Level 1
+### Tasks from Project Board
+| Feature | Task | Status (Completed/In Progress) | Notes |
+|------|------|-------------------------------|-------|
+| Clean up repo | Clean up repo | Completed | … |
+| DFD Level 1 | DFD Level 1 | Completed | … |
+
+### Completed Tasks (Last 2 Weeks)
+- Clean up repo 
+- DFD Level 1
+
+### In-Progress Tasks (Last 2 Weeks)
+
+
+### Additional Context (Optional)
+- NA
+
 ## 2025-SEP-22 to 2025-SEP-28
 
 
