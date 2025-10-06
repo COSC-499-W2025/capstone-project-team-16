@@ -70,3 +70,36 @@
 
 ### Additional Context (Optional)
 - N/A
+
+## 2025-SEP-29 to 2025-OCT-05
+
+### Type of Tasks Worked On
+
+
+<img width="984" height="571" alt="Screenshot 2025-10-05 at 10 03 57 PM" src="https://github.com/user-attachments/assets/ea448137-a5bf-44a5-9269-ac7554bb57e4" />
+
+
+### Recap of Week's Goals
+- DFD Level 0
+- DFD Level 1
+
+### Features Assigned (Project Plan)
+- DFD Level 0
+
+
+### Tasks from Project Board
+| Feature | Task | Status (Completed/In Progress) | Notes |
+|------|------|-------------------------------|-------|
+| DFD Level 0 | DFD Level 0 | Completed | … |
+
+
+### Completed/In-Progress Tasks (Last 2 Weeks)
+- DFD Level 0 ✅
+- Project Scope and Usage Scenario ✅
+- Proposed Solution ✅
+- Security & Observability ✅
+- Privacy & Security Manager ✅
+- Transparency Log ✅
+
+### Additional Context (Optional)
+- N/A
