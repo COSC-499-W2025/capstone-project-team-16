@@ -1,4 +1,43 @@
 # Personal Log - Ethan Sturek
+## 2025-OCT-5 to 2025-OCT-12
+
+
+### Type of Tasks Worked On
+![Screenshot](<screenshots/Ethan/Week 4.png>)
+
+### Recap of Week's Goals
+- Update README
+- Update Documentation
+- Get started coding
+
+
+### Features Assigned (Project Plan)
+- Update System Architecture to Milestone 1 Reqs
+- Setup README
+- Add consent prompt for user input
+
+### Tasks from Project Board
+| Feature | Task | Status (Completed/In Progress) | Notes |
+|------|------|-------------------------------|-------|
+| Update System Architecture to Milestone 1 Reqs  | Update System Architecture Diagram | Completed | … |
+| Setup README | Setup README | Completed | … |
+| Update System Architecture Diagram  | Update README with link to Architecture Diagram & explanation| Completed | … |
+| Consent Prompt | Consent Prompt | Completed | … |
+
+
+### Completed Tasks (Last 2 Weeks)
+- Update System Architecture Diagram
+- Setup README
+- Add link to Architecture Diagram and explanation in README
+- Add consent prompt for user input
+
+### In-Progress Tasks (Last 2 Weeks)
+
+
+### Additional Context (Optional)
+- NA
+
+# Personal Log - Ethan Sturek
 ## 2025-SEP-8 to 2025-OCT-5
 
 
