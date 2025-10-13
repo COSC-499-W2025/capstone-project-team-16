@@ -114,15 +114,26 @@ Our modular architecture ensures that future features can be added without disru
 
 ### Data Flow Diagram (DFD) – Level 1
 
-Link: []()
+<img width="2504" height="1160" alt="DFD-Level 1 drawio (1)" src="https://github.com/user-attachments/assets/82e4c3c5-3508-4eab-9561-e1b689946ff7" />
+
 
 Description:
+
+This Level 1 DFD shows our main processes and data movements within the Digital Work Artifact Analysis System. It breaks the system into key functional components and shows how data flows between them, external entities, and data stores.
+
+The user initiates the process by submitting privacy settings and scan requests, which are received and processed by the system. These requests pass through several stages, starting with privacy rule management to make sure sensitive data is handled correctly. Then it is followed by file scanning and metadata extraction from the file system.
+
+The extracted metadata, along with file paths and thumbnail references, is then sent to the analysis engine, which creates insights and contribution metrics. These results are coordinated and logged through the workflow coordinator, which also updates the record activity and sends logs to the Log Data store.
+
+Finally, the processed results are passed to the export dashboard where they are compiled and returned to the user. Additional data such as thumbnails are stored in the image cache to support visual outputs.
 
 ### Work Breakdown Structure (WBS)
 
-Link: []
+<img width="710" height="524" alt="Screenshot 2025-10-12 at 11 10 32 PM" src="https://github.com/user-attachments/assets/780e35f9-1547-4909-b4a8-9f3de614c103" />
 
 Description:
+
+Our WBS outlines the main phases of our project and breaks them into manageable tasks. It includes project management, system design, backend development, output/export development, testing, and documentation. This structure helps organize the team’s work, clarify responsibilities, and plan the project timeline more effectively.
 
 # Project Structure
 Please use the provided folder structure for your project. You are free to organize any additional internal folder structure as required by the project. 
