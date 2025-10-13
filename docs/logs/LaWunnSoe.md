@@ -103,3 +103,42 @@
 
 ### Additional Context (Optional)
 - N/A
+
+## 2025-OCT-06 to 2025-OCT-12
+
+### Type of Tasks Worked On
+
+
+<img width="968" height="581" alt="Screenshot 2025-10-12 at 11 30 37 PM" src="https://github.com/user-attachments/assets/3af4804b-615a-4609-a38e-7dd49bdc3c4c" />
+
+
+
+### Recap of Week's Goals
+- Update README
+- Update Documentation
+- Get started coding
+
+### Features Assigned (Project Plan)
+- WBS diagram and explanation
+- DFD Diagram level 1 explanation
+
+
+### Tasks from Project Board
+| Feature | Task | Status (Completed/In Progress) | Notes |
+|------|------|-------------------------------|-------|
+| Update Documentation | WBS diagram and explanation | Completed | … |
+| Update Documentation | DFD Diagram level 1 explanation | Completed | … |
+
+
+### Completed/In-Progress Tasks (Last 2 Weeks)
+- WBS diagram and explanation ✅
+- DFD Diagram level 1 explanation ✅
+- DFD Level 0 ✅
+- Project Scope and Usage Scenario ✅
+- Proposed Solution ✅
+- Security & Observability ✅
+- Privacy & Security Manager ✅
+- Transparency Log ✅
+
+### Additional Context (Optional)
+- N/A
