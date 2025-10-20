@@ -1,4 +1,46 @@
 # Personal Log - Ethan Sturek
+## 2025-OCT-12 to 2025-OCT-19
+
+
+### Type of Tasks Worked On
+![Screenshot](<screenshots/Ethan/Week 5.png>)
+
+### Recap of Week's Goals
+- Populate backlog with tasks
+- Add parsing of zip file to be analyzed
+- Add Pytest to allow testing
+
+
+### Features Assigned (Project Plan)
+- Add work items from WSB to backlog
+- Integrate testing framework
+- Parse uploaded zipped folder containing nested files and folders
+
+### Tasks from Project Board
+| Feature | Task | Status (Completed/In Progress) | Notes |
+|------|------|-------------------------------|-------|
+| Add work items from WSB to backlog  | Add tasks that need immediate attention | Completed | Items needing immediate attention have been added. Working on adding more next week |
+| Add work items from WSB to backlog  | Add work items that have dependencies on other items | In Progress | ... |
+| Integrate testing framework | Integrate testing framework | Completed | Pytest dependancies have been added and now we can write tests |
+| Parse uploaded zipped folder containing nested files and folders  | Get user defined zip file locations | In Progress | Done needs testing |
+| Parse uploaded zipped folder containing nested files and folders  | Validate zip file | Done needs testing |
+| Parse uploaded zipped folder containing nested files and folders  | Test zip parsing | ... |
+
+
+### Completed Tasks (Last 2 Weeks)
+- Add tasks that need immediate attention
+- Integrate testing framework
+
+### In-Progress Tasks (Last 2 Weeks)
+- Add work items that have dependencies on other items
+- Get user defined zip file locations
+- Validate zip file
+- Test zip parsing
+
+### Additional Context (Optional)
+- NA
+
+
 ## 2025-OCT-5 to 2025-OCT-12
 
 
