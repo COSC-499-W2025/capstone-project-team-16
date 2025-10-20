@@ -142,3 +142,35 @@
 
 ### Additional Context (Optional)
 - N/A
+
+## 2025-OCT-13 to 2025-OCT-19
+
+### Type of Tasks Worked On
+
+
+<img width="975" height="573" alt="Screenshot 2025-10-19 at 11 18 15 PM" src="https://github.com/user-attachments/assets/04547fda-4967-4f55-8a00-f555767b3004" />
+
+
+
+### Recap of Week's Goals
+
+- coding
+
+### Features Assigned (Project Plan)
+- consent prompt for external service usage
+
+
+### Tasks from Project Board
+| Feature | Task | Status (Completed/In Progress) | Notes |
+|------|------|-------------------------------|-------|
+| consent prompt for external service usage | consent prompt for external service usage | In Progress | … |
+
+
+### Completed/In-Progress Tasks (Last 2 Weeks)
+- WBS diagram and explanation ✅
+- DFD Diagram level 1 explanation ✅
+- consent prompt for external service usage
+
+### Additional Context (Optional)
+- N/A
+
