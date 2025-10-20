@@ -7,11 +7,13 @@
 - Populate backlog with tasks
 - Add parsing of zip file to be analyzed
 - Add Pytest to allow testing
+- Add consent prompt for external service usage
 
 ### Features in Project Plan
 - Add work items from WSB to backlog
 - Integrate testing framework
 - Parse uploaded zipped folder containing nested files and folders
+- Request user permission before using external services (e.g., LLMs) and inform users about data privacy implications
 
 
 ### Burnup Chart
