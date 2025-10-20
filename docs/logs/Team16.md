@@ -1,5 +1,76 @@
 # Team Log - Team 16
 
+## Milestone: 2025-OCT-12 to 2025-OCT-19
+
+
+### Milestone Goals Recap
+- Populate backlog with tasks
+- Add parsing of zip file to be analyzed
+- Add Pytest to allow testing
+
+### Features in Project Plan
+- Add work items from WSB to backlog
+- Integrate testing framework
+- Parse uploaded zipped folder containing nested files and folders
+
+
+### Burnup Chart
+| Name | Username |
+|----------------|----------------|
+| Ethan Sturek | ethansturek |
+| La Wunn| LaWunn|
+| Amani |lugger33 |
+
+![Screenshot](<screenshots/Team16/BurnupW5.png>)
+
+### Completed Tasks Table
+![Screenshot](<screenshots/Team16/DoneTasksW5.png>)
+
+### In Progress Tasks Table
+![Screenshot](<screenshots/Team16/DoneTasksW5.png>)
+
+### Test Report
+- Summary of tests run this milestone
+
+### Additional Context (Optional)
+- Notes or blockers
+
+
+## Milestone: 2025-OCT-5 to 2025-OCT-12
+
+
+### Milestone Goals Recap
+- Update README
+- Update Documentation
+- Get started coding
+
+### Features in Project Plan
+- Update System Architecture to Milestone 1 Reqs
+- Setup README
+- Add consent prompt for user input
+
+
+### Burnup Chart
+| Name | Username |
+|----------------|----------------|
+| Ethan Sturek | ethansturek |
+| La Wunn| LaWunn|
+| Amani |lugger33 |
+
+![Screenshot](<screenshots/Team16/BurnupW4.png>)
+
+### Completed Tasks Table
+![Screenshot](<screenshots/Team16/DoneTasksW4.png>)
+
+### In Progress Tasks Table
+
+
+### Test Report
+- Summary of tests run this milestone
+
+### Additional Context (Optional)
+- Notes or blockers
+
 ## Milestone: 2025-SEP-28 to 2025-OCT-5
 
 
