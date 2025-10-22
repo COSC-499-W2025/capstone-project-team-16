@@ -14,7 +14,7 @@ def get_input_file_path():
             # Validate path and folder before moving on
             if check_file_validity(zip_path):
                 print("Valid zip file detected.")
-                return True
+                return zip_path
 
 
 #TODO: add errors to log file 
