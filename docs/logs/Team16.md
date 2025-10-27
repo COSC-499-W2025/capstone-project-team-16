@@ -7,10 +7,13 @@
 - Create larger tasks in backlog
 - Add unit tests to zip parsing
 - Generate and return file tree for meta data extractor
+- Add consent prompt for external service usage
 
 ### Features in Project Plan
 - Add work items from WSB to backlog
 - Parse uploaded zipped folder containing nested files and folders
+- Add consent prompt for external service usage
+- Provide alternative analyses if external services are not permitted
 
 
 ### Burnup Chart
