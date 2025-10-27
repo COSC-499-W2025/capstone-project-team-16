@@ -1,5 +1,71 @@
 # Team Log - Team 16
 
+## Milestone: 2025-OCT-19 to 2025-OCT-26
+
+
+### Milestone Goals Recap
+- Create larger tasks in backlog
+- Add unit tests to zip parsing
+- Generate and return file tree for meta data extractor
+
+### Features in Project Plan
+- Add work items from WSB to backlog
+- Parse uploaded zipped folder containing nested files and folders
+
+
+### Burnup Chart
+| Name | Username |
+|----------------|----------------|
+| Ethan Sturek | ethansturek |
+| La Wunn| LaWunn|
+| Amani |lugger33 |
+
+![Screenshot](<screenshots/Team16/BurnupW5.png>)
+
+### Completed Tasks Table
+![Screenshot](<screenshots/Team16/DoneTasksW5.png>)
+
+### In Progress Tasks Table
+![Screenshot](<screenshots/Team16/DoneTasksW5.png>)
+
+### Test Report
+![Screenshot](<screenshots/Team16/Test1W8.png>)
+Unit tests for two functions in file_parser have been added using Pytest.
+
+### get_input_file_path
+
+1. User enters a valid zip path immediately.
+2. User presses Enter without typing anything, then enters a valid path.
+3. User enters an invalid path first, then a valid one.
+4. User enters multiple invalid paths (including empty input) before finally entering a valid one.
+5. User enters a valid zip file containing multiple files.
+6. User enters an empty or invalid zip first, then a valid one
+
+### check_file_validity
+
+1. User provides a path that doesn’t exist.
+2. User provides a path to a directory instead of a file.
+3. User provides a file that doesn’t end with .zip.
+4. User provides a .ZIP (uppercase or mixed case) file and should still be accepted.
+5. User provides a valid zip file containing multiple files.
+6. User provides a corrupted zip file (detected by testzip()).
+7. User provides a valid but empty zip file.
+8. User provides a file with a .zip extension that isn’t actually a zip (raises BadZipFile).
+9. User provides a very large zip file using ZIP64 format (raises LargeZipFile).
+10. An unexpected error occurs while opening or reading the zip file.
+
+## Running Tests
+
+1.  Run `python -m venv venv` to create a virtual environment.
+2. On Windows run `venv/Scripts/activate`.
+3. On Mac run `venv/bin/activate`.
+4. Run `pip install -r requirements.txt`.
+5. In the root of the repositiory, enter `pytest` to run all tests.
+
+### Additional Context (Optional)
+- Notes or blockers
+
+
 ## Milestone: 2025-OCT-12 to 2025-OCT-19
 
 

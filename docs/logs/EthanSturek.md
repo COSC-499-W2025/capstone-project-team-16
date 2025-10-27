@@ -1,4 +1,43 @@
 # Personal Log - Ethan Sturek
+## 2025-OCT-19 to 2025-OCT-26
+
+
+### Type of Tasks Worked On
+![Screenshot](<screenshots/Ethan/Week 8.png>)
+
+### Recap of Week's Goals
+- Create larger tasks in backlog
+- Add unit tests to zip parsing
+- Generate and return file tree for meta data extractor
+
+
+### Features Assigned (Project Plan)
+- Add work items from WSB to backlog
+- Parse uploaded zipped folder containing nested files and folders
+
+### Tasks from Project Board
+| Feature | Task | Status (Completed/In Progress) | Notes |
+|------|------|-------------------------------|-------|
+| Add work items from WSB to backlog  | Add work items that have dependencies on other items | Completed | Major componenets for Milestone 1 have been defined and added to the board |
+| Parse uploaded zipped folder containing nested files and folders  | Get user defined zip file locations | Completed | Tests passed |
+| Parse uploaded zipped folder containing nested files and folders  | Validate zip file | Completed | Test passed |
+| Parse uploaded zipped folder containing nested files and folders  | Test zip parsing | Completed | Unit tests have been added for 2 methods in file parser. All passed |
+| Parse uploaded zipped folder containing nested files and folders  | Generate and return file tree for meta data extraction | Completed | Test passed |
+
+
+### Completed Tasks (Last 2 Weeks)
+- Add work items that have dependencies on other items
+- Get user defined zip file locations
+- Validate zip file
+- Test zip parsing
+- Generate and return file tree for meta data extraction
+
+### In-Progress Tasks (Last 2 Weeks)
+- NA
+
+### Additional Context (Optional)
+- NA
+
 ## 2025-OCT-12 to 2025-OCT-19
 
 
