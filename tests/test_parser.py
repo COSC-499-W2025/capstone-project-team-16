@@ -1,6 +1,20 @@
 import pytest
+import zipfile
 from unittest.mock import patch
-from file_parser import get_input_file_path
+from file_parser import (get_input_file_path)
+
+# Helper Function to Create Test Zip Files
+def make_test_zip(tmp_path, files):
+    """
+    Creates a temporary zip file with given file structure.
+    `files` is a dict: { "path/in/zip.txt": "file contents" }
+    """
+    zip_path = tmp_path / "test_project.zip"
+    with zipfile.ZipFile(zip_path, "w") as zf:
+        for filename, content in files.items():
+            zf.writestr(filename, content)
+    return zip_path
+
 
 
 def test_valid_path_first_try(monkeypatch, capsys):
@@ -237,3 +251,4 @@ def test_empty_zip_file(monkeypatch, capsys):
         captured = capsys.readouterr()
         assert "Invalid zip file detected." in captured.out
         assert "Valid zip file detected" in captured.out
+
