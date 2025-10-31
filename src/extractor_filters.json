@@ -1,0 +1,56 @@
+{
+  "categories": {
+    "source_code": [
+      ".py", ".js", ".ts", ".java", ".cpp", ".c", ".cs", ".rb", ".go", ".rs", ".swift", ".kt"
+    ],
+    "web_code": [
+      ".html", ".htm", ".css", ".scss", ".sass", ".less", ".jsx", ".tsx", ".vue", ".php"
+    ],
+    "documentation": [
+      ".md", ".txt", ".rst", ".pdf", ".docx"
+    ],
+    "configuration": [
+      ".json", ".yaml", ".yml", ".ini", ".env", ".toml", ".cfg", ".xml"
+    ],
+    "assets": [
+      ".png", ".jpg", ".jpeg", ".svg", ".gif", ".bmp", ".tiff", ".ico"
+    ],
+    "datasets": [
+      ".csv", ".xlsx", ".json", ".xml", ".parquet", ".tsv"
+    ],
+    "binaries": [
+      ".exe", ".dll", ".bin", ".so", ".dylib"
+    ],
+    "notebooks": [
+      ".ipynb"
+    ],
+    "build_scripts": [
+      "Makefile", "build.gradle", "pom.xml", "CMakeLists.txt", "setup.py", "setup.cfg"
+    ],
+    "docker_files": [
+      "Dockerfile", "docker-compose.yml"
+    ],
+    "git_metadata": [".gitignore", ".gitattributes", ".gitmodules"
+    ],
+    "repository": [
+      ".git", ".hg", ".svn", "package.json", "requirements.txt", "pyproject.toml",
+      "Cargo.toml", "go.mod", "pom.xml", "build.gradle"
+    ]
+  },
+
+  "languages": {
+    ".py": "Python",
+    ".js": "JavaScript",
+    ".java": "Java",
+    ".cpp": "C++",
+    ".c": "C",
+    ".cs": "C#",
+    ".html": "HTML",
+    ".css": "CSS",
+    ".php": "PHP",
+    ".ts": "TypeScript",
+    ".rb": "Ruby",
+    ".go": "Go",
+    ".swift": "Swift"
+  }
+}

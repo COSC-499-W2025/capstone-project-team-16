@@ -50,9 +50,10 @@ def check_file_validity(zip_path):
                       else:
                         file_tree = [
                             {
+                                # May need to add more information for extraction
                                 "filename": info.filename,
                                 "size": info.file_size,
-                                "date_time": info.date_time
+                                "last_modified": info.date_time
                             }
                             for info in zip_ref.infolist()
                         ]
@@ -85,3 +86,4 @@ def check_file_validity(zip_path):
     else:
         print("Path does not exist")
         return None
+

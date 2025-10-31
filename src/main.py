@@ -6,6 +6,14 @@ print("Welcome to Skill Scope!")
 print("~~~~~~~~~~~~~~~~~~~~~~~")
 
 if (get_user_consent()):
-    get_input_file_path()
+    file_list = get_input_file_path()
+else:
+    exit()
+
+if file_list:
+    #call metadata extractor and pass file_path
+    #should get a list of files with accompanying metadata.
+    print("Extracting")
+
 
 
