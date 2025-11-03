@@ -1,4 +1,27 @@
 # Personal Log - Amani Lugalla
+## [Date Range]  
+2025-10-26 to 2025-11-03
+
+### Type of Tasks Worked On
+- ![Screenshot](<screenshots/Amani/Week 9.png>)
+
+### Recap of Week's Goals
+- Improve on previous week's goals
+
+### Features Assigned (Project Plan)
+- Metadata Extractor
+
+### Tasks from Project Board
+| Task | Status (Completed/In Progress) | Notes |
+|------|-------------------------------|-------|
+| Programming language detection | In Progress | … |
+| Repository metadata detection | In Progress | … |
+
+### Completed/In-Progress Tasks (Last 2 Weeks)
+- Worked on the requested changes ✅
+
+### Additional Context (Optional)
+- N/a
 
 ## [Date Range]  
 2025-10-19 to 2025-10-26
