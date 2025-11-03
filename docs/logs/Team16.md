@@ -1,5 +1,79 @@
 # Team Log - Team 16
+## Milestone: 2025-OCT-26 to 2025-NOV-2
 
+
+### Milestone Goals Recap
+- Create a basic metadata extractor to handle all file types.
+
+### Features in Project Plan
+- Scrape Base Level Metadata
+- Test base_extraction
+- Meta Data Extractor
+
+
+### Burnup Chart
+| Name | Username |
+|----------------|----------------|
+| Ethan Sturek | ethansturek |
+| La Wunn| LaWunn|
+| Amani |lugger33 |
+
+![Screenshot](<screenshots/Team16/BurnupW9.png>)
+
+### Completed Tasks Table
+![Screenshot](<screenshots/Team16/DoneTasksW9.png>)
+
+### In Progress Tasks Table
+![Screenshot](<screenshots/Team16/TasksW9.png>)
+
+### Test Report
+![Screenshot](<screenshots/Team16/Test1W9.png>)
+Unit tests for two functions in metadata_extraction have been added using Pytest.
+
+## load_filters Tests
+### test_load_filters_returns_dict
+Scenario: JSON file exists and is valid.
+Expected: Returns a dictionary mapping extensions (e.g. .py) to categories ("source_code").
+
+### test_load_filters_handles_missing_file
+Scenario: JSON file is missing.
+Expected: Prints a warning (“Filter file not found”) and returns an empty {} instead of crashing.
+
+### test_load_filters_invalid_json
+Scenario: JSON file is corrupted or not properly formatted.
+Expected: Prints a warning (“Error decoding JSON”) and returns {}.
+
+### test_load_filters_unexpected_error
+Scenario: Unexpected exception occurs (e.g. permission denied).
+Expected: Prints a general error message (“Unexpected error loading filters”) and returns {}.
+
+## base_extraction Tests
+### test_base_extraction_categorizes_files
+Scenario: Files have extensions that match filters.
+Expected: Returns a list of extracted metadata with correct categories ("source_code", "documentation"), and sets "isFile": True.
+
+### test_base_extraction_handles_folders
+Scenario: Input includes a folder name (ending with /).
+Expected: "isFile" is False, and category is "repository" (if matched) or "uncategorized".
+
+### test_base_extraction_uncategorized
+Scenario: File extension not present in filter map.
+Expected: Category defaults to "uncategorized" and "isFile" is True.
+
+### test_base_extraction_no_filters
+Scenario: load_filters() returns None.
+Expected: Function handles gracefully. Prints an error and doesn’t crash.
+
+## Running Tests
+
+1.  Run `python -m venv venv` to create a virtual environment.
+2. On Windows run `venv/Scripts/activate`.
+3. On Mac run `venv/bin/activate`.
+4. Run `pip install -r requirements.txt`.
+5. In the root of the repositiory, enter `pytest` to run all tests.
+
+### Additional Context (Optional)
+- Notes or blockers
 ## Milestone: 2025-OCT-19 to 2025-OCT-26
 
 
