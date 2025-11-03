@@ -7,7 +7,7 @@ import os
 
 # Loads the list of filters JSON and reverses it for easier identification
 def load_filters(path="extractor_filters.json"):
-    #TODO: surround in try statement and provide alternative if JSON is not found
+    
     try:
         with open(path, "r") as f:
             data = json.load(f)
