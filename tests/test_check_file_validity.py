@@ -148,12 +148,12 @@ def test_valid_zip_with_files(capsys):
         # Check first file
         assert result[0]["filename"] == "readme.txt"
         assert result[0]["size"] == 1024
-        assert result[0]["date_time"] == (2024, 1, 1, 12, 0, 0)
+        assert result[0]["last_modified"] == (2024, 1, 1, 12, 0, 0)
         
         # Check second file
         assert result[1]["filename"] == "src/main.py"
         assert result[1]["size"] == 2048
-        assert result[1]["date_time"] == (2024, 1, 2, 13, 30, 0)
+        assert result[1]["last_modified"] == (2024, 1, 2, 13, 30, 0)
 
 def test_corrupted_zip_file(capsys):
     """
