@@ -1,10 +1,17 @@
-import pytest
+import json
+from pathlib import Path
+import datetime
+import tempfile
+import zipfile
+import os
+
 from unittest.mock import patch
 from metadata_extractor import (check_file_validity,
     extract_project_metadata,
     get_file_metadata,
     categorize_file,
     detect_source_code_data)
+from tests.test_parser import make_test_zip
 
 
 def test_check_file_validity_valid_zip(tmp_path):

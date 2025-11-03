@@ -1,4 +1,3 @@
-import pytest
 import zipfile
 from unittest.mock import patch
 from file_parser import (get_input_file_path)
