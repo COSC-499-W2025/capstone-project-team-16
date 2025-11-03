@@ -18,13 +18,13 @@ def get_input_file_path():
                 print("Valid zip file detected.")
                 for f in file_tree:
                     print(f["filename"], f["size"])
-                return zip_path
+                return file_tree
             else: print("Invalid zip file detected. Please enter a valid zip file.")
 
 
 #TODO: add errors to log file 
 """
-Validates the following in order:
+Validates the following in order for the inputted zip file:
 
 1. Path exists
 2. File exists
@@ -32,7 +32,7 @@ Validates the following in order:
 4. Corrupted file / ZIP64 / Other Errors
 5. Empty zip file
 
-For every file checked in the zip, a list of dictionary entries is made, summarizing the contents. 
+For every file and folder checked in the zip, a list of dictionary entries is made, summarizing the contents. 
 
 """
 def check_file_validity(zip_path):
@@ -52,7 +52,7 @@ def check_file_validity(zip_path):
                             {
                                 "filename": info.filename,
                                 "size": info.file_size,
-                                "date_time": info.date_time
+                                "last_modified": info.date_time
                             }
                             for info in zip_ref.infolist()
                         ]
