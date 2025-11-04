@@ -207,3 +207,38 @@
 
 ### Additional Context (Optional)
 - N/A
+
+## 2025-OCT-20 to 2025-OCT-26
+
+### Type of Tasks Worked On
+
+
+
+<img width="954" height="563" alt="Screenshot 2025-11-03 at 8 02 11 PM" src="https://github.com/user-attachments/assets/266fa442-605f-42c4-802d-893248355683" />
+
+
+
+
+### Recap of Week's Goals
+
+- coding
+
+### Features Assigned (Project Plan)
+
+- Provide alternative analyses if external services are not permitted (continue from last week)
+
+
+### Tasks from Project Board
+| Feature | Task | Status (Completed/In Progress) | Notes |
+|------|------|-------------------------------|-------|
+
+| Provide alternative analyses if external services are not permitted | Provide alternative analyses if external services are not permitted | In progress | … |
+
+
+
+### Completed/In-Progress Tasks (Last 2 Weeks)
+- consent prompt for external service usage
+- Provide alternative analyses if external services are not permitted
+
+### Additional Context (Optional)
+- N/A
