@@ -1,4 +1,38 @@
 # Personal Log - Ethan Sturek
+## 2025-OCT-26 to 2025-NOV-3
+
+
+### Type of Tasks Worked On
+![Screenshot](<screenshots/Ethan/Week 9.png>)
+
+### Recap of Week's Goals
+- Create a basic metadata extractor to handle all file types.
+
+
+### Features Assigned (Project Plan)
+- Scrape Base Level Metadata
+- Test base_extraction
+- Meta Data Extractor
+
+### Tasks from Project Board
+| Feature | Task | Status (Completed/In Progress) | Notes |
+|------|------|-------------------------------|-------|
+| Meta Data Extractor | Meta Data Extractor | In Progress | Basic data extraction for all file types has been made. Next step will be processing repository data for in depth extraction |
+| Meta Data Extractor | Scrape Base Level Metadata | Completed | Basic extraction for all file types has been completed and tested.  |
+| Meta Data Extractor | Test base_extraction | Completed | Test passed |
+
+
+### Completed Tasks (Last 2 Weeks)
+- Scrape Base Level Metadata
+- Test base_extraction
+
+### In-Progress Tasks (Last 2 Weeks)
+- Meta Data Extractor
+- Repository Extraction
+
+### Additional Context (Optional)
+- NA
+
 ## 2025-OCT-19 to 2025-OCT-26
 
 
