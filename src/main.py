@@ -1,12 +1,16 @@
 ### This will act as our orchestrator for coordinating scan tasks
-#from permission_manager import get_user_consent
-#from file_parser import get_input_file_path
+
+from __future__ import annotations
 from permission_manager import get_user_consent
 from file_parser import get_input_file_path
 from metadata_extractor import base_extraction
 
-#print("Welcome to Skill Scope!")
-#print("~~~~~~~~~~~~~~~~~~~~~~~")
+
+from dataclasses import dataclass, field
+from typing import Protocol
+
+print("Welcome to Skill Scope!")
+print("~~~~~~~~~~~~~~~~~~~~~~~")
 
 
 if (get_user_consent()):
@@ -32,10 +36,7 @@ This file only defines:
 No actual logic, data types not finalized, etc.
 """
 
-from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Protocol
 
 # Minimal data contract
 @dataclass
