@@ -64,39 +64,98 @@ The system must be able to:
 
 ### Distinguish between individual and collaborative projects
 - Possible heuristics: multiple authors in commits, presence of team files (like CONTRIBUTORS.md), or multiple top-level directories for users.
-- Output: {project_type: "individual" | "collaborative"}
+- Output: `{project_type: "individual" | "collaborative"}`
 
 ### For coding projects, identify the programming language and framework used
 - Detect frameworks (e.g., Django, React) via file paths or dependencies (requirements.txt, package.json).
-- Output: {languages: [...], frameworks: [...]}
+- Output:` {languages: [...], frameworks: [...]}`
 
 ### Extrapolate individual contributions in collaborative projects
+- For collaborative repos, determine contribution share per user.
+
+- Use commit metadata, file authorship, or timestamps (if available).
+
+- Output: `{contributors: [{name, contribution_percentage, commit_count}]}`
 
 ### Extract contribution metrics, such as project duration and contribution frequency by activity type (e.g., code, test, design, documentation)
+- Compute metrics like project start/end date, commits per week, and contribution breakdown by file type (code, test, doc, etc.).
+
+- Output:
+`
+{
+  "duration_days": 120,
+  "commit_frequency": "3 commits/week",
+  "activity_breakdown": {
+    "code": 70,
+    "test": 15,
+    "docs": 15
+  }
+}`
 
 ### Extract key skills from each project
+- Identify technical and soft skills based on the type of files and frameworks used.
+
+- Example: React project → “Frontend Development”, .py + NumPy → “Data Analysis”.
+
+- Output: `["React", "JavaScript", "Frontend", "UI Design"]`
 
 ## Data Storage & Retrieval
 
+
 ###  Store project information in a database
+- Save parsed and analyzed project data for later use.
+- Store metadata, analysis results, and file trees.
+- Use a unique project ID.
+- Output: DB row `{project_id, user_id, analysis_data}`
 
-- Retrieve previously generated portfolio information
+### Retrieve previously generated portfolio information
+- Query stored project analyses for display or export.
+- Output: List of stored project summaries
 
-- Retrieve previously generated résumé items
+### Retrieve previously generated résumé items
+- Pull summarized skill and experience items derived from prior projects.
+- Output: Structured résumé bullet points
 
-- Delete previously generated insights, ensuring shared files remain unaffected
+### Delete previously generated insights, ensuring shared files remain unaffected
+- Remove stored analyses or derived data without deleting original uploads.
+- Confirm deletion action before proceeding.
+- Output: Success/failure confirmation
 
 ## Output & Reporting
 
-- Output project information in structured text format
+### Output project information in structured text format
+- Produce a structured text or JSON output summarizing each project.
 
-- Rank projects based on user contributions
+- Example Output:
+`
+{
+  "project_name": "Portfolio Analyzer",
+  "language": "Python",
+  "framework": "Flask",
+  "skills": ["API Development", "Data Analysis"]
+} `
 
-- Summarize top-ranked projects
+### Rank projects based on user contributions
+- Assign a ranking or score to each project based on contribution depth and variety.
+- Output: Sorted list of projects by score
 
-- Produce a chronological list of projects
+### Summarize top-ranked projects
+- Generate a brief textual summary of top-scoring projects for résumé use.
+- Output: ["Developed backend analytics system in Python...", ...]
 
-- Produce a chronological list of skills exercised
+### Produce a chronological list of projects
+- Sort projects by creation or completion date.
+- Output: [{"name": "ProjA", "date": "2023-04-01"}, ...]
+
+### Produce a chronological list of skills exercised
+- Track when and how each skill was used across time.
+
+- Output:
+`
+[
+  {"skill": "Python", "first_used": "2021", "last_used": "2025"},
+  {"skill": "React", "first_used": "2023", "last_used": "2024"}
+]`
 
 ## Architecture and Design Documents
 ### System Architecture Diagram
