@@ -37,45 +37,66 @@ Output Format (Milestone 1): Text-based (CSV, JSON, or plain text)
 
 The system must be able to:
 
-1. Require the user to give consent for data access before proceeding
+# Milestone 1 Requirements:
 
-1. Parse an uploaded zipped folder containing nested files and folders
+## User Consent & Privacy
 
-1. Return an error message if the uploaded file is in an incorrect format
+- |X| Require the user to give consent for data access before proceeding
 
-1. Request user permission before using external services (e.g., LLMs) and inform users about data privacy implications
+- |X| Request user permission before using external services (e.g., LLMs) and inform users about data privacy implications
 
-1. Provide alternative analyses if external services are not permitted
+- Provide alternative analyses if external services are not permitted
 
-1. Store user configurations for future sessions
+## File Handling & Input Validation
 
-1. Distinguish between individual and collaborative projects
+- |X|  Parse an uploaded zipped folder containing nested files and folders
 
-1. For coding projects, identify the programming language and framework used
+- |X|  Return an error message if the uploaded file is in an incorrect format
 
-1. Extrapolate individual contributions in collaborative projects
+## User Configuration & Session Management
 
-1. Extract contribution metrics, such as project duration and contribution frequency by activity type (e.g., code, test, design, documentation)
+### Store user configurations for future sessions
+- Persist user settings (e.g., consent choices, preferred analysis mode) across runs.
+- Store configuration in database (depending on scale).
+- Include timestamp for last update and a session ID.
 
-1. Extract key skills from each project
+## Project & Contribution Analysis
 
-1. Output project information in structured text format
+### Distinguish between individual and collaborative projects
+- Possible heuristics: multiple authors in commits, presence of team files (like CONTRIBUTORS.md), or multiple top-level directories for users.
+- Output: {project_type: "individual" | "collaborative"}
 
-1. Store project information in a database
+### For coding projects, identify the programming language and framework used
+- Detect frameworks (e.g., Django, React) via file paths or dependencies (requirements.txt, package.json).
+- Output: {languages: [...], frameworks: [...]}
 
-1. Retrieve previously generated portfolio information
+### Extrapolate individual contributions in collaborative projects
 
-1. Retrieve previously generated résumé items
+### Extract contribution metrics, such as project duration and contribution frequency by activity type (e.g., code, test, design, documentation)
 
-1. Rank projects based on user contributions
+### Extract key skills from each project
 
-1. Summarize top-ranked projects
+## Data Storage & Retrieval
 
-1. Delete previously generated insights, ensuring shared files remain unaffected
+###  Store project information in a database
 
-1. Produce a chronological list of projects
+- Retrieve previously generated portfolio information
 
-1. Produce a chronological list of skills exercised
+- Retrieve previously generated résumé items
+
+- Delete previously generated insights, ensuring shared files remain unaffected
+
+## Output & Reporting
+
+- Output project information in structured text format
+
+- Rank projects based on user contributions
+
+- Summarize top-ranked projects
+
+- Produce a chronological list of projects
+
+- Produce a chronological list of skills exercised
 
 ## Architecture and Design Documents
 ### System Architecture Diagram
