@@ -3,7 +3,7 @@ import os
 
 
 # We should do a shallow extraction regardless of the file type, and selectively deal with larger categorical extractions later
-
+# TODO: run extractors by file type (repo). For repos, validate to make sure it's actually repo. 
 
 # Loads the list of filters JSON and reverses it for easier identification
 def load_filters(path="extractor_filters.json"):
@@ -78,3 +78,12 @@ def base_extraction(file_list):
             
         print("Unable to load filters")
     return extracted_data
+
+
+# Handle detailed extractions. Loops through extracted data and handles it based on category
+def detailed_extraction(extracted_data):
+    for entry in extracted_data:
+        if entry["category"] == "repository":
+            #extract from repository_extractor()
+            
+    print("detailed extraction")
