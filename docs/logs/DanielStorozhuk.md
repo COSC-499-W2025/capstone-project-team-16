@@ -1,4 +1,35 @@
 # Personal Log - Daniel Storozhuk
+## 2025-OCT-26 to 2025-NOV-2
+
+
+### Type of Tasks Worked On
+![Screenshot](<screenshots/Daniel/Week9.png>)
+
+### Recap of Week's Goals
+- 
+
+
+### Features Assigned (Project Plan)
+- 
+
+### Tasks from Project Board
+| Feature | Task | Status (Completed/In Progress) | Notes |
+|------|------|-------------------------------|-------|
+| Orchestrator skeleton | create orchestrator skeleton | Completed | Basic template to continue other work |
+
+
+
+### Completed Tasks (Last 2 Weeks)
+
+
+### In-Progress Tasks (Last 2 Weeks)
+- NA
+
+### Additional Context (Optional)
+- NA
+
+
+# Personal Log - Daniel Storozhuk
 ## 2025-OCT-19 to 2025-OCT-26
 
 
