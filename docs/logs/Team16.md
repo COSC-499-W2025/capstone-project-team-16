@@ -30,7 +30,7 @@
 ![Screenshot](<screenshots/Team16/TasksW10.png>)
 
 ### Test Report
-![Screenshot](<screenshots/Team16/Test1W9.png>)
+![Screenshot](<screenshots/Team16/Test1W10.png>)
 ### Tests for analyze_repo_type
 
 **test_valid_git_repo_single_author_single_branch**
