@@ -12,6 +12,11 @@
 - Test repository_extraction
 - Meta Data Extractor
 - Fully define and refine Milestone requirements for our system
+- - Distinguish between individual and collaborative projects
+- For coding projects, identify the programming language and framework used
+- Extrapolate individual contributions in collaborative projects
+- Extract contribution metrics, such as project duration and contribution frequency by activity type (e.g., code, test, design, documentation)
+
 
 
 ### Burnup Chart
