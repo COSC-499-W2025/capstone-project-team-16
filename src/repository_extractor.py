@@ -9,7 +9,7 @@ import os
 
 
 def analyze_repo_type(repo_path):
-    
+    print("repo analyzing")
     # Only proceed if it is a .git folder indicating .git is likely a legimate repository directory
     if repo_path["extension"].endswith(".git")  and repo_path["isFile"] == False:
              # Compute repo root path by using parent directory of .git. This should be the name of the repository (usually).
@@ -17,11 +17,11 @@ def analyze_repo_type(repo_path):
         repo_name = os.path.basename(repo_root)
             #Try opening repo root. This will actually determine if .git 
         try:
-            repo = Repo(repo_name)
+            repo = Repo(repo_root)
             authors = {c.author.email for c in repo.iter_commits('--all')}
             branches = [b.name for b in repo.branches]
 
-            has_merges = any(c for c in repo.iter_commits('--all') if len(c.parents) > 1)
+            has_merges = any(len(c.parents) > 1 for c in repo.iter_commits('--all'))
             collaborative_signals = sum([
                 len(authors) > 1,
                 len(branches) > 1,
@@ -30,6 +30,9 @@ def analyze_repo_type(repo_path):
 
             project_type = "collaborative" if collaborative_signals >= 2 else "individual"
             return {
+                "is_valid": True,
+                "repo_name": repo_name,
+                "repo_root": repo_root,
                 "authors": list(authors),
                 "branch_count": len(branches),
                 "has_merges": has_merges,
@@ -41,6 +44,3 @@ def analyze_repo_type(repo_path):
             print("Repo analysis failed:", e)
             return None
         
-        
-    authors = analyze_repo_type(repo)
-    print(authors)

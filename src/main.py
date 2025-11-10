@@ -1,16 +1,22 @@
-### This will act as our orchestrator for coordinating scan tasks
-#from permission_manager import get_user_consent
-#from file_parser import get_input_file_path
+
+from __future__ import annotations
 from permission_manager import get_user_consent
 from file_parser import get_input_file_path
 from metadata_extractor import base_extraction
+from metadata_extractor import detailed_extraction
+from dataclasses import dataclass, field
+from typing import Protocol
 
-#print("Welcome to Skill Scope!")
-#print("~~~~~~~~~~~~~~~~~~~~~~~")
+### This will act as our orchestrator for coordinating scan tasks
+#from permission_manager import get_user_consent
+#from file_parser import get_input_file_path
+
+print("Welcome to Skill Scope!")
+print("~~~~~~~~~~~~~~~~~~~~~~~")
 
 
-if (get_user_consent()):
-    file_list = get_input_file_path()
+if get_user_consent():
+    file_list = get_input_file_path()  # get only the tree
 else:
     exit()
 
@@ -18,6 +24,10 @@ if file_list:
     #call metadata extractor and pass file_path
     #should get a list of files with accompanying metadata.
     scraped_data = base_extraction(file_list)
+    
+    #Loop through extracted data and perform deeper extractions based on criteria
+if scraped_data:
+    detailed_extraction(scraped_data)
     
 
 
@@ -32,10 +42,7 @@ This file only defines:
 No actual logic, data types not finalized, etc.
 """
 
-from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Protocol
 
 # Minimal data contract
 @dataclass

@@ -1,6 +1,6 @@
 import json
 import os
-
+from repository_extractor import analyze_repo_type
 
 # We should do a shallow extraction regardless of the file type, and selectively deal with larger categorical extractions later
 # TODO: run extractors by file type (repo). For repos, validate to make sure it's actually repo. 
@@ -83,7 +83,21 @@ def base_extraction(file_list):
 # Handle detailed extractions. Loops through extracted data and handles it based on category
 def detailed_extraction(extracted_data):
     for entry in extracted_data:
+        # Repository extraction
         if entry["category"] == "repository":
-            #extract from repository_extractor()
+            repo_info = analyze_repo_type(entry)
+            # If repo extraction succeeded, merge results into this entry
+            if repo_info and repo_info.get("is_valid", False):
+                entry.update(repo_info)
+                # Print the repo information for debugging
+                print("Repo analysis succeeded:")
+                print(f"  Name: {repo_info.get('repo_name')}")
+                print(f"  Root: {repo_info.get('repo_root')}")
+                print(f"  Authors: {repo_info.get('authors')}")
+                print(f"  Branch count: {repo_info.get('branch_count')}")
+                print(f"  Has merges: {repo_info.get('has_merges')}")
+                print(f"  Project type: {repo_info.get('project_type')}")
+            else:
+                print(f"Skipping invalid or failed repo: {entry['filename']}")
             
     print("detailed extraction")
