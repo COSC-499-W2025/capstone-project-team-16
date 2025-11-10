@@ -1,59 +1,47 @@
-"""
-The Orchestrator class that coordinates the application's core workflow.
-"""
-from __future__ import annotations
+# The Orchestrator class that coordinates the application's core workflow.
+
 import logging
 from src.contracts import (
     ScanSummary,
     MetadataExtractor,
     Storage,
-    AnalysisEngine,
-    Exporter,
+    FileInfo,
+    ExtractionResult,
 )
 
 logger = logging.getLogger(__name__)
 
 class Orchestrator:
-    """Coordinates the application's workflow by calling various services."""
+    # Coordinates the application's workflow by calling various services
 
     def __init__(
         self,
         *,
         metadata_extractor: MetadataExtractor,
         storage: Storage,
-        analysis_engine: AnalysisEngine | None = None,
-        exporter: Exporter | None = None,
     ) -> None:
         self.metadata_extractor = metadata_extractor
         self.storage = storage
-        self.analysis_engine = analysis_engine
-        self.exporter = exporter
 
-    def run(self, file_list: list) -> ScanSummary:
-        """
-        Executes the core workflow: extraction, storage, and analysis.
-        This method is non-interactive and expects all inputs to be provided.
-        """
+    def run(self, file_list: list[FileInfo]) -> ScanSummary:
+        # Executes the core workflow: extraction and storage. This method is non-interactive and expects all inputs to be provided.
+
         # 1. Extract metadata from the raw file list
-        extracted_data = self.metadata_extractor.base_extraction(file_list)
+        extraction_result: ExtractionResult = self.metadata_extractor.base_extraction(file_list)
+
+        # Log any failures during extraction.
+        if extraction_result.failed:
+            logger.warning("Extraction failed for %d files:", len(extraction_result.failed))
+            for failure in extraction_result.failed:
+                logger.warning("  - %s: %s", failure.file_info.filename, failure.reason)
 
         # 2. Save the structured data
-        if extracted_data:
-            self.storage.save_extracted_data(extracted_data)
-            summary_note = "Scan completed and data saved to database."
-        else:
-            logger.info("No data was extracted to save to the database.")
-            summary_note = "Scan completed, but no data was extracted to save."
-
-        # 3. Optional analysis and export steps
-        if self.analysis_engine:
-            # Pass data explicitly to the next step in the pipeline
-            analysis_results = self.analysis_engine.analyze(extracted_data)
-            # In a real scenario, these results would be used.
-        
-        if self.exporter:
-            self.exporter.export(extracted_data)
+        self.storage.save_extracted_data(extraction_result.succeeded)
             
-        summary = ScanSummary(scanned_files=len(file_list))
-        summary.notes.append(summary_note)
+        # 3. Create a summary of the operation.
+        summary = ScanSummary(
+            scanned_files=len(file_list),
+            processed_files=len(extraction_result.succeeded)
+        )
+        logger.info("Orchestration complete. Succeeded: %d, Failed: %d.", len(extraction_result.succeeded), len(extraction_result.failed))
         return summary
