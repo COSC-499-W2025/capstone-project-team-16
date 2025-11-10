@@ -1,122 +1,63 @@
-### This will act as our orchestrator for coordinating scan tasks
-
-from __future__ import annotations
-from permission_manager import get_user_consent
-from file_parser import get_input_file_path
-from metadata_extractor import base_extraction
-
-
-from dataclasses import dataclass, field
-from typing import Protocol
-
-print("Welcome to Skill Scope!")
-print("~~~~~~~~~~~~~~~~~~~~~~~")
-
-
-if (get_user_consent()):
-    file_list = get_input_file_path()
-else:
-    exit()
-
-if file_list:
-    #call metadata extractor and pass file_path
-    #should get a list of files with accompanying metadata.
-    scraped_data = base_extraction(file_list)
-    
-
-
 """
-Orchestrator Template
-
-This file only defines:
-- Minimal contracts
-- A thin Orchestrator with a single run() method
-- A stub main() for a proposed wiring location
-
-No actual logic, data types not finalized, etc.
+Main entry point for the Skill Scope application.
+This file is responsible for wiring up the application dependencies and
+running the orchestrator.
 """
+import logging
+import os
+from file_parser import FileParser
+from storage_manager import StorageManager
+from permission_manager import PermissionManager
+from metadata_extractor import MetadataExtractor
+from orchestrator import Orchestrator
+from src.contracts import ConsentResult, FileScannerError, ExtractionError, StorageError
 
-
-
-# Minimal data contract
-@dataclass
-class ScanSummary:
-    scanned_files: int = 0
-    notes: list[str] = field(default_factory=list)
-
-# Minimal service contracts
-class ConsentGateway(Protocol):
-    def request_consent(self) -> bool: ...
-
-class FileScanner(Protocol):
-    def scan(self) -> int: ...  
-
-class MetadataExtractor(Protocol):
-    def extract(self) -> None: ...
-
-class AnalysisEngine(Protocol):
-    def analyze(self) -> None: ...
-
-class Exporter(Protocol):
-    def export(self) -> None: ...
-
-class Storage(Protocol):
-    def save(self) -> None: ...
-
-# Orchestrator skeleton
-class Orchestrator:
-    """Make implementations for each dependency, implement run() when ready.
-    Until then, it returns a blank summary.
-    """
-
-    def __init__(
-        self,
-        *,
-        consent_gateway: ConsentGateway | None = None,
-        file_scanner: FileScanner | None = None,
-        metadata_extractor: MetadataExtractor | None = None,
-        analysis_engine: AnalysisEngine | None = None,
-        exporter: Exporter | None = None,
-        storage: Storage | None = None,
-    ) -> None:
-        self.consent_gateway = consent_gateway
-        self.file_scanner = file_scanner
-        self.metadata_extractor = metadata_extractor
-        self.analysis_engine = analysis_engine
-        self.exporter = exporter
-        self.storage = storage
-
-    def run(self) -> ScanSummary:
-        """
-        High-level flow (to be implemented):
-
-        1) consent = consent_gateway.request_consent()
-        2) inventory_count = file_scanner.scan()
-        3) metadata_extractor.extract()
-        4) analysis_engine.analyze()
-        5) exporter.export()
-        6) storage.save()
-        7) return ScanSummary(scanned_files=inventory_count, notes=[...])
-
-        For now, returns an empty summary as a placeholder.
-        """
-        # TODO: implement the flow above once components exist
-        return ScanSummary()
+# Read configuration from environment variables with sensible defaults.
+DB_PATH = os.getenv("SKILLSCOPE_DB_PATH", "skill_scope.db")
 
 # CLI entry
 def main() -> None:
-    # TODO: Wire real components like:
-    # orchestrator = Orchestrator(
-    #     consent_gateway=MyConsentGateway(),
-    #     file_scanner=MyFileScanner(),
-    #     metadata_extractor=MyMetadataExtractor(),
-    #     analysis_engine=MyAnalysisEngine(),
-    #     exporter=MyExporter(),
-    #     storage=MyStorage(),
-    # )
-    # summary = orchestrator.run()
-    # print(summary)
-    pass
+    """Initializes components, handles user interaction, and runs the orchestrator."""
+    print("Welcome to Skill Scope!")
+    print("~~~~~~~~~~~~~~~~~~~~~~~")
+
+    # Instantiate components with direct I/O for the CLI
+    permission_manager = PermissionManager()
+    file_scanner = FileParser()
+    storage = StorageManager(db_path=DB_PATH)
+
+    try:
+        # 1. Handle user-facing interactions first
+        consent = permission_manager.get_user_consent()
+        if consent != ConsentResult.GRANTED:
+            # Handles DENIED and CANCELLED
+            return # Exit gracefully
+
+        # 2. Initialize database once at startup
+        storage.initialize_database()
+
+        # 3. Get file list from the user
+        file_list = file_scanner.get_input_file_path()
+        if not file_list:
+            print("Scan aborted: No valid file list was provided.")
+            return
+
+        # 4. Instantiate the core logic and run it with the prepared data
+    orchestrator = Orchestrator(
+        metadata_extractor=MetadataExtractor(),
+        storage=storage,
+    )
+        summary = orchestrator.run(file_list=file_list)
+        print("\n--- Scan Summary ---")
+        print(summary)
+
+    except (FileScannerError, ExtractionError, StorageError) as e:
+        print(f"\nA critical error occurred: {e}")
+    except (KeyboardInterrupt, EOFError):
+        print("\nOperation cancelled by user. Exiting.")
+    except Exception as e:
+        logging.exception("An unexpected critical error occurred.")
+        print(f"\nAn unexpected error occurred: {e}")
 
 if __name__ == "__main__":
     main()
