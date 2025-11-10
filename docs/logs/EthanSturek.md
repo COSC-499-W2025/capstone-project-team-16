@@ -1,4 +1,42 @@
 # Personal Log - Ethan Sturek
+## 2025-NOV-3 to 2025-NOV-9
+
+
+### Type of Tasks Worked On
+![Screenshot](<screenshots/Ethan/Week 10.png>)
+
+### Recap of Week's Goals
+- Scrape repository information
+- Clarify milestone 1 requirements for group
+- Test repository scraping
+
+
+### Features Assigned (Project Plan)
+- Repository Extraction
+- Test repository_extraction
+- Meta Data Extractor
+- Fully define and refine Milestone requirements for our system
+
+### Tasks from Project Board
+| Feature | Task | Status (Completed/In Progress) | Notes |
+|------|------|-------------------------------|-------|
+| Meta Data Extractor | Meta Data Extractor | In Progress | Basic data extraction for all file types and repo information has been made. Next step will be be processing source code files |
+| Meta Data Extractor | Repository Extraction | Completed | Repository information can now be identified and scraped for analyser.  |
+| Meta Data Extractor | Test repository_extraction | Completed | Test passed |
+| Fully define and refine Milestone requirements for our system | Fully define and refine Milestone requirements for our system | Completed | Requirements have been fleshed out and specifically defined |
+
+
+### Completed Tasks (Last 2 Weeks)
+- Repository Extraction
+- Test repository_extraction
+- Fully define and refine Milestone requirements for our system
+
+### In-Progress Tasks (Last 2 Weeks)
+- Meta Data Extractor
+
+### Additional Context (Optional)
+- NA
+
 ## 2025-OCT-26 to 2025-NOV-3
 
 

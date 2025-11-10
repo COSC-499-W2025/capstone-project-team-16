@@ -1,4 +1,93 @@
 # Team Log - Team 16
+## Milestone: 2025-NOV-2 to 2025-NOV-9
+
+
+### Milestone Goals Recap
+- Scrape repository information
+- Clarify milestone 1 requirements for group
+- Test repository scraping
+
+### Features in Project Plan
+- Repository Extraction
+- Test repository_extraction
+- Meta Data Extractor
+- Fully define and refine Milestone requirements for our system
+
+
+### Burnup Chart
+| Name | Username |
+|----------------|----------------|
+| Ethan Sturek | ethansturek |
+| La Wunn| LaWunn|
+| Amani |lugger33 |
+
+![Screenshot](<screenshots/Team16/BurnupW10.png>)
+
+### Completed Tasks Table
+![Screenshot](<screenshots/Team16/DoneTasksW10.png>)
+
+### In Progress Tasks Table
+![Screenshot](<screenshots/Team16/TasksW10.png>)
+
+### Test Report
+![Screenshot](<screenshots/Team16/Test1W10.png>)
+### Tests for analyze_repo_type
+
+**test_valid_git_repo_single_author_single_branch**
+
+Description: Checks that a .git folder with only one author, one branch, and no merges is correctly identified as an individual project.
+
+Checks: is_valid=True, project type is "individual", correct author, branch count, and no merges.
+
+**test_valid_git_repo_collaborative**
+
+Description: Tests a .git folder with multiple authors, multiple branches, and at least one merge commit.
+
+Checks: Project type is "collaborative", multiple authors and branches, merges detected.
+
+**test_non_git_folder_returns_none**
+
+Description: Verifies that a folder that is not a .git directory is ignored.
+
+Checks: Function returns None.
+
+**test_git_repo_raises_exception**
+
+Description: Ensures the function gracefully handles exceptions when trying to open a repository.
+
+Checks: Returns None and does not crash.
+
+### Tests for detailed_extraction
+
+**test_detailed_extraction_valid_repo**
+
+Description: Confirms that a valid repository entry is updated with the information returned by analyze_repo_type.
+
+Checks: Entry is updated with repo name, root, authors, branch count, merges, and project type; success messages printed.
+
+**test_detailed_extraction_invalid_repo**
+
+Description: Ensures that if analyze_repo_type fails (returns None), the entry is not modified.
+
+Checks: No new keys added, and skipping message is printed.
+
+**test_detailed_extraction_non_repo**
+
+Description: Tests that non-repository entries are left untouched.
+
+Checks: Entry data unchanged, no repo analysis output printed.
+
+## Running Tests
+
+1.  Run `python -m venv venv` to create a virtual environment.
+2. On Windows run `venv/Scripts/activate`.
+3. On Mac run `venv/bin/activate`.
+4. Run `pip install -r requirements.txt`.
+5. In the root of the repositiory, enter `pytest` to run all tests.
+
+### Additional Context (Optional)
+- Notes or blockers
+
 ## Milestone: 2025-OCT-26 to 2025-NOV-2
 
 
@@ -75,6 +164,7 @@ Expected: Function handles gracefully. Prints an error and doesn’t crash.
 
 ### Additional Context (Optional)
 - Notes or blockers
+
 ## Milestone: 2025-OCT-19 to 2025-OCT-26
 
 
