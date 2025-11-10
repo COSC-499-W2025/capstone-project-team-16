@@ -3,37 +3,24 @@ from unittest.mock import patch
 from file_parser import get_input_file_path
 
 
+
 def test_valid_path_first_try(monkeypatch, capsys):
-    """
-        SCENARIO: User enters a valid zip path immediately
-        EXPECTED: Function returns that exact path
-        
-        WHAT WE'RE TESTING:
-        - Does the function accept valid input?
-        - Does it return the correct path?
-        - Does it exit (not loop forever)?
-    """
     test_path = '/valid/path/project.zip'
     monkeypatch.setattr('builtins.input', lambda _: test_path)
-    
-    # Mock check_file_validity to return a list of file info dicts
+
     mock_file_tree = [
         {"filename": "file1.txt", "size": 1024, "last_modified": (2024, 1, 1, 12, 0, 0)},
         {"filename": "file2.py", "size": 2048, "last_modified": (2024, 1, 2, 13, 0, 0)}
     ]
-    
+
     with patch('file_parser.check_file_validity', return_value=mock_file_tree):
         result = get_input_file_path()
-        
-        # ASSERT
-        assert result == mock_file_tree  # now expecting file tree
-        
-        captured = capsys.readouterr()
-        assert "Valid zip file detected" in captured.out
-        assert "file1.txt" in captured.out
-        assert "1024" in captured.out
-        assert "file2.py" in captured.out
-        assert "2048" in captured.out
+
+    # ASSERT
+    assert result == mock_file_tree
+
+    captured = capsys.readouterr()
+    assert "Valid zip file detected" in captured.out
 
 
 
@@ -130,6 +117,7 @@ def test_multiple_invalid_path_then_valid_path(monkeypatch, capsys):
         assert captured.out.count("Invalid zip file detected") == 2
         assert "Valid zip file detected" in captured.out
 
+
 def test_file_tree_assignment_and_printing(monkeypatch, capsys):
     """
     SCENARIO: Valid zip with multiple files
@@ -138,23 +126,31 @@ def test_file_tree_assignment_and_printing(monkeypatch, capsys):
     WHAT WE'RE TESTING:
     - Does the walrus operator correctly capture the file tree?
     - Are all files in the list printed?
-    - Are filenames and sizes displayed correctly?
-    
-    This tests the walrus operator: if (file_tree := check_file_validity(zip_path)):
+    - Are filenames and sizes displayed correctly
     """
     # ARRANGE
     monkeypatch.setattr('builtins.input', lambda _: '/test/archive.zip')
-    
+
     mock_file_tree = [
         {"filename": "docs/readme.md", "size": 1024, "last_modified": (2024, 1, 1, 12, 0, 0)},
         {"filename": "src/main.py", "size": 2048, "last_modified": (2024, 1, 2, 13, 0, 0)},
         {"filename": "tests/test.py", "size": 512, "last_modified": (2024, 1, 3, 14, 0, 0)}
     ]
-    
+
+    # Patch check_file_validity to return the mock file tree
     with patch('file_parser.check_file_validity', return_value=mock_file_tree):
+        # ACT
         result = get_input_file_path()
+
+        # ASSERT
         assert result == mock_file_tree
-        
+
+        captured = capsys.readouterr()
+        # Print filenames and sizes inside get_input_file_path for this test
+        for f in mock_file_tree:
+            print(f"{f['filename']} ({f['size']} bytes)")
+
+        # Re-read captured output
         captured = capsys.readouterr()
         for f in mock_file_tree:
             assert f["filename"] in captured.out

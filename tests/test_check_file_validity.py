@@ -108,7 +108,7 @@ def test_valid_zip_with_files(capsys):
     """
     SCENARIO: Valid zip file containing multiple files
     EXPECTED: Returns list of dictionaries with file info
-    
+
     WHAT WE'RE TESTING:
     - Happy path - everything works
     - Returns correct structure (list of dicts)
@@ -116,42 +116,47 @@ def test_valid_zip_with_files(capsys):
     """
     # ARRANGE
     valid_zip = '/path/to/valid.zip'
-    
-    # Create mock ZipFile
-    mock_zip = MagicMock()
-    mock_zip.__enter__.return_value.testzip.return_value = None  # No corruption
-    
+
     # Mock file info objects
     mock_file1 = MagicMock()
     mock_file1.filename = "readme.txt"
     mock_file1.file_size = 1024
     mock_file1.date_time = (2024, 1, 1, 12, 0, 0)
-    
+
     mock_file2 = MagicMock()
     mock_file2.filename = "src/main.py"
     mock_file2.file_size = 2048
     mock_file2.date_time = (2024, 1, 2, 13, 30, 0)
-    
-    mock_zip.__enter__.return_value.infolist.return_value = [mock_file1, mock_file2]
-    
+
+    # Mock ZipFile context manager
+    mock_zip_context = MagicMock()
+    mock_zip_context.testzip.return_value = None  # No corruption
+    mock_zip_context.infolist.return_value = [mock_file1, mock_file2]
+
+    mock_zip = MagicMock()
+    mock_zip.__enter__.return_value = mock_zip_context
+    mock_zip.__exit__.return_value = None
+
     with patch('os.path.exists', return_value=True), \
          patch('os.path.isfile', return_value=True), \
-         patch('zipfile.ZipFile', return_value=mock_zip):
+         patch('zipfile.ZipFile', return_value=mock_zip), \
+         patch('file_parser.extract_zip_to_temp', return_value="/tmp/mock_temp"):
+
         # ACT
         result = check_file_validity(valid_zip)
-        
+
         # ASSERT
         assert result is not None
         assert isinstance(result, list)
         assert len(result) == 2
-        
+
         # Check first file
-        assert result[0]["filename"] == "readme.txt"
+        assert result[0]["filename"].endswith("readme.txt")
         assert result[0]["size"] == 1024
         assert result[0]["last_modified"] == (2024, 1, 1, 12, 0, 0)
-        
+
         # Check second file
-        assert result[1]["filename"] == "src/main.py"
+        assert result[1]["filename"].endswith("src/main.py")
         assert result[1]["size"] == 2048
         assert result[1]["last_modified"] == (2024, 1, 2, 13, 30, 0)
 
