@@ -21,7 +21,7 @@
 
 ### Burnup Chart
 | Name | Username |
-|----------------|----------------|
+| Daniel Storozhuk | DanielKelowna|
 | Ethan Sturek | ethansturek |
 | La Wunn| LaWunn|
 | Amani |lugger33 |
