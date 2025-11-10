@@ -208,7 +208,7 @@
 ### Additional Context (Optional)
 - N/A
 
-## 2025-OCT-20 to 2025-OCT-26
+## 2025-OCT-26 to 2025-Nov-02
 
 ### Type of Tasks Worked On
 
@@ -238,6 +238,54 @@
 
 ### Completed/In-Progress Tasks (Last 2 Weeks)
 - consent prompt for external service usage
+- Provide alternative analyses if external services are not permitted
+
+### Additional Context (Optional)
+- N/A
+
+  
+
+## 2025-Nov-02 to 2025-Nov-09
+
+### Type of Tasks Worked On
+
+
+
+
+<img width="962" height="570" alt="Screenshot 2025-11-09 at 10 30 11 PM" src="https://github.com/user-attachments/assets/e386994c-1ebc-4ed1-8059-f0846159dc2a" />
+
+
+
+
+
+### Recap of Week's Goals
+
+- coding (working on analysis part. progress is in branch user-consent-prompt)
+
+### Features Assigned (Project Plan)
+
+- Provide alternative analyses if external services are not permitted (continue from last week)
+- Distinguish between individual and collaborative projects
+- For coding projects, identify the programming language and framework used
+- Extrapolate individual contributions in collaborative projects
+- Extract contribution metrics, such as project duration and contribution frequency by activity type (e.g., code, test, design, documentation)
+
+
+
+### Tasks from Project Board
+| Feature | Task | Status (Completed/In Progress) | Notes |
+|------|------|-------------------------------|-------|
+
+| Provide alternative analyses if external services are not permitted | Provide alternative analyses if external services are not permitted | In progress | … |
+| Distinguish between individual and collaborative projects |Distinguish between individual and collaborative projects | In progress | … |
+| For coding projects, identify the programming language and framework used | For coding projects, identify the programming language and framework used | In progress | … |
+| Extrapolate individual contributions in collaborative projects | Extrapolate individual contributions in collaborative projects | In progress | … |
+| Extract contribution metrics, such as project duration and contribution frequency by activity type (e.g., code, test, design, documentation) | Extract contribution metrics, such as project duration and contribution frequency by activity type (e.g., code, test, design, documentation) | In progress | … |
+
+
+
+### Completed/In-Progress Tasks (Last 2 Weeks)
+
 - Provide alternative analyses if external services are not permitted
 
 ### Additional Context (Optional)
