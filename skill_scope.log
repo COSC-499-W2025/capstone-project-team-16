@@ -25,3 +25,11 @@
 2025-11-18 23:00:01 [INFO] src.components.extractor: Successfully loaded 72 category filters and 22 language filters.
 2025-11-18 23:00:05 [INFO] src.components.storage: Database version is 2, initializing/upgrading schema to version 3.
 2025-11-18 23:00:05 [INFO] src.components.storage: Dropping outdated 'files' table to apply new schema.
+2025-11-19 01:49:48 [INFO] __main__: Running in PROD mode. Loading real implementations.
+2025-11-19 01:49:48 [INFO] components.extractor: Successfully loaded 72 category filters and 22 language filters.
+2025-11-19 01:49:48 [INFO] __main__: Check 'skill_scope.db' for persisted data.
+2025-11-19 01:50:28 [ERROR] components.scanner: Scan failed: Invalid zip file path.
+2025-11-19 01:50:40 [INFO] components.storage: Saved batch of 1000 records.
+2025-11-19 01:50:40 [INFO] components.storage: Saved batch of 519 records.
+2025-11-19 01:50:40 [INFO] components.storage: Successfully saved a total of 1519 records to the database.
+2025-11-19 01:50:40 [INFO] core.orchestrator: Orchestration complete. Succeeded: 1519, Failed: 0.
