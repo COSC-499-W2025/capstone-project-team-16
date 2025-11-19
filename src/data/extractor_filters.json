@@ -1,0 +1,61 @@
+{
+  "categories": {
+    "source_code": [
+      ".py", ".js", ".ts", ".java", ".cpp", ".c", ".cs", ".rb", ".go", ".rs", ".swift", ".kt", ".jsx", ".tsx"
+    ],
+    "web_code": [
+      ".html", ".htm", ".css", ".scss", ".sass", ".less", ".vue", ".php"
+    ],
+    "documentation": [
+      ".md", ".txt", ".rst", ".pdf", ".docx"
+    ],
+    "configuration": [
+      ".json", ".yaml", ".yml", ".ini", ".env", ".toml", ".cfg", ".xml", "package.json", "pyproject.toml", "Cargo.toml", "go.mod"
+    ],
+    "assets": [
+      ".png", ".jpg", ".jpeg", ".svg", ".gif", ".bmp", ".tiff", ".ico"
+    ],
+    "datasets": [
+      ".csv", ".xlsx", ".parquet", ".tsv"
+    ],
+    "binaries": [
+      ".exe", ".dll", ".bin", ".so", ".dylib"
+    ],
+    "notebooks": [
+      ".ipynb"
+    ],
+    "build_scripts": [
+      "Makefile", "build.gradle", "pom.xml", "CMakeLists.txt", "setup.py", "setup.cfg", "docker-compose.yml"
+    ],
+    "docker_files": [
+      "Dockerfile"
+    ],
+    "git_metadata": [
+      ".gitignore", ".gitattributes", ".gitmodules"
+    ],
+    "repository": [
+      ".git", ".hg", ".svn", "requirements.txt"
+    ]
+  },
+  "languages": {
+    "python": [".py"],
+    "javascript": [".js", ".jsx"],
+    "typescript": [".ts", ".tsx"],
+    "java": [".java"],
+    "cpp": [".cpp"],
+    "c": [".c"],
+    "csharp": [".cs"],
+    "ruby": [".rb"],
+    "go": [".go"],
+    "rust": [".rs"],
+    "swift": [".swift"],
+    "kotlin": [".kt"],
+    "html": [".html", ".htm"],
+    "css": [".css"],
+    "scss": [".scss"],
+    "sass": [".sass"],
+    "less": [".less"],
+    "vue": [".vue"],
+    "php": [".php"]
+  }
+}
