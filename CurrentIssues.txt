@@ -1,0 +1,91 @@
+ 
+TLDR: Database does not persist right now (destructive save)
+No analysis yet. Probably a bunch of issues that I couldn't find but I'm too tired to keep testing
+
+Written by Gemini
+
+
+Project Outline: SkillScope Artifact Analysis System
+=====================================================
+
+This document provides a high-level overview of the SkillScope project, including its current architecture, core workflow, key limitations, and planned future implementations.
+
+
+1. Project Overview
+-------------------
+
+*   **Goal:** To extract and analyze a user's digital projects (code, documents, etc.) to provide insights into productivity, skill development, and project evolution.
+*   **Target Users:** Students, early-career professionals, programmers, and creatives.
+*   **Milestone 1 Functionality:**
+    -   Obtain user consent before accessing data.
+    -   Scan user-provided zipped project folders.
+    -   Extract file metadata (type, size, category, language) based on a configurable JSON filter.
+    -   Store the extracted metadata in a local SQLite database.
+    -   Provide a command-line summary of the scan results.
+
+
+2. Current Architecture
+-----------------------
+
+The application is built on a modular, protocol-based architecture designed for testability and maintainability.
+
+*   **Design Pattern:** Dependency Injection. The main entry point (`src/main.py`) wires up components based on the runtime mode (PROD or DEV).
+*   **Core Contracts (`src/contracts.py`):** A set of protocols and data classes define the boundaries between components, preventing tight coupling.
+*   **Key Components:**
+    -   **ConsentGateway:** Protocol for handling user consent.
+        -   *Implementation:* `ConsolePermissionManager` (prompts user in the CLI).
+    -   **FileScanner:** Protocol for discovering project files.
+        -   *Implementation:* `ZipFileScanner` (scans a .zip file's headers without extracting to disk).
+    -   **MetadataExtractor:** Protocol for categorizing files.
+        -   *Implementation:* `MetadataExtractorImpl` (uses `extractor_filters.json` to categorize files and detect languages).
+    -   **Storage:** Protocol for data persistence.
+        -   *Implementation:* `StorageManager` (manages an SQLite database).
+    -   **Orchestrator:** A central class that coordinates the workflow between the extractor and storage components.
+
+
+3. Core Workflow
+----------------
+
+The application follows a sequential, command-line-driven workflow:
+
+1.  **Initialization:** `main.py` sets up logging and injects either real or mock components.
+2.  **User Consent:** The `ConsolePermissionManager` prompts the user for consent. The application exits if consent is denied or cancelled.
+3.  **Database Setup:** The `StorageManager` initializes the SQLite database, creating tables if they don't exist.
+4.  **File Input:** The `ZipFileScanner` prompts the user for the path to a zip file.
+5.  **Scanning:** The scanner reads the zip file's headers in memory, validates against security threats (e.g., Zip Slip), and produces a list of `FileInfo` objects.
+6.  **Extraction:** The `Orchestrator` passes the file list to the `MetadataExtractorImpl`, which categorizes each file and returns an `ExtractionResult`.
+7.  **Persistence:** The `Orchestrator` sends the successful extraction results to the `StorageManager`, which saves the data to the database.
+8.  **Summary:** A final summary of the operation (files scanned, processed, failed) is printed to the console.
+
+
+4. Key Limitations & Future Implementations
+-------------------------------------------
+
+*   **1. Data Persistence:**
+    -   **Limitation:** The `StorageManager` currently performs a destructive save, deleting all previous records from the database on every run.
+    -   **Future Work:** Implement "upsert" (UPDATE or INSERT) logic to maintain a historical record of all scanned projects, allowing for trend analysis over time.
+
+*   **2. Core Analysis Engine:**
+    -   **Limitation:** The application currently stops after storing metadata. The "analysis" phase, which is the core value proposition, is not yet implemented.
+    -   **Future Work:** Build an `AnalysisEngine` component to process the stored data. This would include:
+        -   Git repository analysis (commit history, authors, branches).
+        -   Dependency and framework detection (from `requirements.txt`, `package.json`, etc.).
+        -   Skill inference based on project content and technologies used.
+
+*   **3. Input & Scanning Capabilities:**
+    -   **Limitation:** The system only supports scanning `.zip` files, which is not a typical user workflow.
+    -   **Future Work:**
+        -   Implement a `LocalDirectoryScanner` to scan project folders directly on the filesystem.
+        -   Implement a `GitCloneScanner` to analyze projects directly from remote repository URLs.
+
+*   **4. User Experience & Interface:**
+    -   **Limitation:** The application is a CLI-only tool with a rigid workflow.
+    -   **Future Work:**
+        -   Develop a REST API (using Flask or FastAPI) to decouple the backend logic from the CLI.
+        -   Build a web-based front-end to provide a rich, interactive user experience for uploading projects and viewing results.
+
+*   **5. Error Handling and Reporting:**
+    -   **Limitation:** Failures (e.g., during extraction) are logged but not presented in a highly actionable way to the user.
+    -   **Future Work:**
+        -   Implement structured (JSON) logging for easier parsing in production environments.
+        -   Enhance the final `ScanSummary` to provide more detailed and user-friendly reports on failures.
