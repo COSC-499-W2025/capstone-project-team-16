@@ -33,3 +33,6 @@
 2025-11-19 01:50:40 [INFO] components.storage: Saved batch of 519 records.
 2025-11-19 01:50:40 [INFO] components.storage: Successfully saved a total of 1519 records to the database.
 2025-11-19 01:50:40 [INFO] core.orchestrator: Orchestration complete. Succeeded: 1519, Failed: 0.
+2025-11-19 17:17:57 [INFO] __main__: Running in PROD mode. Loading real implementations.
+2025-11-19 17:17:57 [INFO] components.extractor: Successfully loaded 72 category filters and 22 language filters.
+2025-11-19 17:17:57 [INFO] __main__: Check 'skill_scope.db' for persisted data.

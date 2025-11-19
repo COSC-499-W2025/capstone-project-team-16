@@ -66,6 +66,14 @@ class ZipFileScanner(FileScanner):
             with zipfile.ZipFile(zip_path, 'r') as zip_ref:
                 file_tree = []
                 for info in zip_ref.infolist():
+                    # --- macOS Artifact Filtering ---
+                    # Exclude macOS-specific metadata directories and files.
+                    if info.filename.startswith("__MACOSX/") or info.filename.endswith(".DS_Store"):
+                        continue
+                    # Exclude resource fork files (e.g., `._somefile.py`) using posixpath for safety.
+                    if posixpath.basename(info.filename).startswith("._"):
+                        continue
+
                     # --- Security Check ---
                     # Validate file path to prevent Zip Slip vulnerabilities.
                     if self._is_malicious_path(info.filename):
