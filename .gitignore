@@ -1,4 +1,16 @@
-__pycache__/ 
-*.pyc 
-*.db 
-.DS_Store 
+# --- OS settings ---
+.DS_Store
+
+
+# --- Virtual environments ---
+venv/
+.venv/
+env/
+.env/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# pytest cache
+.pytest_cache/
