@@ -1,0 +1,22 @@
+Navigate to your root directory (for me it's cd /d E:\COSC499\capstone-project-team-16)
+
+Docker isn't really realistic to use for the core functionality without poking a ton of holes,
+not sure how that wasn't caught earlier. Eventually for final submission probably best to package this as an EXE
+(For now, have to have python and pytest installed)
+
+To run tests : 
+
+pip install pytest (first run only, if you don't already have it)
+
+set PYTHONPATH=src;%PYTHONPATH%  (Python doesn't know your code is in src/ folder unless you tell it)
+pytest tests\ -v
+
+To run CLI : 
+
+set PYTHONPATH=src;%PYTHONPATH%
+python src\main.py
+
+Change from PROD and DEV on line 63 in main.py to test using mocks
+
+test_project.zip is in the root (your_path\capstone-project-team-16\test_project.zip)
+(as a testing zip for when CLI prompts for a path)
