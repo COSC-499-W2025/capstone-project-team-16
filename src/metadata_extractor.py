@@ -12,13 +12,18 @@ def load_filters(path="extractor_filters.json"):
         with open(path, "r") as f:
             data = json.load(f)
 
-        # Flips the category with extension for easier comparison
+         # Build extension to category mapping
         ext_to_category = {}
         for category, extensions in data["categories"].items():
             for ext in extensions:
                 ext_to_category[ext.lower()] = category
 
-        return ext_to_category
+        # Build extension to language mapping
+        ext_to_language = {}
+        for ext, lang in data.get("languages", {}).items():
+            ext_to_language[ext.lower()] = lang
+
+        return ext_to_category, ext_to_language
 
     except FileNotFoundError:
         print(f"Filter file not found: {path}")
@@ -28,36 +33,40 @@ def load_filters(path="extractor_filters.json"):
         print(f"Unexpected error loading filters: {e}")
 
     # Provide fallback if JSON not found or failed
-    return {}
+    return {}, {}
 
 
 # Loads filters and builds metadata
 def base_extraction(file_list):
-    filters = load_filters()
+    extensions, languages = load_filters()
     extracted_data = []
 
 
-    if filters:
+    if extensions:
         for f in file_list:
             filename = f["filename"]
             size = f["size"]
             last_modified = f["last_modified"]
             is_file = False
+            language = "undefined"
 
             #TODO: handle specific files like requirements.txt so they don't fall under broader categories like txt since it is a repo file
             if filename.endswith("/"):
                 # Treat as folder
                 ext = filename.rstrip("/")
                 ext = os.path.basename(ext)
-                category = filters.get(ext, "uncategorized")
+                category = extensions.get(ext, "uncategorized")
+                language = ""
             else:
                 # Treat as a file and assign category
                 _, ext = os.path.splitext(filename)
                 ext = ext.lower()
                 #TODO: add uncategorized file extensions to log to be added to filter list
-                category = filters.get(ext, "uncategorized")
+                category = extensions.get(ext, "uncategorized")
                 is_file = True
                 
+                if category == "source_code" or category == "web_code":
+                    language = languages.get(ext, "undefined")
 
             
 
@@ -68,7 +77,8 @@ def base_extraction(file_list):
                     "last_modified": last_modified,
                     "extension": ext,
                     "category": category,
-                    "isFile": is_file
+                    "isFile": is_file,
+                    "language": language
                 }
             )
 
@@ -100,4 +110,3 @@ def detailed_extraction(extracted_data):
             else:
                 print(f"Skipping invalid or failed repo: {entry['filename']}")
             
-    print("detailed extraction")
