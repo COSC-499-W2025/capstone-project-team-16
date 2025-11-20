@@ -3,14 +3,8 @@
 from __future__ import annotations
 from permission_manager import get_user_consent
 from file_parser import get_input_file_path
-<<<<<<< Updated upstream
 from metadata_extractor import base_extraction, detailed_extraction
-
-=======
-from metadata_extractor import base_extraction
 from alternative_analysis import analyze_projects
->>>>>>> Stashed changes
-
 from dataclasses import dataclass, field
 from typing import Protocol
 
@@ -27,14 +21,12 @@ if file_list:
     #call metadata extractor and pass file_path
     #should get a list of files with accompanying metadata.
     scraped_data = base_extraction(file_list)
-<<<<<<< Updated upstream
+
     advanced_data = detailed_extraction(scraped_data)
     
-=======
-
     #for analysis part
     analyze_projects(scraped_data)
->>>>>>> Stashed changes
+
 
 
 """
