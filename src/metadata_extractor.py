@@ -6,10 +6,13 @@ from repository_extractor import analyze_repo_type
 # TODO: run extractors by file type (repo). For repos, validate to make sure it's actually repo. 
 
 # Loads the list of filters JSON and reverses it for easier identification
-def load_filters(path="extractor_filters.json"):
+def load_filters(filename="extractor_filters.json"):
+
+    here = os.path.dirname(__file__)
+    path = os.path.join(here, filename)
     
     try:
-        with open(path, "r") as f:
+        with open(path, "r", encoding="utf-8") as f:
             data = json.load(f)
 
          # Build extension to category mapping
@@ -109,4 +112,9 @@ def detailed_extraction(extracted_data):
                 print(f"  Project type: {repo_info.get('project_type')}")
             else:
                 print(f"Skipping invalid or failed repo: {entry['filename']}")
+<<<<<<< Updated upstream
             
+=======
+            
+    print("detailed extraction")
+>>>>>>> Stashed changes
