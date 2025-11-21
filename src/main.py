@@ -1,126 +1,158 @@
-### This will act as our orchestrator for coordinating scan tasks
+"""
+Brief summary of module purpose.
 
+This module serves as the main entry point for the SkillScope application.
+It is responsible for initializing and wiring up all dependencies, handling
+user consent, and orchestrating the primary workflow.
+"""
 from __future__ import annotations
-from permission_manager import get_user_consent
-from file_parser import get_input_file_path
-from metadata_extractor import base_extraction, detailed_extraction
-from alternative_analysis import analyze_projects
-from dataclasses import dataclass, field
-from typing import Protocol
+import logging
+import os
+import sys
 
-print("Welcome to Skill Scope!")
-print("~~~~~~~~~~~~~~~~~~~~~~~")
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+from contracts import (
+    ConsentResult,
+    FileScannerError,
+    ExtractionError,
+    StorageError,
+)
+from utils.logging_config import setup_logging
+from core.orchestrator import Orchestrator
+from contracts import ConsentGateway, FileScanner, MetadataExtractor, Storage
 
-if (get_user_consent()):
-    file_list = get_input_file_path()
-else:
-    exit()
+# --- Configuration ---
+DB_PATH = os.getenv("SKILLSCOPE_DB_PATH", "skill_scope.db")
+FILTER_PATH = os.getenv(
+    "SKILLSCOPE_FILTER_PATH",
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "extractor_filters.json")
+)
 
-if file_list:
-    #call metadata extractor and pass file_path
-    #should get a list of files with accompanying metadata.
-    scraped_data = base_extraction(file_list)
-
-    advanced_data = detailed_extraction(scraped_data)
-    
-    #for analysis part
-    analyze_projects(scraped_data)
-
+logger = logging.getLogger(__name__)
 
 
-"""
-Orchestrator Template
-
-This file only defines:
-- Minimal contracts
-- A thin Orchestrator with a single run() method
-- A stub main() for a proposed wiring location
-
-No actual logic, data types not finalized, etc.
-"""
-
-
-
-# Minimal data contract
-@dataclass
-class ScanSummary:
-    scanned_files: int = 0
-    notes: list[str] = field(default_factory=list)
-
-# Minimal service contracts
-class ConsentGateway(Protocol):
-    def request_consent(self) -> bool: ...
-
-class FileScanner(Protocol):
-    def scan(self) -> int: ...  
-
-class MetadataExtractor(Protocol):
-    def extract(self) -> None: ...
-
-class AnalysisEngine(Protocol):
-    def analyze(self) -> None: ...
-
-class Exporter(Protocol):
-    def export(self) -> None: ...
-
-class Storage(Protocol):
-    def save(self) -> None: ...
-
-# Orchestrator skeleton
-class Orchestrator:
-    """Make implementations for each dependency, implement run() when ready.
-    Until then, it returns a blank summary.
+def main(
+    permission_manager: ConsentGateway | None = None,
+    file_scanner: FileScanner | None = None,
+    metadata_extractor: MetadataExtractor | None = None,
+    storage: Storage | None = None,
+) -> None:
     """
+    Runs the main application workflow.
 
-    def __init__(
-        self,
-        *,
-        consent_gateway: ConsentGateway | None = None,
-        file_scanner: FileScanner | None = None,
-        metadata_extractor: MetadataExtractor | None = None,
-        analysis_engine: AnalysisEngine | None = None,
-        exporter: Exporter | None = None,
-        storage: Storage | None = None,
-    ) -> None:
-        self.consent_gateway = consent_gateway
-        self.file_scanner = file_scanner
-        self.metadata_extractor = metadata_extractor
-        self.analysis_engine = analysis_engine
-        self.exporter = exporter
-        self.storage = storage
+    This function orchestrates the entire process, from dependency injection
+    and user consent to file scanning, extraction, and summarization. It accepts
+    optional dependencies to facilitate testing.
 
-    def run(self) -> ScanSummary:
-        """
-        High-level flow (to be implemented):
+    Args:
+        permission_manager (ConsentGateway | None): The consent management component.
+        file_scanner (FileScanner | None): The file scanning component.
+        metadata_extractor (MetadataExtractor | None): The metadata extraction component.
+        storage (Storage | None): The data storage component.
+    """
+    scanner_instance = file_scanner
+    try:
+        setup_logging()
 
-        1) consent = consent_gateway.request_consent()
-        2) inventory_count = file_scanner.scan()
-        3) metadata_extractor.extract()
-        4) analysis_engine.analyze()
-        5) exporter.export()
-        6) storage.save()
-        7) return ScanSummary(scanned_files=inventory_count, notes=[...])
+        print("~~~~~~~~~~~~~~~~~~~~~~~\nSkillScope Skeleton Runner\n~~~~~~~~~~~~~~~~~~~~~~~")
 
-        For now, returns an empty summary as a placeholder.
-        """
-        # TODO: implement the flow above once components exist
-        return ScanSummary()
+        # --- Dependency Injection ---
+        # If components are not passed in (i.e., running in production), create them.
+        if permission_manager is None:  # Production mode initialization
+            RUN_MODE = os.getenv("SKILLSCOPE_MODE", "PROD").upper()
+            if RUN_MODE == "PROD":
+                logger.info("Running in PROD mode. Loading real implementations.")
+                from components.scanner import ZipFileScanner
+                from components.extractor import MetadataExtractorImpl
+                from components.permissions import ConsolePermissionManager
+                from components.storage import StorageManager
+                
+                permission_manager = ConsolePermissionManager()
+                scanner_instance = ZipFileScanner()
+                metadata_extractor = MetadataExtractorImpl(filters_path=FILTER_PATH)
+                storage = StorageManager(db_path=DB_PATH)
+                logger.info("Check 'skill_scope.db' for persisted data.")
+            else:
+                print("Running in DEV mode")  # For tests
+                logger.info("Running in DEV mode. Loading mock implementations.")  # For logs
+                logger.info("Running in DEV mode. Loading mock implementations.")
+                from utils.mocks import MockPermissionManager, MockFileScanner, MockMetadataExtractor, MockStorage
+                
+                permission_manager = MockPermissionManager()
+                scanner_instance = MockFileScanner()
+                metadata_extractor = MockMetadataExtractor()
+                storage = MockStorage()
 
-# CLI entry
-def main() -> None:
-    # TODO: Wire real components like:
-    # orchestrator = Orchestrator(
-    #     consent_gateway=MyConsentGateway(),
-    #     file_scanner=MyFileScanner(),
-    #     metadata_extractor=MyMetadataExtractor(),
-    #     analysis_engine=MyAnalysisEngine(),
-    #     exporter=MyExporter(),
-    #     storage=MyStorage(),
-    # )
-    # summary = orchestrator.run()
-    # print(summary)
-    pass
+        permission_manager: "ConsentGateway"
+        metadata_extractor: "MetadataExtractor"
+        storage: "Storage"
+
+        # --- Main Workflow ---
+
+        # 1. Handle user-facing interactions first.
+        assert permission_manager is not None
+        consent = permission_manager.get_user_consent()
+        if consent != ConsentResult.GRANTED:
+            # This block handles both DENIED and CANCELLED results, exiting gracefully.
+            print("Consent denied. Exiting.")
+            return 
+
+        # 2. Initialize database
+        assert storage is not None
+        storage.initialize_database()
+
+        # 3. Get file list from the user.
+        assert scanner_instance is not None
+        scanned_files = scanner_instance.get_input_file_path()
+        if not scanned_files:
+            print("No files found.")
+            return
+
+        # 4. Instantiate the core logic and run it with the prepared data.
+        orchestrator = Orchestrator(
+            metadata_extractor=metadata_extractor,
+            storage=storage,
+        )
+        summary = orchestrator.run(scanned_files=scanned_files)
+
+        # 5. Continue implementation (analysis)
+        #TODO: Implement the analysis stage using the extracted data.
+        print("\n--- Scan Summary ---")
+        print(f"Scan ID:         {summary.scan_id}")
+        print(f"Files Scanned:   {summary.scanned_files}")
+        print(f"Files Processed: {summary.processed_files}")
+
+        if summary.failures:
+            print(f"Failures:        {len(summary.failures)}")
+            for failure in summary.failures:
+                print(f"  - {failure.file_path}: {failure.reason}")
+
+    except (ValueError, FileNotFoundError) as e:
+        # Catches configuration errors, e.g., from MetadataExtractorImpl initialization.
+        logger.critical(f"Configuration error: {e}", exc_info=True)
+        print(f"\n❌ Configuration Error: {e}")
+        print("Please check your filter file and application setup, then try again.")
+    except RuntimeError as e:
+        # Catches unexpected errors during setup, such as filter loading.
+        logger.critical(f"A critical runtime error occurred during setup: {e}", exc_info=True)
+        print(f"\n❌ Critical Error: {e}")
+    except (
+        FileScannerError, ExtractionError, StorageError
+    ) as e:
+        # Catches custom application-specific errors during the workflow.
+        logger.error(f"Operation failed: {e}", exc_info=True)
+        print(f"\n❌ Operation Failed: {e}")
+    except (KeyboardInterrupt, EOFError):
+        # Gracefully handle user cancellation.
+        print("\nOperation cancelled by user. Exiting.")
+    except Exception as e:
+        logging.critical("An unexpected error occurred.", exc_info=True)
+        print(f"\nAn unexpected critical error occurred. Please check the logs for details.")
+    finally:
+        # Ensure cleanup is always called if the scanner was initialized.
+        if scanner_instance:
+            scanner_instance.cleanup()
 
 if __name__ == "__main__":
     main()
