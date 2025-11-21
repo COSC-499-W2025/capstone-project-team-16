@@ -26,7 +26,7 @@ def test_load_filters_returns_dict(tmp_path):
     test_file = tmp_path / "extractor_filters.json"
     test_file.write_text(json.dumps(json_data))
 
-    extensions, languages = load_filters(path=str(test_file))
+    extensions, languages = load_filters(filename=str(test_file))
 
     # Check extension→category mapping
     assert extensions == {
@@ -47,7 +47,7 @@ def test_load_filters_handles_missing_file(tmp_path, capsys):
     """SCENARIO: JSON file does not exist
        EXPECTED: Prints warning and returns empty dicts"""
     
-    extensions, languages = load_filters(path=str(tmp_path / "nonexistent.json"))
+    extensions, languages = load_filters(filename=str(tmp_path / "nonexistent.json"))
     
     captured = capsys.readouterr()
     
@@ -65,7 +65,7 @@ def test_load_filters_invalid_json(tmp_path, capsys):
     bad_json = tmp_path / "bad.json"
     bad_json.write_text("{ invalid json")
     
-    extensions, languages = load_filters(path=str(bad_json))
+    extensions, languages = load_filters(filename=str(bad_json))
     
     captured = capsys.readouterr()
     
@@ -86,7 +86,7 @@ def test_load_filters_unexpected_error(monkeypatch, capsys):
     
     monkeypatch.setattr("builtins.open", mock_open)
     
-    extensions, languages = load_filters(path="extractor_filters.json")
+    extensions, languages = load_filters(filename="extractor_filters.json")
     captured = capsys.readouterr()
     
     # Both dictionaries should be empty
