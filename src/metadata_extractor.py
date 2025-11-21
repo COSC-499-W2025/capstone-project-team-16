@@ -27,7 +27,7 @@ def load_filters(filename=None):
         for ext, lang in data.get("languages", {}).items():
             ext_to_language[ext.lower()] = lang
 
-        return ext_to_category, ext_to_language
+        return{"extensions":ext_to_category, "languages":ext_to_language}
 
     except FileNotFoundError:
         print(f"Filter file not found: {filename}")
@@ -37,14 +37,15 @@ def load_filters(filename=None):
         print(f"Unexpected error loading filters: {e}")
 
     # Provide fallback if JSON not found or failed
-    return {}, {}
+    return {}
 
 
 # Loads filters and builds metadata
-def base_extraction(file_list):
-    extensions, languages = load_filters()
+def base_extraction(file_list, filters):
+    #extensions, languages = load_filters()
     extracted_data = []
-
+    extensions = filters.get("extensions", {})
+    languages = filters.get("languages", {})
 
     if extensions:
         for f in file_list:

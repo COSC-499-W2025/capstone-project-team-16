@@ -3,7 +3,7 @@
 from __future__ import annotations
 from permission_manager import get_user_consent
 from file_parser import get_input_file_path
-from metadata_extractor import base_extraction, detailed_extraction
+from metadata_extractor import base_extraction, detailed_extraction, load_filters
 from alternative_analysis import analyze_projects
 from dataclasses import dataclass, field
 from typing import Protocol
@@ -20,7 +20,9 @@ else:
 if file_list:
     #call metadata extractor and pass file_path
     #should get a list of files with accompanying metadata.
-    scraped_data = base_extraction(file_list)
+
+    filters = load_filters()
+    scraped_data = base_extraction(file_list, filters)
 
     advanced_data = detailed_extraction(scraped_data)
     
