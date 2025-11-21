@@ -39,25 +39,27 @@
   },
 
   "languages": {
-  "python": [".py"],
-  "javascript": [".js", ".jsx"],
-  "typescript": [".ts", ".tsx"],
-  "java": [".java"],
-  "cpp": [".cpp"],
-  "c": [".c"],
-  "csharp": [".cs"],
-  "ruby": [".rb"],
-  "go": [".go"],
-  "rust": [".rs"],
-  "swift": [".swift"],
-  "kotlin": [".kt"],
-
-  "html": [".html", ".htm"],
-  "css": [".css"],
-  "scss": [".scss"],
-  "sass": [".sass"],
-  "less": [".less"],
-  "vue": [".vue"],
-  "php": [".php"]
-  }
+  ".py": "python",
+  ".js": "javascript",
+  ".jsx": "javascript",
+  ".ts": "typescript",
+  ".tsx": "typescript",
+  ".java": "java",
+  ".cpp": "cpp",
+  ".c": "c",
+  ".cs": "csharp",
+  ".rb": "ruby",
+  ".go": "go",
+  ".rs": "rust",
+  ".swift": "swift",
+  ".kt": "kotlin",
+  ".html": "html",
+  ".htm": "html",
+  ".css": "css",
+  ".scss": "scss",
+  ".sass": "sass",
+  ".less": "less",
+  ".vue": "vue",
+  ".php": "php"
+}
 }

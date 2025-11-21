@@ -27,7 +27,7 @@ if file_list:
     advanced_data = detailed_extraction(scraped_data)
     
     #for analysis part
-    analyze_projects(scraped_data)
+    analyze_projects(scraped_data, filters)
 
 
 
