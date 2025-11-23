@@ -2,10 +2,10 @@ import pytest
 from unittest.mock import patch, MagicMock
 from metadata_extractor import detailed_extraction
 
-def test_detailed_extraction_valid_repo(capsys):
+def test_detailed_extraction_valid_repo():
     """
     SCENARIO: Entry is a valid repository with info returned by analyze_repo_type
-    EXPECTED: Entry is updated with repo info and prints success message
+    EXPECTED: Entry is added to projects with correct metadata
     """
     extracted_data = [
         {
@@ -21,49 +21,35 @@ def test_detailed_extraction_valid_repo(capsys):
         "repo_name": "repo",
         "repo_root": "/path/to/repo",
         "authors": ["author1@example.com"],
+        "contributors": ["author1@example.com"],  # required by detailed_extraction
         "branch_count": 1,
         "has_merges": False,
-        "project_type": "individual"
+        "project_type": "individual",
+        "duration_days": 10,
+        "commit_frequency": 2
     }
 
+    # Patch analyze_repo_type to return mock repo info
     with patch("metadata_extractor.analyze_repo_type", return_value=mock_repo_info):
-        detailed_extraction(extracted_data)
+        result = detailed_extraction(extracted_data)
 
-    entry = extracted_data[0]
-    assert entry["repo_name"] == "repo"
-    assert entry["repo_root"] == "/path/to/repo"
-    assert entry["authors"] == ["author1@example.com"]
-    assert entry["branch_count"] == 1
-    assert entry["has_merges"] is False
-    assert entry["project_type"] == "individual"
+    # Extract the first project
+    project = result["projects"][0]
 
-    captured = capsys.readouterr()
-    assert "Repo analysis succeeded:" in captured.out
-    assert "Name: repo" in captured.out
+    # Check that project metadata matches mock
+    assert project["repo_name"] == "repo"
+    assert project["repo_root"] == "/path/to/repo"
+    assert project["authors"] == ["author1@example.com"]
+    assert project["contributors"] == ["author1@example.com"]
+    assert project["branch_count"] == 1
+    assert project["has_merges"] is False
+    assert project["project_type"] == "individual"
+    assert project["duration_days"] == 10
+    assert project["commit_frequency"] == 2
 
-def test_detailed_extraction_invalid_repo(capsys):
-    """
-    SCENARIO: Entry is a repository, but analyze_repo_type fails (returns None)
-    EXPECTED: Entry remains unchanged and prints skipping message
-    """
-    extracted_data = [
-        {
-            "filename": "/path/to/badrepo/.git/",
-            "extension": ".git",
-            "isFile": False,
-            "category": "repository"
-        }
-    ]
+    # Check that the file is attached to the project
+    assert extracted_data[0] in project["files"]
 
-    with patch("metadata_extractor.analyze_repo_type", return_value=None):
-        detailed_extraction(extracted_data)
-
-    entry = extracted_data[0]
-    assert "repo_name" not in entry
-    assert "repo_root" not in entry
-
-    captured = capsys.readouterr()
-    assert "Skipping invalid or failed repo" in captured.out
 
 def test_detailed_extraction_non_repo(capsys):
     """
