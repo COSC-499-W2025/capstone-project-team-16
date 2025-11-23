@@ -3,7 +3,7 @@ import os
 from repository_extractor import analyze_repo_type
 
 # We should do a shallow extraction regardless of the file type, and selectively deal with larger categorical extractions later
-# TODO: run extractors by file type (repo). For repos, validate to make sure it's actually repo. 
+
 
 # Loads the list of filters JSON and reverses it for easier identification
 def load_filters(filename=None):
@@ -97,14 +97,15 @@ def base_extraction(file_list, filters):
 
 # Handle detailed extractions. Loops through extracted data and handles it based on category
 def detailed_extraction(extracted_data):
+    repositories = []
+
+      # Identify repo roots and gather repo metadata
     for entry in extracted_data:
-        # Repository extraction
         if entry["category"] == "repository":
             repo_info = analyze_repo_type(entry)
-            # If repo extraction succeeded, merge results into this entry
+
             if repo_info and repo_info.get("is_valid", False):
-                entry.update(repo_info)
-                # Print the repo information for debugging
+                """
                 print("Repo analysis succeeded:")
                 print(f"  Name: {repo_info.get('repo_name')}")
                 print(f"  Root: {repo_info.get('repo_root')}")
@@ -112,9 +113,37 @@ def detailed_extraction(extracted_data):
                 print(f"  Branch count: {repo_info.get('branch_count')}")
                 print(f"  Has merges: {repo_info.get('has_merges')}")
                 print(f"  Project type: {repo_info.get('project_type')}")
+                """
+                # Create a new project object
+                repositories.append({
+                    "repo_name": repo_info["repo_name"],
+                    "repo_root": repo_info["repo_root"],
+                    "authors": repo_info["authors"],
+                    "contributors": repo_info["contributors"],
+                    "branch_count": repo_info["branch_count"],
+                    "has_merges": repo_info["has_merges"],
+                    "project_type": repo_info["project_type"],
+                    "duration_days": repo_info["duration_days"],
+                    "commit_frequency": repo_info["commit_frequency"],
+                    "files": []  # will fill in the next step
+                })
+
             else:
                 print(f"Skipping invalid or failed repo: {entry['filename']}")
 
+    #Attach files to the correct project
+    for project in repositories:
+        root = project["repo_root"]
+
+        for file_entry in extracted_data:
+            # If file path starts with the repo root, it's part of that project
+            if file_entry["filename"].startswith(root):
+                project["files"].append(file_entry)
+
             
-    print("detailed extraction")
+        # Return both structures
+    return {
+        "files": extracted_data,
+        "projects": repositories
+    }
 

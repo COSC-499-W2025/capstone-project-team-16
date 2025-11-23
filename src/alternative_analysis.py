@@ -109,8 +109,6 @@ def _skill_from_ext(ext: str) -> str | None:
 #main part
 def analyze_projects(extracted_data, filters,  write_csv=True):
     # read languages etc from json file
-
-    #filters = _load_filters(filters_filename)
     
     lang_map = filters.get("languages", {})
 
