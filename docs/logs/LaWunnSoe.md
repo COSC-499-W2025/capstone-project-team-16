@@ -290,3 +290,55 @@
 
 ### Additional Context (Optional)
 - N/A
+- 
+
+## 2025-Nov-09 to 2025-Nov-23
+
+### Type of Tasks Worked On
+
+
+
+<img width="959" height="551" alt="Screenshot 2025-11-23 at 11 02 35 PM" src="https://github.com/user-attachments/assets/be75eae1-622e-4063-9749-c21ef525454d" />
+
+
+
+
+
+
+### Recap of Week's Goals
+
+- coding (working on analysis part)
+
+### Features Assigned (Project Plan)
+
+- Provide alternative analyses if external services are not permitted
+- Distinguish between individual and collaborative projects
+- For coding projects, identify the programming language and framework used
+- Extrapolate individual contributions in collaborative projects
+- Extract contribution metrics, such as project duration and contribution frequency by activity type (e.g., code, test, design, documentation)
+- Demo
+
+
+
+### Tasks from Project Board
+| Feature | Task | Status (Completed/In Progress) | Notes |
+|------|------|-------------------------------|-------|
+
+| Provide alternative analyses if external services are not permitted | Provide alternative analyses if external services are not permitted | In progress | … |
+| Distinguish between individual and collaborative projects |Distinguish between individual and collaborative projects | In progress | … |
+| For coding projects, identify the programming language and framework used | For coding projects, identify the programming language and framework used | In progress | … |
+| Extrapolate individual contributions in collaborative projects | Extrapolate individual contributions in collaborative projects | In progress | … |
+| Extract contribution metrics, such as project duration and contribution frequency by activity type (e.g., code, test, design, documentation) | Extract contribution metrics, such as project duration and contribution frequency by activity type (e.g., code, test, design, documentation) | In progress | … |
+
+
+
+### Completed/In-Progress Tasks (Last 2 Weeks)
+
+- Provide alternative analyses if external services are not permitted
+- Distinguish between individual and collaborative projects 
+- For coding projects, identify the programming language and framework used
+- Extract contribution metrics, such as project duration and contribution frequency by activity type (e.g., code, test, design, documentation)
+- Demo
+
+### Additional Context (Optional)
+- N/A
