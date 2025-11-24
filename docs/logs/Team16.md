@@ -14,6 +14,11 @@
 - Meta Data Extractor
 - Extract contribution metrics, such as project duration and contribution frequency
 - Extrapolate individual contributions in collaborative projects
+- Provide alternative analyses if external services are not permitted
+- Distinguish between individual and collaborative projects
+- For coding projects, identify the programming language and framework used
+- Extrapolate individual contributions in collaborative projects
+- Extract contribution metrics, such as project duration and contribution frequency by activity type (e.g., code, test, design, documentation)
 
 
 ### Burnup Chart
