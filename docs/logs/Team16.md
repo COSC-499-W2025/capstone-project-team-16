@@ -1,4 +1,52 @@
 # Team Log - Team 16
+## Milestone: 2025-NOV-9 to 2025-NOV-23
+
+
+### Milestone Goals Recap
+- Process programming language 
+- Identify individual projects and collaborative
+- Extract repo data on a individual basis
+- Fully integrate metadata extractor and analysis
+
+### Features in Project Plan
+- For coding projects, identify the programming language
+- Fully integrate Meta Data extractor and Analysis Engine
+- Meta Data Extractor
+- Extract contribution metrics, such as project duration and contribution frequency
+- Extrapolate individual contributions in collaborative projects
+
+
+### Burnup Chart
+| Name | Username |
+|----------------|----------------|
+| Ethan Sturek | ethansturek |
+| La Wunn| LaWunn|
+| Amani |lugger33 |
+
+![Screenshot](<screenshots/Team16/BurnupW10.png>)
+
+### Completed Tasks Table
+![Screenshot](<screenshots/Team16/DoneTasksW10.png>)
+
+### In Progress Tasks Table
+![Screenshot](<screenshots/Team16/TasksW11.png>)
+
+### Test Report
+![Screenshot](<screenshots/Team16/Test1W10.png>)
+![Screenshot](<screenshots/Team16/Test2W11.png>)
+
+### Tests
+- No new unit tests added. All have been run and pass.
+- Extensive manual testing with zip files
+## Running Tests
+
+1.  Run `python -m venv venv` to create a virtual environment.
+2. On Windows run `venv/Scripts/activate`.
+3. On Mac run `venv/bin/activate`.
+4. Run `pip install -r requirements.txt`.
+5. In the root of the repositiory, enter `pytest` to run all tests.
+
+
 ## Milestone: 2025-NOV-2 to 2025-NOV-9
 
 
