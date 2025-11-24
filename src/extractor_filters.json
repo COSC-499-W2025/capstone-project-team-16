@@ -30,27 +30,47 @@
     "docker_files": [
       "Dockerfile", "docker-compose.yml"
     ],
-    "git_metadata": [".gitignore", ".gitattributes", ".gitmodules"
-    ],
-    "repository": [
-      ".git", ".hg", ".svn", "package.json", "requirements.txt", "pyproject.toml",
-      "Cargo.toml", "go.mod", "pom.xml", "build.gradle"
-    ]
+    "git_metadata": [
+      ".gitignore",
+      ".gitattributes",
+      ".gitmodules",
+      "package.json",
+      "requirements.txt",
+      "pyproject.toml",
+      "Cargo.toml",
+      "go.mod",
+      "pom.xml",
+      "build.gradle"
+  ],
+  "repository": [
+    ".git",
+    ".hg",
+    ".svn"
+  ]
   },
 
   "languages": {
-    ".py": "Python",
-    ".js": "JavaScript",
-    ".java": "Java",
-    ".cpp": "C++",
-    ".c": "C",
-    ".cs": "C#",
-    ".html": "HTML",
-    ".css": "CSS",
-    ".php": "PHP",
-    ".ts": "TypeScript",
-    ".rb": "Ruby",
-    ".go": "Go",
-    ".swift": "Swift"
-  }
+  ".py": "python",
+  ".js": "javascript",
+  ".jsx": "javascript",
+  ".ts": "typescript",
+  ".tsx": "typescript",
+  ".java": "java",
+  ".cpp": "cpp",
+  ".c": "c",
+  ".cs": "csharp",
+  ".rb": "ruby",
+  ".go": "go",
+  ".rs": "rust",
+  ".swift": "swift",
+  ".kt": "kotlin",
+  ".html": "html",
+  ".htm": "html",
+  ".css": "css",
+  ".scss": "scss",
+  ".sass": "sass",
+  ".less": "less",
+  ".vue": "vue",
+  ".php": "php"
+}
 }
