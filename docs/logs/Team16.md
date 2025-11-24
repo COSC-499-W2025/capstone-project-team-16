@@ -1,7 +1,6 @@
 # Team Log - Team 16
 ## Milestone: 2025-OCT-26 to 2025-NOV-2
 
-
 ### Milestone Goals Recap
 - Create a basic metadata extractor to handle all file types.
 
@@ -17,7 +16,7 @@
 |----------------|----------------|
 | Ethan Sturek | ethansturek |
 | La Wunn| LaWunn|
-| Amani |lugger33 |
+| Amani Lugalla |lugger33 |
 
 ![Screenshot](<screenshots/Team16/BurnupW9.png>)
 
