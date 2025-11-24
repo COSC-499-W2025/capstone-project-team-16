@@ -6,7 +6,7 @@ import os
 from datetime import datetime
 from collections import defaultdict, Counter
 
-
+#TODO: move to extractor. Possibly rework as the guessing can be improved
 def _project_name(filename: str) -> str:
     """guess project name from first folder in the path"""
     path = filename.replace("\\", "/")
@@ -39,24 +39,6 @@ def _to_datetime(dt_value):
 
     # if everything fails, just return now so code doesn’t crash
     return datetime.now()
-
-
-# reads the json filters. 
-def _load_filters(filename: str = "extractor_filters.json") -> dict:
-    
-    here = os.path.dirname(__file__)
-    path = os.path.join(here, filename)
-
-    try:
-        with open(path, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except FileNotFoundError:
-        print(f"Filter file not found: {path}")
-    except Exception as e:
-        print(f"cant load filter file: {e}")
-
-    # fallback if anything broke
-    return {"categories": {}, "languages": {}}
 
 
     #figure out if this file is code / test / docs / design
@@ -125,9 +107,9 @@ def _skill_from_ext(ext: str) -> str | None:
 
 
 #main part
-def analyze_projects(extracted_data, filters_filename="extractor_filters.json", write_csv=True):
+def analyze_projects(extracted_data, filters,  write_csv=True):
     # read languages etc from json file
-    filters = _load_filters(filters_filename)
+    
     lang_map = filters.get("languages", {})
 
     # group files by project name
@@ -175,6 +157,7 @@ def analyze_projects(extracted_data, filters_filename="extractor_filters.json", 
         frameworks = set()
         skills = set()
 
+        #TODO: integrate detailed extraction to include .git
         # simple collab guess: if we see a .git folder/file anywhere
         is_collab = any(".git" in f["filename"] for f in files)
 
@@ -188,8 +171,8 @@ def analyze_projects(extracted_data, filters_filename="extractor_filters.json", 
             act = _detect_activity(category, filename)
             activity_counts[act] += 1
 
-            # language
-            lang = lang_map.get(ext, "Unknown")
+            # language assign
+            lang = f["language"]
             if lang != "Unknown":
                 langs.add(lang)
 
