@@ -29,24 +29,15 @@
 ![Screenshot](<screenshots/Team16/DoneTasksW10.png>)
 
 ### In Progress Tasks Table
-![Screenshot](<screenshots/Team16/TasksW10.png>)
+![Screenshot](<screenshots/Team16/TasksW11.png>)
 
 ### Test Report
 ![Screenshot](<screenshots/Team16/Test1W10.png>)
-### Tests for analyze_repo_type
+![Screenshot](<screenshots/Team16/Test2W11.png>)
 
-**test_valid_git_repo_single_author_single_branch**
-Verifies that a valid .git directory with a single author, a single branch, and no merge commits is classified correctly as an individual project. Ensures all returned metadata (repo name, root path, authors, branch count, merge flag) matches expectations.
-
-**test_valid_git_repo_collaborative**
-Checks that a repository with multiple authors, multiple branches, and at least one merge commit is classified as collaborative. Confirms correct detection of authors, branches, and merge activity.
-
-**test_non_git_folder_returns_none**
-Ensures the function returns None when the provided path is not a .git folder, confirming that non-repository directories are ignored.
-
-**test_git_repo_raises_exception**
-Ensures that if opening the repository raises an exception, the function safely handles the error and returns None rather than crashing.
-
+### Tests
+- No new unit tests added. All have been run and pass.
+- Extensive manual testing with zip files
 ## Running Tests
 
 1.  Run `python -m venv venv` to create a virtual environment.
