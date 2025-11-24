@@ -1,5 +1,61 @@
 # Personal Log - Amani Lugalla
 ## [Date Range]
+2025-11-16 to 2025-11-23
+
+### Type of Tasks Worked On
+![Screenshot](screenshots/Amani/Week12.png)
+
+---
+
+### Recap of Week's Goals
+
+Improve performance of the ZIP file parsing and validation system.
+Reduce redundant operations such as multiple ZIP file openings and repeated decompression.
+Maintain method names and existing functionality to avoid breaking changes.
+Ensure all improvements are validated through automated tests.
+Clean up code to improve readability and long-term maintainability.
+
+---
+
+### Features Assigned (Project Plan)
+
+Performance Optimization: Reduce unnecessary operations in ZIP validation and extraction logic.
+Refactor for Efficiency: Reuse the same ZipFile handle instead of reopening archives multiple times.
+Redundancy Removal: Eliminate repeated metadata reads and double decompression.
+Test Alignment: Update and correct test cases to match optimized behavior.
+Memory Efficiency: Skip directory entries when building the file tree.
+
+---
+
+### Tasks from Project Board
+
+| Task | Status (Completed/In Progress) | Notes |
+|------|-------------------------------|------|
+| Remove redundant ZIP file openings | ✅ Completed | Reused a single `ZipFile` handle for validation and extraction |
+| Eliminate unnecessary decompression (`testzip`) | ✅ Completed | Removed expensive default full-archive scan for performance |
+| Reuse metadata from `infolist()` | ✅ Completed | Prevented redundant re-reads of archive metadata |
+| Filter directory entries from file tree | ✅ Completed | Reduced memory usage and improved output quality |
+| Update and align unit tests | ✅ Completed | Modified tests to reflect optimized and corrected behavior |
+| Clean up comments and structure | ✅ Completed | Improved readability without changing public interfaces |
+---
+
+### Completed/In-Progress Tasks (Last 2 Weeks)
+
+Optimized check_file_validity by avoiding multiple ZIP file reads.
+Updated extract_zip_to_temp to accept an existing zip_ref and prevent reopening.
+Improved file tree generation performance by filtering non-file entries.
+Refactored and clarified test cases to match the actual logic.
+Ensured no breaking changes through consistent function names and behavior.
+Planning further performance improvements via streamed extraction and generator-based file loading (future work).
+
+---
+
+### Additional Context (Optional)
+
+This week focused on improving efficiency and maintainability without changing the external API. By removing redundant operations and unnecessary decompression passes, ZIP processing is now significantly faster and more resource-efficient, especially for large files. These changes make the system more scalable while preserving full backward compatibility. Next steps include exploring streamed extraction and lazy loading for even larger archives.
+
+
+## [Date Range]
 
 2025-11-02 to 2025-11-09
 
