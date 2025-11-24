@@ -1,4 +1,4 @@
-# Team 16 (Name in Progress)
+# Team 16 - Secure Scan
 ## Project Overview (Milestone 1)
 
 This project aims to extract and analyze various personal projects on a user's machine such as code, documents, notes, design sketches, and media files to identify meaningful insights into an individual’s work contributions, creative process, and project evolution.

@@ -30,34 +30,47 @@
     "docker_files": [
       "Dockerfile", "docker-compose.yml"
     ],
-    "git_metadata": [".gitignore", ".gitattributes", ".gitmodules"
-    ],
-    "repository": [
-      ".git", ".hg", ".svn", "package.json", "requirements.txt", "pyproject.toml",
-      "Cargo.toml", "go.mod", "pom.xml", "build.gradle"
-    ]
+    "git_metadata": [
+      ".gitignore",
+      ".gitattributes",
+      ".gitmodules",
+      "package.json",
+      "requirements.txt",
+      "pyproject.toml",
+      "Cargo.toml",
+      "go.mod",
+      "pom.xml",
+      "build.gradle"
+  ],
+  "repository": [
+    ".git",
+    ".hg",
+    ".svn"
+  ]
   },
 
   "languages": {
-  "python": [".py"],
-  "javascript": [".js", ".jsx"],
-  "typescript": [".ts", ".tsx"],
-  "java": [".java"],
-  "cpp": [".cpp"],
-  "c": [".c"],
-  "csharp": [".cs"],
-  "ruby": [".rb"],
-  "go": [".go"],
-  "rust": [".rs"],
-  "swift": [".swift"],
-  "kotlin": [".kt"],
-
-  "html": [".html", ".htm"],
-  "css": [".css"],
-  "scss": [".scss"],
-  "sass": [".sass"],
-  "less": [".less"],
-  "vue": [".vue"],
-  "php": [".php"]
-  }
+  ".py": "python",
+  ".js": "javascript",
+  ".jsx": "javascript",
+  ".ts": "typescript",
+  ".tsx": "typescript",
+  ".java": "java",
+  ".cpp": "cpp",
+  ".c": "c",
+  ".cs": "csharp",
+  ".rb": "ruby",
+  ".go": "go",
+  ".rs": "rust",
+  ".swift": "swift",
+  ".kt": "kotlin",
+  ".html": "html",
+  ".htm": "html",
+  ".css": "css",
+  ".scss": "scss",
+  ".sass": "sass",
+  ".less": "less",
+  ".vue": "vue",
+  ".php": "php"
+}
 }
