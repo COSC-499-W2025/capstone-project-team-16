@@ -1,9 +1,53 @@
 # Personal Log - Ethan Sturek
-## 2025-NOV-3 to 2025-NOV-9
+## 2025-NOV-9 to 2025-NOV-23
 
 
 ### Type of Tasks Worked On
 ![Screenshot](<screenshots/Ethan/Week 11.png>)
+
+### Recap of Week's Goals
+- Process programming language 
+- Identify individual projects and collaborative
+- Extract repo data on a individual basis
+- Fully integrate metadata extractor and analysis
+
+
+### Features Assigned (Project Plan)
+- For coding projects, identify the programming language
+- Fully integrate Meta Data extractor and Analysis Engine
+- Meta Data Extractor
+- Extract contribution metrics, such as project duration and contribution frequency
+- Extrapolate individual contributions in collaborative projects
+
+### Tasks from Project Board
+| Feature | Task | Status (Completed/In Progress) | Notes |
+|------|------|-------------------------------|-------|
+| Meta Data Extractor | Meta Data Extractor | In Progress | Repo extractor has been added with individual's breakdown and marked as collaborative or individual.  |
+| Repository Extraction | For coding projects, identify the programming language | Completed | Repository information now includes a translation of the extension to a programming language  |
+| Analysis Engine | Fully integrate Meta Data extractor and Analysis Engine | Completed | Las work has been integrated with mine and now reduces some redundancies like load filters. Also programming languages now display. |
+| Repository Extraction | Extrapolate individual contributions in collaborative projects | Completed | Repository extraction now identifies whether a .git folder is an individual or group project and passes information about the contributers to the projects data. |
+| Repository Extraction | Extract contribution metrics, such as project duration and contribution frequency | Completed | Repository extraction now groups scanned repos into project dictionary. The duration and commits per week are calculated and passed on. |
+
+
+### Completed Tasks (Last 2 Weeks)
+- For coding projects, identify the programming language
+- Fully integrate Meta Data extractor and Analysis Engine
+- Extract contribution metrics, such as project duration and contribution frequency
+- Extrapolate individual contributions in collaborative projects
+
+### In-Progress Tasks 
+- Meta Data Extractor
+- For coding projects, identify the framework used
+- Scan Prefrences
+
+### Additional Context (Optional)
+- NA
+
+## 2025-NOV-3 to 2025-NOV-9
+
+
+### Type of Tasks Worked On
+![Screenshot](<screenshots/Ethan/Week 10.png>)
 
 ### Recap of Week's Goals
 - Scrape repository information

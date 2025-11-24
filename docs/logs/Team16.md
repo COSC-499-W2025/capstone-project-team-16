@@ -1,4 +1,61 @@
 # Team Log - Team 16
+## Milestone: 2025-NOV-9 to 2025-NOV-23
+
+
+### Milestone Goals Recap
+- Process programming language 
+- Identify individual projects and collaborative
+- Extract repo data on a individual basis
+- Fully integrate metadata extractor and analysis
+
+### Features in Project Plan
+- For coding projects, identify the programming language
+- Fully integrate Meta Data extractor and Analysis Engine
+- Meta Data Extractor
+- Extract contribution metrics, such as project duration and contribution frequency
+- Extrapolate individual contributions in collaborative projects
+
+
+### Burnup Chart
+| Name | Username |
+|----------------|----------------|
+| Ethan Sturek | ethansturek |
+| La Wunn| LaWunn|
+| Amani |lugger33 |
+
+![Screenshot](<screenshots/Team16/BurnupW10.png>)
+
+### Completed Tasks Table
+![Screenshot](<screenshots/Team16/DoneTasksW10.png>)
+
+### In Progress Tasks Table
+![Screenshot](<screenshots/Team16/TasksW10.png>)
+
+### Test Report
+![Screenshot](<screenshots/Team16/Test1W10.png>)
+### Tests for analyze_repo_type
+
+**test_valid_git_repo_single_author_single_branch**
+Verifies that a valid .git directory with a single author, a single branch, and no merge commits is classified correctly as an individual project. Ensures all returned metadata (repo name, root path, authors, branch count, merge flag) matches expectations.
+
+**test_valid_git_repo_collaborative**
+Checks that a repository with multiple authors, multiple branches, and at least one merge commit is classified as collaborative. Confirms correct detection of authors, branches, and merge activity.
+
+**test_non_git_folder_returns_none**
+Ensures the function returns None when the provided path is not a .git folder, confirming that non-repository directories are ignored.
+
+**test_git_repo_raises_exception**
+Ensures that if opening the repository raises an exception, the function safely handles the error and returns None rather than crashing.
+
+## Running Tests
+
+1.  Run `python -m venv venv` to create a virtual environment.
+2. On Windows run `venv/Scripts/activate`.
+3. On Mac run `venv/bin/activate`.
+4. Run `pip install -r requirements.txt`.
+5. In the root of the repositiory, enter `pytest` to run all tests.
+
+
 ## Milestone: 2025-NOV-2 to 2025-NOV-9
 
 
