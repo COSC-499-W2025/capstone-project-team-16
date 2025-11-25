@@ -99,7 +99,7 @@ def base_extraction(file_list, filters):
                     "size": size,
                     "last_modified": last_modified,
                     "extension": ext,
-                    "category": category,
+                    "category": category, 
                     "isFile": is_file,
                     "language": language
                 }
