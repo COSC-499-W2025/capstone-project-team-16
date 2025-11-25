@@ -27,7 +27,11 @@ def load_filters(filename=None):
         for ext, lang in data.get("languages", {}).items():
             ext_to_language[ext.lower()] = lang
 
-        return{"extensions":ext_to_category, "languages":ext_to_language}
+        framework_files = set(name.lower() for name in data.get("frameworks", []))
+
+
+
+        return{"extensions":ext_to_category, "languages":ext_to_language, "frameworks":framework_files}
 
     except FileNotFoundError:
         print(f"Filter file not found: {filename}")
@@ -46,6 +50,7 @@ def base_extraction(file_list, filters):
     extracted_data = []
     extensions = filters.get("extensions", {})
     languages = filters.get("languages", {})
+    frameworks_list = filters.get("frameworks", {})
 
     if extensions:
         for f in file_list:
@@ -53,9 +58,9 @@ def base_extraction(file_list, filters):
             size = f["size"]
             last_modified = f["last_modified"]
             is_file = False
-            language = "undefined"
+            language = ""
 
-            #TODO: handle specific files like requirements.txt so they don't fall under broader categories like txt since it is a repo file
+            
             if filename.endswith("/"):
                 # Treat as folder
                 ext = filename.rstrip("/")
@@ -63,15 +68,28 @@ def base_extraction(file_list, filters):
                 category = extensions.get(ext, "uncategorized")
                 language = ""
             else:
-                # Treat as a file and assign category
-                _, ext = os.path.splitext(filename)
-                ext = ext.lower()
-                #TODO: add uncategorized file extensions to log to be added to filter list
-                category = extensions.get(ext, "uncategorized")
-                is_file = True
                 
-                if category == "source_code" or category == "web_code":
-                    language = languages.get(ext, "undefined")
+                is_file = True
+
+                # Check if it's a framework file
+                basename = os.path.basename(filename).lower()
+                if basename in frameworks_list:
+                    category = "framework"
+                    ext = ""
+                    language = ""
+                else: 
+                        # It is not a framework file. Continue on
+                        # Extract extension, and assign a category based on it 
+                    _, ext = os.path.splitext(filename)
+                    ext = ext.lower()
+
+                    #TODO: add uncategorized file extensions to log to be added to filter list
+                    category = extensions.get(ext, "uncategorized")
+
+
+                    # Assign programming language if detected as source_code or web_code
+                    if category in( "source_code", "web_code"):
+                        language = languages.get(ext, "undefined")
 
             
 
