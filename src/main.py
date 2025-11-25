@@ -25,7 +25,12 @@ if file_list:
     scraped_data = base_extraction(file_list, filters)
 
     advanced_data = detailed_extraction(scraped_data)
-    
+    for project in advanced_data["projects"]:
+        print(f"\nProject: {project['repo_name']}")
+        frameworks = [f for f in project["files"] if f["category"] == "framework"]
+        print(f"Framework files: {[f['filename'] for f in frameworks]}")
+
+
     #for analysis part
     analyze_projects(scraped_data, filters)
 
