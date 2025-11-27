@@ -7,6 +7,7 @@ from metadata_extractor import base_extraction, detailed_extraction, load_filter
 from alternative_analysis import analyze_projects
 from dataclasses import dataclass, field
 from typing import Protocol
+import db
 
 print("Welcome to Skill Scope!")
 print("~~~~~~~~~~~~~~~~~~~~~~~")
