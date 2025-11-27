@@ -9,9 +9,6 @@ class UserConfig:
 
     def __init__(self, consent=False, analysis_mode="default", advanced_scans=None, last_updated=None):
         self.consent = consent
-        self.analysis_mode = analysis_mode
-        self.advanced_scans = advanced_scans or {}   # dict of booleans, e.g. {"languages": True}
-        self.last_updated = last_updated or datetime.utcnow()
 
     # ---------------------------------------------------------
     # Database Methods TODO:Integrate and save into DB
