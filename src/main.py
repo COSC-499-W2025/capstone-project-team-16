@@ -14,29 +14,6 @@ from dataclasses import dataclass, field
 from typing import Protocol
 import db
 
-print("Welcome to Skill Scope!")
-print("~~~~~~~~~~~~~~~~~~~~~~~")
-
-
-if (get_user_consent()):
-    file_list = get_input_file_path()
-else:
-    exit()
-
-if file_list:
-    #call metadata extractor and pass file_path
-    #should get a list of files with accompanying metadata.
-
-    filters = load_filters()
-    scraped_data = base_extraction(file_list, filters)
-
-    advanced_data = detailed_extraction(scraped_data)
-
-       
-
-
-    #for analysis part
-    analyze_projects(scraped_data, filters)
 
 
 
