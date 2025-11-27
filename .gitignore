@@ -17,4 +17,4 @@ __pycache__/
 
 
 #Scan results
-out/
+src/out/
