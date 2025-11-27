@@ -65,17 +65,16 @@ def check_file_validity(zip_path):
             # Extract once, using the already-open zip_ref
             temp_dir = extract_zip_to_temp(zip_path, zip_ref=zip_ref)
 
-            # Build file tree using the already-fetched infos
-            file_tree = [
-                {
-                    "filename": os.path.join(temp_dir, info.filename),
+            # Build file tree with directories included
+            file_tree = []
+            for info in infos:
+                full_path = os.path.join(temp_dir, info.filename)
+                file_tree.append({
+                    "filename": full_path,
                     "size": info.file_size,
                     "last_modified": info.date_time,
-                }
-                for info in infos
-                # Skip directory entries to avoid useless records
-                if not info.is_dir()
-            ]
+                    "isFile": not info.is_dir()
+                })
 
         return file_tree
 

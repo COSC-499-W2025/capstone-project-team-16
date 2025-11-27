@@ -164,29 +164,31 @@ def test_corrupted_zip_file(capsys):
     """
     SCENARIO: Zip file has corruption detected by testzip()
     EXPECTED: Returns None and prints corruption message
-    
-    WHAT WE'RE TESTING:
-    - Corruption detection (testzip returns filename of bad entry)
-    - Proper error message with bad file name
     """
-    # ARRANGE
-    corrupt_zip = '/path/to/corrupt.zip'
-    
+    corrupt_zip = "/path/to/corrupt.zip"
+
+    # Build a proper mock ZipFile context manager
+    mock_ctx = MagicMock()
+    mock_ctx.testzip.return_value = "corrupted_file.txt"
+    mock_ctx.infolist.return_value = []  # not used, but required
+
     mock_zip = MagicMock()
-    mock_zip.__enter__.return_value.testzip.return_value = "corrupted_file.txt"
-    
-    with patch('os.path.exists', return_value=True), \
-         patch('os.path.isfile', return_value=True), \
-         patch('zipfile.ZipFile', return_value=mock_zip):
-        # ACT
+    mock_zip.__enter__.return_value = mock_ctx
+    mock_zip.__exit__.return_value = None
+
+    with patch("os.path.exists", return_value=True), \
+         patch("os.path.isfile", return_value=True), \
+         patch("zipfile.ZipFile", return_value=mock_zip):
+
         result = check_file_validity(corrupt_zip)
-        
+
         # ASSERT
         assert result is None
-        
-        captured = capsys.readouterr()
-        assert "Corrupted archive" in captured.out
-        assert "corrupted_file.txt" in captured.out
+
+        out = capsys.readouterr().out
+        assert "Corrupted archive" in out
+        assert "corrupted_file.txt" in out
+
 
 def test_empty_zip_file(capsys):
     """
