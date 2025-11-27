@@ -16,7 +16,7 @@
       ".png", ".jpg", ".jpeg", ".svg", ".gif", ".bmp", ".tiff", ".ico"
     ],
     "datasets": [
-      ".csv", ".xlsx", ".json", ".xml", ".parquet", ".tsv"
+      ".csv", ".xlsx", ".xml", ".parquet", ".tsv"
     ],
     "binaries": [
       ".exe", ".dll", ".bin", ".so", ".dylib"
@@ -24,29 +24,19 @@
     "notebooks": [
       ".ipynb"
     ],
-    "build_scripts": [
-      "Makefile", "build.gradle", "pom.xml", "CMakeLists.txt", "setup.py", "setup.cfg"
-    ],
-    "docker_files": [
-      "Dockerfile", "docker-compose.yml"
-    ],
     "git_metadata": [
-      ".gitignore",
-      ".gitattributes",
-      ".gitmodules",
-      "package.json",
-      "requirements.txt",
-      "pyproject.toml",
-      "Cargo.toml",
-      "go.mod",
-      "pom.xml",
-      "build.gradle"
+       ".gitignore",
+       ".gitattributes",
+       ".gitmodules",
+        ".gitkeep" 
   ],
   "repository": [
     ".git",
     ".hg",
     ".svn"
   ]
+
+
   },
 
   "languages": {
@@ -72,5 +62,30 @@
   ".less": "less",
   ".vue": "vue",
   ".php": "php"
-}
+},
+
+"frameworks": [
+    "requirements.txt",
+    "environment.yml",
+    "Pipfile",
+    "package.json",
+    "package-lock.json",
+    "yarn.lock",
+    "pom.xml",
+    "build.gradle",
+    "settings.gradle",
+    "gradlew",
+    "gradlew.bat",
+    "Cargo.toml",
+    "Cargo.lock",
+    "go.mod",
+    "go.sum",
+    "pyproject.toml",
+    "Gemfile",
+    "Dockerfile",
+    "docker-compose.yml",
+    "composer.json",
+    "composer.lock"
+]
+
 }

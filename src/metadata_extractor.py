@@ -27,7 +27,11 @@ def load_filters(filename=None):
         for ext, lang in data.get("languages", {}).items():
             ext_to_language[ext.lower()] = lang
 
-        return{"extensions":ext_to_category, "languages":ext_to_language}
+        framework_files = set(name.lower() for name in data.get("frameworks", []))
+
+
+
+        return{"extensions":ext_to_category, "languages":ext_to_language, "frameworks":framework_files}
 
     except FileNotFoundError:
         print(f"Filter file not found: {filename}")
@@ -46,32 +50,46 @@ def base_extraction(file_list, filters):
     extracted_data = []
     extensions = filters.get("extensions", {})
     languages = filters.get("languages", {})
+    frameworks_list = filters.get("frameworks", {})
 
     if extensions:
         for f in file_list:
             filename = f["filename"]
             size = f["size"]
             last_modified = f["last_modified"]
-            is_file = False
-            language = "undefined"
+            is_file = f["isFile"]
+            language = ""
 
-            #TODO: handle specific files like requirements.txt so they don't fall under broader categories like txt since it is a repo file
-            if filename.endswith("/"):
+            
+            if not is_file:
                 # Treat as folder
                 ext = filename.rstrip("/")
                 ext = os.path.basename(ext)
                 category = extensions.get(ext, "uncategorized")
                 language = ""
             else:
-                # Treat as a file and assign category
-                _, ext = os.path.splitext(filename)
-                ext = ext.lower()
-                #TODO: add uncategorized file extensions to log to be added to filter list
-                category = extensions.get(ext, "uncategorized")
-                is_file = True
                 
-                if category == "source_code" or category == "web_code":
-                    language = languages.get(ext, "undefined")
+                is_file = True
+
+                # Check if it's a framework file
+                basename = os.path.basename(filename).lower()
+                if basename in frameworks_list:
+                    category = "framework"
+                    ext = ""
+                    language = ""
+                else: 
+                        # It is not a framework file. Continue on
+                        # Extract extension, and assign a category based on it 
+                    _, ext = os.path.splitext(filename)
+                    ext = ext.lower()
+
+                    #TODO: add uncategorized file extensions to log to be added to filter list
+                    category = extensions.get(ext, "uncategorized")
+
+
+                    # Assign programming language if detected as source_code or web_code
+                    if category in( "source_code", "web_code"):
+                        language = languages.get(ext, "undefined")
 
             
 
@@ -81,7 +99,7 @@ def base_extraction(file_list, filters):
                     "size": size,
                     "last_modified": last_modified,
                     "extension": ext,
-                    "category": category,
+                    "category": category, 
                     "isFile": is_file,
                     "language": language
                 }
@@ -95,6 +113,73 @@ def base_extraction(file_list, filters):
     return extracted_data
 
 
+def detect_frameworks(framework_file_entry):
+    """
+    Given a framework file entry, extract the ecosystem and dependencies.
+    """
+    filename = os.path.basename(framework_file_entry["filename"]).lower()
+    full_path = framework_file_entry["filename"]
+    result = {"ecosystem": None, "detected": []}
+
+    # ---- PYTHON ----
+    if filename in ("requirements.txt", "environment.yml", "pipfile", "pyproject.toml"):
+        result["ecosystem"] = "python"
+
+        try:
+            with open(full_path, "r", encoding="utf-8") as f:
+                lines = f.read().splitlines()
+
+            for line in lines:
+                if line and not line.startswith("#"):
+                    pkg = line.split("==")[0].split(">=")[0].strip()
+                    if pkg:
+                        result["detected"].append(pkg)
+
+        except Exception:
+            pass  # No crash — this runs inside extraction
+
+    # ---- NODE ----
+    elif filename == "package.json":
+        result["ecosystem"] = "node"
+        try:
+            with open(full_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+
+            deps = data.get("dependencies", {})
+            dev = data.get("devDependencies", {})
+
+            result["detected"] = list(deps.keys()) + list(dev.keys())
+
+        except Exception:
+            pass
+
+    # ---- RUST ----
+    elif filename == "cargo.toml":
+        result["ecosystem"] = "rust"
+
+    # ---- GO ----
+    elif filename == "go.mod":
+        result["ecosystem"] = "go"
+
+    # ---- JAVA (Maven) ----
+    elif filename == "pom.xml":
+        result["ecosystem"] = "java"
+
+    # ---- JAVA (Gradle) ----
+    elif filename == "build.gradle":
+        result["ecosystem"] = "java"
+
+    # ---- RUBY ----
+    elif filename == "gemfile":
+        result["ecosystem"] = "ruby"
+
+    # ---- DOCKER ----
+    elif filename == "dockerfile":
+        result["ecosystem"] = "docker"
+
+    return result
+
+
 # Handle detailed extractions. Loops through extracted data and handles it based on category
 def detailed_extraction(extracted_data):
     repositories = []
@@ -105,15 +190,6 @@ def detailed_extraction(extracted_data):
             repo_info = analyze_repo_type(entry)
 
             if repo_info and repo_info.get("is_valid", False):
-                """
-                print("Repo analysis succeeded:")
-                print(f"  Name: {repo_info.get('repo_name')}")
-                print(f"  Root: {repo_info.get('repo_root')}")
-                print(f"  Authors: {repo_info.get('authors')}")
-                print(f"  Branch count: {repo_info.get('branch_count')}")
-                print(f"  Has merges: {repo_info.get('has_merges')}")
-                print(f"  Project type: {repo_info.get('project_type')}")
-                """
                 # Create a new project object
                 repositories.append({
                     "repo_name": repo_info["repo_name"],
@@ -139,6 +215,12 @@ def detailed_extraction(extracted_data):
             # If file path starts with the repo root, it's part of that project
             if file_entry["filename"].startswith(root):
                 project["files"].append(file_entry)
+
+                # If the file is a detected framework, then analyze it.
+                if file_entry["category"] == "framework":
+                    framework_info = detect_frameworks(file_entry)
+                    project.setdefault("frameworks", []).append(framework_info)
+
 
             
         # Return both structures

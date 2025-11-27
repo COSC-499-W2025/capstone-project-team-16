@@ -25,7 +25,10 @@ if file_list:
     scraped_data = base_extraction(file_list, filters)
 
     advanced_data = detailed_extraction(scraped_data)
-    
+
+       
+
+
     #for analysis part
     analyze_projects(scraped_data, filters)
 
