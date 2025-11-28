@@ -7,6 +7,18 @@ from typing import Any, Mapping, Sequence
 # Database file name (auto-created if missing)
 DB_NAME = "skillscope.db"
 
+# Creates user config table if it doesn't exist
+USER_CONFIG_TABLE_SQL = """
+CREATE TABLE IF NOT EXISTS user_config (
+    id INTEGER PRIMARY KEY CHECK (id = 1),
+    consent TEXT,
+    analysis_mode TEXT,
+    advanced_scans TEXT,
+    last_updated TEXT
+)
+"""
+
+
 # Creates table to store project scan summaries + analysis metadata
 CREATE_TABLE_SQL = """
 CREATE TABLE IF NOT EXISTS project_summaries (
@@ -64,15 +76,22 @@ INSERT INTO project_summaries (
 db_initialized = False
 
 
+
 def ensure_db_initialized(conn: sqlite3.Connection) -> None:
     """
-    Ensures the 'project_summaries' table exists in the database.
+    Ensures all required tables exist in the database.
     Only runs once per program execution.
     """
     global db_initialized
     if db_initialized:
         return
+
+    # project summaries table
     conn.execute(CREATE_TABLE_SQL)
+
+    # User config table
+    conn.execute(USER_CONFIG_TABLE_SQL)
+
     db_initialized = True
 
 
@@ -414,3 +433,4 @@ def delete_project_insights(project_id: str) -> bool:
         )
         conn.commit()
         return cursor.rowcount > 0
+
