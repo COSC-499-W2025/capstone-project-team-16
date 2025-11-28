@@ -77,7 +77,7 @@ def orchestrator():
         """
 
         #for analysis part
-        analyze_projects(scraped_data, filters)
+        analyze_projects(scraped_data, filters, detailed_data=detailed_data)
 
 #Runs orchestrator
 if __name__ == "__main__":
