@@ -41,8 +41,8 @@ def get_analysis_mode() -> str:
     """
     while True:
         print("\nSelect analysis mode:")
-        print("1) Basic")
-        print("2) Advanced")
+        print("1) Basic (Does not open file content)")
+        print("2) Advanced (Opens file content)")
         choice = input("Enter 1 or 2: ").strip()
         if choice == "1":
             return "basic"
