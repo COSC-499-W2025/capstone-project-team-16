@@ -72,27 +72,19 @@ INSERT INTO project_summaries (
 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 """
 
-# Prevents re-running CREATE TABLE multiple times per process
-db_initialized = False
-
 
 
 def ensure_db_initialized(conn: sqlite3.Connection) -> None:
     """
     Ensures all required tables exist in the database.
-    Only runs once per program execution.
+    Runs every time; SQLite ignores repeated CREATE TABLE commands if the table exists.
     """
-    global db_initialized
-    if db_initialized:
-        return
-
     # project summaries table
     conn.execute(CREATE_TABLE_SQL)
 
     # User config table
     conn.execute(USER_CONFIG_TABLE_SQL)
 
-    db_initialized = True
 
 
 def save_results(
