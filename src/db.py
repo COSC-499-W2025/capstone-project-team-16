@@ -4,9 +4,11 @@ import uuid
 from datetime import datetime
 from typing import Any, Mapping, Sequence, Optional, List, Dict
 
+# Creates table to store project scan summaries + analysis metadata
 # Default database file name
 DB_NAME = "skillscope.db"
 
+# Creates table to store project scan summaries + analysis metadata
 # ----------------------
 # SQL definitions
 # ----------------------
@@ -49,11 +51,26 @@ CREATE TABLE IF NOT EXISTS project_summaries (
 
 INSERT_SQL = """
 INSERT INTO project_summaries (
-    scan_date, project_name, total_files, duration_days,
-    code_files, test_files, doc_files, design_files,
-    languages, frameworks, skills, is_collaborative,
-    score, user_consent, analysis_mode,
-    project_id, user_id, analysis_data, file_tree, resume_bullets
+    scan_date, 
+    project_name, 
+    total_files, 
+    duration_days,
+    code_files, 
+    test_files, 
+    doc_files, 
+    design_files,
+    languages, 
+    frameworks, 
+    skills, 
+    is_collaborative,
+    score, 
+    user_consent, 
+    analysis_mode,
+    project_id, 
+    user_id, 
+    analysis_data, 
+    file_tree, 
+    resume_bullets
 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 """
 
@@ -62,7 +79,10 @@ INSERT INTO project_summaries (
 # ----------------------
 
 def ensure_db_initialized(conn: sqlite3.Connection) -> None:
-    """Ensure all tables exist."""
+    """
+    Ensures the 'project_summaries' table and 'user_config' exists in the database.
+    Only runs once per program execution.
+    """
     conn.execute(CREATE_TABLE_SQL)
     conn.execute(USER_CONFIG_TABLE_SQL)
 
@@ -80,7 +100,20 @@ def save_results(
     resume_bullets: Optional[Sequence[str]] = None,
     db_path: str = DB_NAME
 ) -> None:
-    """Save a list of project summaries into SQLite."""
+    """
+    Saves a list of project-analysis dictionaries to the SQLite database.
+    Each row includes:
+      - a unique project_id
+      - user_id (if available)
+      - analysis_data (JSON)
+      - file_tree (JSON)
+      - resume_bullets (JSON list)
+      - all the summary metrics (files, score, etc.)
+      - user_consent + analysis_mode
+    Backwards-compatible: existing callers can still use
+      save_results(results, user_consent, analysis_mode)
+    and omit the rest.
+    """
     if not results_list:
         return
 
@@ -194,6 +227,15 @@ def store_project_insights(
     resume_bullets: Optional[Sequence[str]] = None,
     db_path: str = DB_NAME
 ) -> None:
+    """
+    Convenience wrapper to store a single project's insights:
+    Output row conceptually matches:
+      {project_id, user_id, analysis_data}
+    where:
+      - project_id: provided
+      - user_id: provided
+      - analysis_data: JSON representation of `project` dict
+    """
     save_results(
         [project],
         user_consent=user_consent,
@@ -205,14 +247,31 @@ def store_project_insights(
         db_path=db_path,
     )
 
+
+
+    """
+    Retrieve previously generated portfolio information.
+    Output: List of stored project summaries.
+    If user_id is provided, only return that user's projects.
+    """
+
 def list_project_summaries(user_id: Optional[str] = None, db_path: str = DB_NAME) -> List[Dict[str, Any]]:
     with sqlite3.connect(db_path) as conn:
         ensure_db_initialized(conn)
         conn.row_factory = sqlite3.Row
         if user_id:
             rows = conn.execute(
-                """SELECT project_id, user_id, project_name, score, total_files, duration_days,
-                          languages, frameworks, skills, scan_date
+                """SELECT 
+                        project_id, 
+                        user_id, 
+                        project_name, 
+                        score, 
+                        total_files, 
+                        duration_days,
+                        languages, 
+                        frameworks, 
+                        skills, 
+                        scan_date
                    FROM project_summaries
                    WHERE user_id = ?
                    ORDER BY scan_date DESC""",
@@ -220,8 +279,17 @@ def list_project_summaries(user_id: Optional[str] = None, db_path: str = DB_NAME
             ).fetchall()
         else:
             rows = conn.execute(
-                """SELECT project_id, user_id, project_name, score, total_files, duration_days,
-                          languages, frameworks, skills, scan_date
+                """SELECT 
+                        project_id, 
+                        user_id, 
+                        project_name, 
+                        score, 
+                        total_files, 
+                        duration_days,
+                        languages, 
+                        frameworks, 
+                        skills, 
+                        scan_date
                    FROM project_summaries
                    ORDER BY scan_date DESC"""
             ).fetchall()
