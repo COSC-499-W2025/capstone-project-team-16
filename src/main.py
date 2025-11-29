@@ -176,7 +176,7 @@ def orchestrator(config):
         detailed_data = detailed_extraction(scraped_data)
 
     # Step 5: Run analysis on the extracted metadata
-    analyze_projects(scraped_data, filters)
+    analyze_projects(scraped_data, filters, detailed_data=detailed_data)
 
     print("\nReturning to home screen...\n")
 
