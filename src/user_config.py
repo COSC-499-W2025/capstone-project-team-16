@@ -5,6 +5,7 @@ class UserConfig:
     """
 
     def __init__(self, consent=False):
+        # Store consent as a boolean internally
         self.consent = consent
 
     # ---------------------------------------------------------
@@ -21,6 +22,9 @@ class UserConfig:
         conn.row_factory = sqlite3.Row
         db.ensure_db_initialized(conn)
 
+        # Convert boolean to "Yes"/"No" for database storage
+        consent_str = "Yes" if self.consent else "No"
+
         conn.execute(
             """
             INSERT INTO user_config (id, consent)
@@ -28,7 +32,7 @@ class UserConfig:
             ON CONFLICT(id) DO UPDATE SET
                 consent=excluded.consent
             """,
-            (1 if self.consent else 0,),
+            (consent_str,),
         )
         conn.commit()
 
@@ -56,7 +60,10 @@ class UserConfig:
 
         if row is None:
             return None
-        return cls(consent=bool(row[0]))
+
+        # Convert "Yes"/"No" back to boolean
+        consent_bool = True if row["consent"] == "Yes" else False
+        return cls(consent=consent_bool)
 
     # ---------------------------------------------------------
     # Delete config
