@@ -110,13 +110,13 @@ def ensure_db_initialized(conn: sqlite3.Connection) -> None:
 Temporary, generic, short term DB saving. Our returned data is changing so much that it makes more sense to save the entire summary as one data type rather than refactor it everytime something is added.
 
 """
-# Saving method for just summaries. (save results needs refactoring with alternative analysis)
+# For displaying in selection now.
 def list_full_scans(db_path=DB_NAME):
     """Return minimal info about each scan for selection menus."""
     scans = get_all_full_scans(db_path)
     return [{"summary_id": s["summary_id"], "timestamp": s["timestamp"], "analysis_mode": s["analysis_mode"]} for s in scans]
 
-
+# Saving method for all data
 def save_full_scan(
     analysis_results: Mapping[str, any], 
     analysis_mode: str,
