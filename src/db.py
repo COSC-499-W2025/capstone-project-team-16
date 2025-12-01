@@ -185,6 +185,14 @@ def get_all_full_scans(db_path=DB_NAME):
                 "project_summaries_json": json.loads(row["project_summaries_json"]) if row["project_summaries_json"] else {}
             })
         return results
+    
+
+def delete_full_scan_by_id(summary_id, db_path=DB_NAME):
+    with sqlite3.connect(db_path) as conn:
+        conn.execute("DELETE FROM full_scan_summaries WHERE summary_id = ?", (summary_id,))
+        conn.commit()
+        return True
+
 
 
 
