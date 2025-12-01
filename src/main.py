@@ -1,128 +1,270 @@
-### This will act as our orchestrator for coordinating scan tasks
+### Orchestrator for coordinating scan tasks
 
-from __future__ import annotations
-from permission_manager import get_user_consent
+from user_config import UserConfig
+from permission_manager import (
+    get_user_consent,
+    get_analysis_mode,
+    get_advanced_options
+)
 from file_parser import get_input_file_path
 from metadata_extractor import base_extraction, detailed_extraction, load_filters
 from alternative_analysis import analyze_projects
-from dataclasses import dataclass, field
-from typing import Protocol
 
-print("Welcome to Skill Scope!")
-print("~~~~~~~~~~~~~~~~~~~~~~~")
+import db 
+import sqlite3
+
+# --------------------------------------------------------
+# INITIALIZATION (runs once per app start)
+# --------------------------------------------------------
+def initialize_app():
+    print("Welcome to Skill Scope!")
+    print("~~~~~~~~~~~~~~~~~~~~~~~")
+
+    # Load existing config if it exists
+    config = UserConfig.load_from_db()
+    if config is None:
+        config = UserConfig()
+
+    # Ensure consent exists
+    if not config.consent:
+        consent = get_user_consent()
+        if not consent:
+            exit()
+        config.consent = True
+        config.save_to_db()
+
+    return config
+
+# --------------------------------------------------------
+# HOME SCREEN (loops until quit)
+# --------------------------------------------------------
+def home_screen(config):
+    while True:
+        print("\n===== SKILL SCOPE HOME =====")
+        print("1. Run a new scan")
+        print("2. Scan Manager (view/manage previous scans)")
+        print("3. Quit")
+
+        choice = input("Choose an option: ").strip()
+
+        if choice == "1":
+            orchestrator(config)
+
+        elif choice == "2":
+            scan_manager()
+
+        elif choice == "3":
+            print("Goodbye!")
+            exit()
+
+        else:
+            print("Invalid input. Try again.")
+
+# --------------------------------------------------------
+# SCAN MANAGER (View + future management actions)
+# --------------------------------------------------------
+def scan_manager():
+    while True:
+        print("\n===== SCAN MANAGER =====")
+        print("1. View stored project analyses")
+        print("2. Delete stored scans")
+        print("3. Return to home screen")
+
+        choice = input("Choose an option: ").strip()
+
+        if choice == "1":
+            view_full_scan_details()
+
+        elif choice == "2":
+            delete_full_scan()
+
+        elif choice == "3":
+            break
+
+        else:
+            print("Invalid input. Try again.")
+
+# ----------------------
+# Scan Manager helpers
+# ----------------------
+
+def view_full_scan_details():
+    from db import list_full_scans, get_all_full_scans
+    import json
+
+    scans = list_full_scans()
+    if not scans:
+        print("No scans found.")
+        return
+
+    print("Select a scan to view:")
+    for i, s in enumerate(scans, start=1):
+        print(f"{i}. {s['timestamp']} ({s['analysis_mode']})")
+
+    choice = input("Enter number (0 to cancel): ").strip()
+    if not choice.isdigit() or int(choice) == 0:
+        print("Canceled.")
+        return
+    idx = int(choice) - 1
+    if idx < 0 or idx >= len(scans):
+        print("Invalid selection.")
+        return
+
+    scan = get_all_full_scans()[idx]
+    data = scan["project_summaries_json"]
+
+    project_summaries = data.get("project_summaries", [])
+    resume_summaries = data.get("resume_summaries", [])
+    skills_chronological = data.get("skills_chronological", [])
+    projects_chronological = data.get("projects_chronological", [])
+
+    print("\n============================")
+    print(" FULL SCAN DETAILS")
+    print("============================")
+    print(f"Timestamp: {scan['timestamp']}")
+    print(f"Mode: {scan['analysis_mode']}")
+    print("============================\n")
+
+    # -------------------------
+    # 1. Ranked Project Table
+    # -------------------------
+    if project_summaries:
+        print("\nRanked Projects")
+        print("-" * 150)
+        print(
+            f"\n{'Project':30} "
+            f"{'Files':>6} {'Days':>6} {'Code':>6} {'Test':>6} "
+            f"{'Doc':>6} {'Des':>6} "
+            f"{'Langs':25} {'Frameworks':25} "
+            f"{'Collab':>7} {'Score':>7}"
+        )
+        print("-" * 150)
+
+        for p in project_summaries:
+            print(
+                f"{p['project'][:30]:30} "
+                f"{p['total_files']:6} {p['duration_days']:6} {p['code_files']:6} "
+                f"{p['test_files']:6} {p['doc_files']:6} {p['design_files']:6} "
+                f"{p['languages'][:25]:25} {p['frameworks'][:25]:25} "
+                f"{p['is_collaborative']:>7} {p['score']:7.1f}"
+            )
+
+    # -------------------------
+    # 2. Chronological Projects
+    # -------------------------
+    if projects_chronological:
+        print("\nProjects in Chronological Order")
+        print("-" * 80)
+        for p in projects_chronological:
+            print(
+                f"- {p['name']}: {p['first_used']} → {p['last_used']}"
+            )
+
+    # -------------------------
+    # 3. Skills Over Time
+    # -------------------------
+    if skills_chronological:
+        print("\nSkills Exercised Over Time")
+        print("-" * 80)
+        for s in skills_chronological:
+            print(
+                f"- {s['first_used']} → {s['last_used']}: {s['skill']}"
+            )
+
+    # -------------------------
+    # 4. Resume Summaries
+    # -------------------------
+    if resume_summaries:
+        print("\nTop Project Résumé Summaries")
+        print("-" * 80)
+        for bullet in resume_summaries:
+            print(f"- {bullet}")
+
+    print("\nEnd of scan.\n")
 
 
-if (get_user_consent()):
+
+def delete_full_scan():
+    from db import list_full_scans, delete_full_scan_by_id
+    from permission_manager import get_yes_no
+
+    scans = list_full_scans()
+    if not scans:
+        print("No saved scans found to delete.")
+        return
+
+    print("\nSelect a scan to delete:")
+    for i, s in enumerate(scans, start=1):
+        print(f"{i}. [{s['timestamp']}]  Mode: {s['analysis_mode']}")
+
+    choice = input("Enter number (or 0 to cancel): ").strip()
+    if not choice.isdigit() or int(choice) == 0:
+        print("Deletion canceled.")
+        return
+
+    idx = int(choice) - 1
+    if idx < 0 or idx >= len(scans):
+        print("Invalid selection.")
+        return
+
+    scan = scans[idx]
+
+    if get_yes_no(f"Are you sure you want to delete the scan from {scan['timestamp']}?"):
+        success = delete_full_scan_by_id(scan["summary_id"])
+        print("Scan deleted." if success else "Failed to delete scan.")
+    else:
+        print("Deletion canceled.")
+
+
+# --------------------------------------------------------
+# ORCHESTRATOR (handles running a scan)
+# --------------------------------------------------------
+def orchestrator(config):
+    print("\n=== New Scan ===")
+
+    # Step 1: Ask for analysis mode EACH TIME
+    analysis_mode = get_analysis_mode()
+
+    # Step 2: Advanced mode logic
+    advanced_options = {}
+    if analysis_mode == "advanced":
+        advanced_options = get_advanced_options()
+
+    # Step 3: Select project files
     file_list = get_input_file_path()
-else:
-    exit()
+    if not file_list:
+        print("No files selected. Returning to home.")
+        return
 
-if file_list:
-    #call metadata extractor and pass file_path
-    #should get a list of files with accompanying metadata.
-
+    # Step 4: Extract metadata
     filters = load_filters()
     scraped_data = base_extraction(file_list, filters)
 
-    advanced_data = detailed_extraction(scraped_data)
-    
-    #for analysis part
-    analyze_projects(scraped_data, filters)
+    detailed_data = None
+    if analysis_mode == "advanced":
+        "TODO: pass advanced parameters for scanning"
+        detailed_data = detailed_extraction(scraped_data)
+
+    # Step 5: Run analysis on the extracted metadata and save data to DB
+    from db import save_full_scan  
+
+    analysis_results = analyze_projects(scraped_data, filters, detailed_data=detailed_data)
+
+    try:
+        save_full_scan(analysis_results, analysis_mode, config.consent)
+        print("Scan successfully saved.")
+    except Exception as e:
+        print(f"[WARN] Could not store project analysis: {e}")
+
+   
 
 
-
-"""
-Orchestrator Template
-
-This file only defines:
-- Minimal contracts
-- A thin Orchestrator with a single run() method
-- A stub main() for a proposed wiring location
-
-No actual logic, data types not finalized, etc.
-"""
-
-
-
-# Minimal data contract
-@dataclass
-class ScanSummary:
-    scanned_files: int = 0
-    notes: list[str] = field(default_factory=list)
-
-# Minimal service contracts
-class ConsentGateway(Protocol):
-    def request_consent(self) -> bool: ...
-
-class FileScanner(Protocol):
-    def scan(self) -> int: ...  
-
-class MetadataExtractor(Protocol):
-    def extract(self) -> None: ...
-
-class AnalysisEngine(Protocol):
-    def analyze(self) -> None: ...
-
-class Exporter(Protocol):
-    def export(self) -> None: ...
-
-class Storage(Protocol):
-    def save(self) -> None: ...
-
-# Orchestrator skeleton
-class Orchestrator:
-    """Make implementations for each dependency, implement run() when ready.
-    Until then, it returns a blank summary.
-    """
-
-    def __init__(
-        self,
-        *,
-        consent_gateway: ConsentGateway | None = None,
-        file_scanner: FileScanner | None = None,
-        metadata_extractor: MetadataExtractor | None = None,
-        analysis_engine: AnalysisEngine | None = None,
-        exporter: Exporter | None = None,
-        storage: Storage | None = None,
-    ) -> None:
-        self.consent_gateway = consent_gateway
-        self.file_scanner = file_scanner
-        self.metadata_extractor = metadata_extractor
-        self.analysis_engine = analysis_engine
-        self.exporter = exporter
-        self.storage = storage
-
-    def run(self) -> ScanSummary:
-        """
-        High-level flow (to be implemented):
-
-        1) consent = consent_gateway.request_consent()
-        2) inventory_count = file_scanner.scan()
-        3) metadata_extractor.extract()
-        4) analysis_engine.analyze()
-        5) exporter.export()
-        6) storage.save()
-        7) return ScanSummary(scanned_files=inventory_count, notes=[...])
-
-        For now, returns an empty summary as a placeholder.
-        """
-        # TODO: implement the flow above once components exist
-        return ScanSummary()
-
-# CLI entry
-def main() -> None:
-    # TODO: Wire real components like:
-    # orchestrator = Orchestrator(
-    #     consent_gateway=MyConsentGateway(),
-    #     file_scanner=MyFileScanner(),
-    #     metadata_extractor=MyMetadataExtractor(),
-    #     analysis_engine=MyAnalysisEngine(),
-    #     exporter=MyExporter(),
-    #     storage=MyStorage(),
-    # )
-    # summary = orchestrator.run()
-    # print(summary)
-    pass
-
+# --------------------------------------------------------
+# ENTRY POINT
+# --------------------------------------------------------
 if __name__ == "__main__":
-    main()
+    try:
+        config = initialize_app()
+        home_screen(config)  # handles loop until quit
+    except KeyboardInterrupt:
+        print("\nGoodbye!")

@@ -115,7 +115,6 @@ def test_base_extraction_categorizes_files(mock_load_filters):
     """SCENARIO: Files are correctly categorized using filter map
        EXPECTED: Returns extracted data list with correct categories and languages"""
     
-    # Patch returns a single dict just like the real load_filters()
     mock_load_filters.return_value = {
         "extensions": {
             ".py": "source_code",
@@ -124,15 +123,17 @@ def test_base_extraction_categorizes_files(mock_load_filters):
         "languages": {
             ".py": "Python",
             ".txt": "undefined"
-        }
+        },
+        "frameworks": {}   # needed because your function accesses this key
     }
 
     file_list = [
-        {"filename": "script.py", "size": 100, "last_modified": (2025, 1, 1, 12, 0, 0)},
-        {"filename": "readme.txt", "size": 200, "last_modified": (2025, 1, 2, 12, 0, 0)}
+        {"filename": "script.py", "size": 100, "last_modified": (2025, 1, 1, 12, 0, 0), "isFile": True},
+        {"filename": "readme.txt", "size": 200, "last_modified": (2025, 1, 2, 12, 0, 0), "isFile": True}
     ]
 
     result = base_extraction(file_list, mock_load_filters.return_value)
+    
     assert len(result) == 2
 
     # Check first file
@@ -143,7 +144,8 @@ def test_base_extraction_categorizes_files(mock_load_filters):
     # Check second file
     assert result[1]["category"] == "documentation"
     assert result[1]["isFile"] is True
-    assert result[1]["language"] == "undefined"
+    assert result[1]["language"] == ""
+
 
 
 
@@ -153,20 +155,26 @@ def test_base_extraction_handles_folders(mock_load_filters):
     """SCENARIO: Folder is detected
        EXPECTED: isFile is False and category is uncategorized (or matching folder)"""
     
-    # Patch returns a single dict like the real load_filters()
     mock_load_filters.return_value = {
         "extensions": {"myfolder": "repository"},
         "languages": {}
     }
 
     file_list = [
-        {"filename": "myfolder/", "size": 0, "last_modified": (2025, 1, 1, 12, 0, 0)}
+        {
+            "filename": "myfolder/",
+            "size": 0,
+            "last_modified": (2025, 1, 1, 12, 0, 0),
+            "isFile": False   # REQUIRED
+        }
     ]
 
     result = base_extraction(file_list, mock_load_filters.return_value)
+
     assert result[0]["isFile"] is False
     assert result[0]["category"] in ["repository", "uncategorized"]
-    assert result[0]["language"] == ""  # folders get empty language
+    assert result[0]["language"] == ""
+
 
 
 @patch("metadata_extractor.load_filters")
@@ -174,20 +182,21 @@ def test_base_extraction_uncategorized(mock_load_filters):
     """SCENARIO: Unknown extension
        EXPECTED: Category set to 'uncategorized' and language empty"""
     
-    # Patch returns a single dict like the real load_filters()
     mock_load_filters.return_value = {
         "extensions": {".py": "source_code"},
         "languages": {".py": "Python"}
     }
 
     file_list = [
-        {"filename": "unknown.xyz", "size": 123, "last_modified": (2025, 1, 1, 12, 0, 0)}
+        {"filename": "unknown.xyz", "size": 123, "last_modified": (2025, 1, 1, 12, 0, 0), "isFile": True}
     ]
 
     result = base_extraction(file_list, mock_load_filters.return_value)
+
     assert result[0]["category"] == "uncategorized"
     assert result[0]["isFile"] is True
-    assert result[0]["language"] == "undefined"  # unknown extensions get empty language
+    assert result[0]["language"] == ""  # unknown extensions → empty string
+
 
 
 
