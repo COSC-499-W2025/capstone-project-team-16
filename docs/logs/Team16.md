@@ -32,8 +32,7 @@
 ![Screenshot](<screenshots/Team16/TasksW12.png>)
 
 ### Test Report
-![Screenshot](<screenshots/Team16/Test1W10.png>)
-![Screenshot](<screenshots/Team16/Test2W11.png>)
+![Screenshot](<screenshots/Team16/Test1W12.png>)
 
 ### Tests
 - Unit tests added to DB
