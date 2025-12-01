@@ -633,7 +633,10 @@ def analyze_projects(extracted_data, filters, detailed_data=None, write_csv=True
         skills_output
     )
 
-    # we still just return project_summaries so main.py doesn't break
-    return project_summaries
-
-
+        # we still just return project_summaries so main.py doesn't break
+    return {
+    "project_summaries": project_summaries,
+    "resume_summaries": resume_summaries,        # résumé-style top projects
+    "skills_chronological": skills_output,      # skills exercised over time
+    "projects_chronological": chronological_projects,  # projects in chronological order
+}

@@ -9,6 +9,7 @@ from permission_manager import (
 from file_parser import get_input_file_path
 from metadata_extractor import base_extraction, detailed_extraction, load_filters
 from alternative_analysis import analyze_projects
+
 import db 
 import sqlite3
 
@@ -65,23 +66,19 @@ def home_screen(config):
 def scan_manager():
     while True:
         print("\n===== SCAN MANAGER =====")
-        print("1. View stored project analyses (portfolio)")
-        print("2. View stored résumé items")
-        print("3. Delete stored insights")
-        print("4. Return to home screen")
+        print("1. View stored project analyses")
+        print("2. Delete stored scans")
+        print("3. Return to home screen")
 
         choice = input("Choose an option: ").strip()
 
         if choice == "1":
-            view_project_analyses()
+            view_full_scan_details()
 
         elif choice == "2":
-            view_resume_items()
+            delete_full_scan()
 
         elif choice == "3":
-            delete_insights()
-
-        elif choice == "4":
             break
 
         else:
@@ -91,39 +88,114 @@ def scan_manager():
 # Scan Manager helpers
 # ----------------------
 
-def view_project_analyses():
-    from db import get_all_summaries
-    summaries = get_all_summaries()
-    if not summaries:
-        print("No project analyses found.")
+def view_full_scan_details():
+    from db import list_full_scans, get_all_full_scans
+    import json
+
+    scans = list_full_scans()
+    if not scans:
+        print("No scans found.")
         return
 
-    for s in summaries:
-        print(f"- {s['project_name']} (Score: {s['score']}, Files: {s['total_files']}, Date: {s['scan_date']})")
+    print("Select a scan to view:")
+    for i, s in enumerate(scans, start=1):
+        print(f"{i}. {s['timestamp']} ({s['analysis_mode']})")
 
-
-def view_resume_items():
-    from db import get_resume_bullets
-    bullets = get_resume_bullets()
-    if not bullets:
-        print("No résumé items found.")
+    choice = input("Enter number (0 to cancel): ").strip()
+    if not choice.isdigit() or int(choice) == 0:
+        print("Canceled.")
+        return
+    idx = int(choice) - 1
+    if idx < 0 or idx >= len(scans):
+        print("Invalid selection.")
         return
 
-    for b in bullets:
-        print(f"- {b['project_name']}: {b['bullet']}")
+    scan = get_all_full_scans()[idx]
+    data = scan["project_summaries_json"]
+
+    project_summaries = data.get("project_summaries", [])
+    resume_summaries = data.get("resume_summaries", [])
+    skills_chronological = data.get("skills_chronological", [])
+    projects_chronological = data.get("projects_chronological", [])
+
+    print("\n============================")
+    print(" FULL SCAN DETAILS")
+    print("============================")
+    print(f"Timestamp: {scan['timestamp']}")
+    print(f"Mode: {scan['analysis_mode']}")
+    print("============================\n")
+
+    # -------------------------
+    # 1. Ranked Project Table
+    # -------------------------
+    if project_summaries:
+        print("\nRanked Projects")
+        print("-" * 150)
+        print(
+            f"\n{'Project':30} "
+            f"{'Files':>6} {'Days':>6} {'Code':>6} {'Test':>6} "
+            f"{'Doc':>6} {'Des':>6} "
+            f"{'Langs':25} {'Frameworks':25} "
+            f"{'Collab':>7} {'Score':>7}"
+        )
+        print("-" * 150)
+
+        for p in project_summaries:
+            print(
+                f"{p['project'][:30]:30} "
+                f"{p['total_files']:6} {p['duration_days']:6} {p['code_files']:6} "
+                f"{p['test_files']:6} {p['doc_files']:6} {p['design_files']:6} "
+                f"{p['languages'][:25]:25} {p['frameworks'][:25]:25} "
+                f"{p['is_collaborative']:>7} {p['score']:7.1f}"
+            )
+
+    # -------------------------
+    # 2. Chronological Projects
+    # -------------------------
+    if projects_chronological:
+        print("\nProjects in Chronological Order")
+        print("-" * 80)
+        for p in projects_chronological:
+            print(
+                f"- {p['name']}: {p['first_used']} → {p['last_used']}"
+            )
+
+    # -------------------------
+    # 3. Skills Over Time
+    # -------------------------
+    if skills_chronological:
+        print("\nSkills Exercised Over Time")
+        print("-" * 80)
+        for s in skills_chronological:
+            print(
+                f"- {s['first_used']} → {s['last_used']}: {s['skill']}"
+            )
+
+    # -------------------------
+    # 4. Resume Summaries
+    # -------------------------
+    if resume_summaries:
+        print("\nTop Project Résumé Summaries")
+        print("-" * 80)
+        for bullet in resume_summaries:
+            print(f"- {bullet}")
+
+    print("\nEnd of scan.\n")
 
 
-def delete_insights():
-    from db import list_project_summaries, delete_project_insights
 
-    summaries = list_project_summaries()
-    if not summaries:
-        print("No project analyses found to delete.")
+def delete_full_scan():
+    from db import list_full_scans, delete_full_scan_by_id
+    from permission_manager import get_yes_no
+
+    scans = list_full_scans()
+    if not scans:
+        print("No saved scans found to delete.")
         return
 
-    print("Select a project to delete insights for:")
-    for i, s in enumerate(summaries, start=1):
-        print(f"{i}. {s['project_name']}")
+    print("\nSelect a scan to delete:")
+    for i, s in enumerate(scans, start=1):
+        print(f"{i}. [{s['timestamp']}]  Mode: {s['analysis_mode']}")
 
     choice = input("Enter number (or 0 to cancel): ").strip()
     if not choice.isdigit() or int(choice) == 0:
@@ -131,20 +203,18 @@ def delete_insights():
         return
 
     idx = int(choice) - 1
-    if idx < 0 or idx >= len(summaries):
+    if idx < 0 or idx >= len(scans):
         print("Invalid selection.")
         return
 
-    project_id = summaries[idx]["project_id"]
-    confirmed = input(f"Are you sure you want to delete insights for '{summaries[idx]['project_name']}'? (y/n): ").strip().lower()
-    if confirmed == "y":
-        success = delete_project_insights(project_id)
-        if success:
-            print("Insights deleted.")
-        else:
-            print("Failed to delete insights.")
+    scan = scans[idx]
+
+    if get_yes_no(f"Are you sure you want to delete the scan from {scan['timestamp']}?"):
+        success = delete_full_scan_by_id(scan["summary_id"])
+        print("Scan deleted." if success else "Failed to delete scan.")
     else:
         print("Deletion canceled.")
+
 
 # --------------------------------------------------------
 # ORCHESTRATOR (handles running a scan)
@@ -175,10 +245,16 @@ def orchestrator(config):
         "TODO: pass advanced parameters for scanning"
         detailed_data = detailed_extraction(scraped_data)
 
-    # Step 5: Run analysis on the extracted metadata
-    analyze_projects(scraped_data, filters, detailed_data=detailed_data)
+    # Step 5: Run analysis on the extracted metadata and save data to DB
+    from db import save_full_scan  
 
-    print("\nReturning to home screen...\n")
+    analysis_results = analyze_projects(scraped_data, filters, detailed_data=detailed_data)
+
+    try:
+        save_full_scan(analysis_results, analysis_mode, config.consent)
+        print("Scan successfully saved.")
+    except Exception as e:
+        print(f"[WARN] Could not store project analysis: {e}")
 
    
 
