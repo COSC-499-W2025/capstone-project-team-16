@@ -1,4 +1,45 @@
 # Personal Log - Amani Lugalla
+## [Date Range]  
+2025-11-23 to 2025-11-30
+
+### Type of Tasks Worked On
+- ![Screenshot](<screenshots/Amani/Week 13.png>)
+
+### Recap of Week's Goals
+- Expand and refine the database layer to support richer, future-proof analysis.
+- Build supporting helper functions for project storage, résumé extraction, and insight deletion.
+- Prepare presentation slides explaining database design choices and future directions.
+- Introduce plans for future LLM-powered analysis and integration.
+
+### Features Assigned (Project Plan)
+- Extend the SQLite schema to include all relevant project metadata and analysis fields.
+- Implement new DB helper functions for storing and retrieving structured analysis.
+- Add slide content covering DB rationale, current implementation, and long-term roadmap.
+- Outline how future LLM integration will enhance project analysis, skill inference, and résumé generation.
+
+### Tasks from Project Board
+| Task | Status (Completed/In Progress) | Notes |
+|------|-------------------------------|-------|
+| Expand DB schema with new fields | Completed | Added project_id, user_id, consent, analysis_mode, analysis_data, file_tree, resume_bullets |
+| Implement insight storage helper | Completed | `store_project_insights` fully implemented |
+| Add retrieval functions for summaries | Completed | Added `list_project_summaries` |
+| Add résumé extraction feature | Completed | Implemented `get_resume_bullets` |
+| Add deletion function | Completed | `delete_project_insights` now safely removes DB entries |
+| Update existing tests | Completed | All old tests updated to match new structure |
+| Add new tests for new helpers | Completed | Full coverage for insights, summaries, bullets, deletion |
+| Create presentation slides | Completed | Covered DB design, SQLite choice, current vs future state |
+| Add future LLM integration section | Completed | Slides outline planned advanced analysis and résumé generation |
+
+### Completed/In-Progress Tasks (Last 2 Weeks)
+- Expanded SQLite schema to store project metadata, analysis results, file trees, and résumé bullets.
+- Added helper functions for saving, retrieving, and deleting complex analysis outputs.
+- Updated and expanded the automated test suite to cover the new features.
+- Created presentation slides explaining database choices, JSON-first strategy, and future migration to structured columns.
+- Added forward-looking slide content on LLM-based analysis, automated skill extraction, and model-driven résumé generation.
+
+### Additional Context (Optional)
+- N/a
+
 ## [Date Range]
 2025-11-16 to 2025-11-23
 
