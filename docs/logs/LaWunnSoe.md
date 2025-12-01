@@ -342,3 +342,71 @@
 
 ### Additional Context (Optional)
 - N/A
+
+## 2025-Nov-24 to 2025-Nov-30
+
+### Type of Tasks Worked On
+
+
+<img width="956" height="559" alt="Screenshot 2025-11-30 at 11 34 29 PM" src="https://github.com/user-attachments/assets/0188d38a-e385-45de-9f5b-e6cac0f824f5" />
+
+
+
+
+### Recap of Week's Goals
+
+- Finish up milestone 1 requirements
+- Integrate other people's work
+- Clean up code
+- Resume document generator
+- Ranking system
+- Resume summaries
+
+### Features Assigned (Project Plan)
+
+- Provide alternative analyses if external services are not permitted
+- Distinguish between individual and collaborative projects
+- For coding projects, identify the programming language and framework used
+- Output project information in structured text format
+- Rank projects based on user contributions
+- Summarize top-ranked projects
+- Produce a chronological list of projects
+- Produce a chronological list of skills exercised
+- Resume document file
+
+
+### Tasks from Project Board
+| Feature | Task | Status (Completed/In Progress) | Notes |
+|------|------|-------------------------------|-------|
+
+| Provide alternative analyses if external services are not permitted | Provide alternative analyses if external services are not permitted | complete | … |
+| Distinguish between individual and collaborative projects |Distinguish between individual and collaborative projects | complete | … |
+| For coding projects, identify the programming language and framework used | For coding projects, identify the programming language and framework used | complete | … |
+| Extrapolate individual contributions in collaborative projects | Extrapolate individual contributions in collaborative projects | comeplete | … |
+| Extract contribution metrics, such as project duration and contribution frequency by activity type (e.g., code, test, design, documentation) | Extract contribution metrics, such as project duration and contribution frequency by activity type (e.g., code, test, design, documentation) | comeplete | … |
+| Output project information in structured text format | Output project information in structured text format | complete | … |
+| Rank projects based on user contributions | Rank projects based on user contributions | complete | … |
+| Summarize top-ranked projects | Summarize top-ranked projects | complete | … |
+| Produce a chronological list of projects | Produce a chronological list of projects | complete | … |
+| Produce a chronological list of skills exercised | Produce a chronological list of skills exercised | complete | … |
+| Resume document file | Resume document file | complete | … |
+
+
+
+
+### Completed/In-Progress Tasks (Last 2 Weeks)
+
+- Provide alternative analyses if external services are not permitted
+- Distinguish between individual and collaborative projects 
+- For coding projects, identify the programming language and framework used
+- Extract contribution metrics, such as project duration and contribution frequency by activity type (e.g., code, test, design, documentation)
+- Demo
+- Output project information in structured text format
+- Rank projects based on user contributions
+- Summarize top-ranked projects
+- Produce a chronological list of projects
+- Produce a chronological list of skills exercised
+- Resume document file
+
+### Additional Context (Optional)
+- N/A
