@@ -66,10 +66,9 @@ def home_screen(config):
 def scan_manager():
     while True:
         print("\n===== SCAN MANAGER =====")
-        print("1. View stored project analyses (portfolio)")
-        print("2. View stored résumé items")
-        print("3. Delete stored insights")
-        print("4. Return to home screen")
+        print("1. View stored project analyses")
+        print("2. Delete stored scans")
+        print("3. Return to home screen")
 
         choice = input("Choose an option: ").strip()
 
@@ -77,12 +76,9 @@ def scan_manager():
             view_full_scan_details()
 
         elif choice == "2":
-            view_resume_items()
+            delete_full_scan()
 
         elif choice == "3":
-            delete_insights()
-
-        elif choice == "4":
             break
 
         else:
@@ -127,7 +123,6 @@ def view_full_scan_details():
     print("============================")
     print(f"Timestamp: {scan['timestamp']}")
     print(f"Mode: {scan['analysis_mode']}")
-    print(f"User Consent: {scan['user_consent']}")
     print("============================\n")
 
     # -------------------------
@@ -189,32 +184,18 @@ def view_full_scan_details():
 
 
 
+def delete_full_scan():
+    from db import list_full_scans, delete_full_scan_by_id
+    from permission_manager import get_yes_no
 
-
-
-
-def view_resume_items():
-    from db import get_resume_bullets
-    bullets = get_resume_bullets()
-    if not bullets:
-        print("No résumé items found.")
+    scans = list_full_scans()
+    if not scans:
+        print("No saved scans found to delete.")
         return
 
-    for b in bullets:
-        print(f"- {b['project_name']}: {b['bullet']}")
-
-
-def delete_insights():
-    from db import list_project_summaries, delete_project_insights
-
-    summaries = list_project_summaries()
-    if not summaries:
-        print("No project analyses found to delete.")
-        return
-
-    print("Select a project to delete insights for:")
-    for i, s in enumerate(summaries, start=1):
-        print(f"{i}. {s['project_name']}")
+    print("\nSelect a scan to delete:")
+    for i, s in enumerate(scans, start=1):
+        print(f"{i}. [{s['timestamp']}]  Mode: {s['analysis_mode']}")
 
     choice = input("Enter number (or 0 to cancel): ").strip()
     if not choice.isdigit() or int(choice) == 0:
@@ -222,20 +203,18 @@ def delete_insights():
         return
 
     idx = int(choice) - 1
-    if idx < 0 or idx >= len(summaries):
+    if idx < 0 or idx >= len(scans):
         print("Invalid selection.")
         return
 
-    project_id = summaries[idx]["project_id"]
-    confirmed = input(f"Are you sure you want to delete insights for '{summaries[idx]['project_name']}'? (y/n): ").strip().lower()
-    if confirmed == "y":
-        success = delete_project_insights(project_id)
-        if success:
-            print("Insights deleted.")
-        else:
-            print("Failed to delete insights.")
+    scan = scans[idx]
+
+    if get_yes_no(f"Are you sure you want to delete the scan from {scan['timestamp']}?"):
+        success = delete_full_scan_by_id(scan["summary_id"])
+        print("Scan deleted." if success else "Failed to delete scan.")
     else:
         print("Deletion canceled.")
+
 
 # --------------------------------------------------------
 # ORCHESTRATOR (handles running a scan)
