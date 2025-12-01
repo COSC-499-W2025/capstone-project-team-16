@@ -176,7 +176,16 @@ def orchestrator(config):
         detailed_data = detailed_extraction(scraped_data)
 
     # Step 5: Run analysis on the extracted metadata
-    analyze_projects(scraped_data, filters, detailed_data=detailed_data)
+    from db import save_full_scan  
+
+    project_summaries = analyze_projects(scraped_data, filters, detailed_data=detailed_data)
+
+    # Save results to DB (if applicable)
+    try:
+        save_full_scan(project_summaries, analysis_mode, config.consent )
+        print("Scan successfully saved.")
+    except Exception as e:
+        print(f"[WARN] Could not store project analysis: {e}")
 
     print("\nReturning to home screen...\n")
 

@@ -74,6 +74,18 @@ INSERT INTO project_summaries (
 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 """
 
+# full scan summary table
+CREATE_FULL_SCAN_TABLE_SQL = """
+CREATE TABLE IF NOT EXISTS full_scan_summaries (
+    summary_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    timestamp TEXT NOT NULL,
+    analysis_mode TEXT NOT NULL,
+    user_consent TEXT NOT NULL,
+    project_summaries_json TEXT NOT NULL
+)
+"""
+
+
 # ----------------------
 # Initialization
 # ----------------------
@@ -85,11 +97,63 @@ def ensure_db_initialized(conn: sqlite3.Connection) -> None:
     """
     conn.execute(CREATE_TABLE_SQL)
     conn.execute(USER_CONFIG_TABLE_SQL)
+    """Ensure the table for full scans exists."""
+    conn.execute(CREATE_FULL_SCAN_TABLE_SQL)
 
 # ----------------------
 # Save results
 # ----------------------
 
+
+""" 
+
+Temporary, short term DB saving. Our returned data is changing so much that it makes more sense to save the entire summary as one data type rather than refactor it everytime something is added.
+
+"""
+# Saving method for just summaries. (save results needs refactoring with alternative analysis)
+
+def save_full_scan(
+    project_summaries: Sequence[Mapping[str, any]],
+    analysis_mode: str,
+    user_consent: bool,
+    db_path: str = DB_NAME
+) -> None:
+    """
+    Saves the entire scan (all projects) as one JSON blob in the
+    'full_scan_summaries' table. Each row has a unique auto-increment summary_id.
+    """
+    
+    if not project_summaries:
+        return
+
+    # Convert datetime fields to ISO strings
+    def _serialize_project(p):
+        p_copy = p.copy()
+        for key in ["first_modified", "last_modified"]:
+            if key in p_copy and isinstance(p_copy[key], datetime):
+                p_copy[key] = p_copy[key].isoformat()
+        return p_copy
+
+    serialized_projects = [_serialize_project(p) for p in project_summaries]
+    projects_json = json.dumps(serialized_projects, ensure_ascii=False)
+    timestamp = datetime.now().isoformat()
+    consent_str = "Yes" if user_consent else "No"
+
+    with sqlite3.connect(db_path) as conn:
+        ensure_db_initialized(conn)
+        conn.execute(
+            """
+            INSERT INTO full_scan_summaries
+            (timestamp, analysis_mode, user_consent, project_summaries_json)
+            VALUES (?, ?, ?, ?)
+            """,
+            (timestamp, analysis_mode, consent_str, projects_json)
+        )
+        conn.commit()
+
+
+
+# Full save results (needs to be reconfigured to support final data types)
 def save_results(
     results_list: Sequence[Mapping[str, Any]],
     user_consent: bool,
@@ -330,3 +394,6 @@ def delete_project_insights(project_id: str, db_path: str = DB_NAME) -> bool:
         cursor = conn.execute("DELETE FROM project_summaries WHERE project_id = ?", (project_id,))
         conn.commit()
         return cursor.rowcount > 0
+
+
+
