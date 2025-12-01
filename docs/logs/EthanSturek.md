@@ -1,4 +1,58 @@
 # Personal Log - Ethan Sturek
+## 2025-NOV-23 to 2025-NOV-30
+
+
+### Type of Tasks Worked On
+![Screenshot](<screenshots/Ethan/Week 12.png>)
+
+### Recap of Week's Goals
+- Finish up milestone 1 requirements
+- Integrate other people's work
+- Clean up code
+- Fully integrate metadata extractor and analysis
+
+
+### Features Assigned (Project Plan)
+- Refactor Main
+- For coding projects, identify framework used
+- Scan Preferences
+- Add more feedback to user
+- Meta Data Extractor
+- Home Screen
+- Repository Extraction
+- Integrate database within System
+- Integrate Scan Variables into Analysis
+
+### Tasks from Project Board
+| Feature | Task | Status (Completed/In Progress) | Notes |
+|------|------|-------------------------------|-------|
+| Meta Data Extractor | Meta Data Extractor | Completed | Fully done and implemented  |
+| Repository Extraction | For coding projects, identify framework used | Completed | Opens and identifies marked files |
+| Scan Preferences | Scan Preferences | Completed | 2 different scan modes have been added |
+| Add more feedback to user| Add more feedback to user | Completed | User now recieves more feedback during use |
+| Home Screen | Home Screen | Completed | Home screen and scan manager added to UI for proper looping functionality |
+| Refactor Main | Refactor Main | Completed | Removed unimplemented artifacts in main. Also reworked orchestrator|
+| Integrate database within System | Integrate database within System | Completed | Integrated database to save analysis data, retrieve it and delete it within the scan manager |
+| Integrate Scan Variables into Analysis | Integrate Scan Variables into Analysis | In Progress | Scan variables still need to be optionally run |
+
+
+### Completed Tasks (Last 2 Weeks)
+- Refactor Main
+- For coding projects, identify framework used
+- Scan Preferences
+- Add more feedback to user
+- Meta Data Extractor
+- Home Screen
+- Repository Extraction
+- Integrate database within System
+
+
+### In-Progress Tasks 
+- Integrate Scan Variables into Analysis
+
+### Additional Context (Optional)
+- NA
+
 ## 2025-NOV-9 to 2025-NOV-23
 
 
