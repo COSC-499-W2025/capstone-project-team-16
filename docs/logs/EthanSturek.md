@@ -21,6 +21,7 @@
 - Home Screen
 - Repository Extraction
 - Integrate database within System
+- Integrate Scan Variables into Analysis
 
 ### Tasks from Project Board
 | Feature | Task | Status (Completed/In Progress) | Notes |
@@ -32,6 +33,7 @@
 | Home Screen | Home Screen | Completed | Home screen and scan manager added to UI for proper looping functionality |
 | Refactor Main | Refactor Main | Completed | Removed unimplemented artifacts in main. Also reworked orchestrator|
 | Integrate database within System | Integrate database within System | Completed | Integrated database to save analysis data, retrieve it and delete it within the scan manager |
+| Integrate Scan Variables into Analysis | Integrate Scan Variables into Analysis | In Progress | Scan variables still need to be optionally run |
 
 
 ### Completed Tasks (Last 2 Weeks)
@@ -46,7 +48,7 @@
 
 
 ### In-Progress Tasks 
-- n/a
+- Integrate Scan Variables into Analysis
 
 ### Additional Context (Optional)
 - NA

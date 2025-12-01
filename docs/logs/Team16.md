@@ -1,4 +1,52 @@
 # Team Log - Team 16
+## Milestone: 2025-NOV-23 to 2025-NOV-30
+
+
+### Milestone Goals Recap
+- Finish up milestone 1 requirements
+- Integrate other people's work
+- Clean up code
+- Fully integrate metadata extractor and analysis
+
+### Features in Project Plan
+- For coding projects, identify the programming language
+- Fully integrate Meta Data extractor and Analysis Engine
+- Meta Data Extractor
+- Extract contribution metrics, such as project duration and contribution frequency
+- Extrapolate individual contributions in collaborative projects
+
+
+### Burnup Chart
+| Name | Username |
+|----------------|----------------|
+| Ethan Sturek | ethansturek |
+| La Wunn| LaWunn|
+| Amani |lugger33 |
+
+![Screenshot](<screenshots/Team16/BurnupW12.png>)
+
+### Completed Tasks Table
+![Screenshot](<screenshots/Team16/DoneTasksW12.png>)
+
+### In Progress Tasks Table
+![Screenshot](<screenshots/Team16/TasksW12.png>)
+
+### Test Report
+![Screenshot](<screenshots/Team16/Test1W10.png>)
+![Screenshot](<screenshots/Team16/Test2W11.png>)
+
+### Tests
+- Unit tests added to DB
+- Extensive manual testing
+## Running Tests
+
+1.  Run `python -m venv venv` to create a virtual environment.
+2. On Windows run `venv/Scripts/activate`.
+3. On Mac run `venv/bin/activate`.
+4. Run `pip install -r requirements.txt`.
+5. In the root of the repositiory, enter `pytest` to run all tests.
+
+
 ## Milestone: 2025-NOV-9 to 2025-NOV-23
 
 
@@ -23,7 +71,7 @@
 | La Wunn| LaWunn|
 | Amani |lugger33 |
 
-![Screenshot](<screenshots/Team16/BurnupW10.png>)
+![Screenshot](<screenshots/Team16/BurnupW11.png>)
 
 ### Completed Tasks Table
 ![Screenshot](<screenshots/Team16/DoneTasksW10.png>)
