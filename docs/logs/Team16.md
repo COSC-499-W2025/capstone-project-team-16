@@ -7,6 +7,9 @@
 - Integrate other people's work
 - Clean up code
 - Fully integrate metadata extractor and analysis
+- Resume document generator
+- Ranking system
+- Resume summaries
 
 ### Features in Project Plan
 - For coding projects, identify the programming language
@@ -14,6 +17,12 @@
 - Meta Data Extractor
 - Extract contribution metrics, such as project duration and contribution frequency
 - Extrapolate individual contributions in collaborative projects
+- Output project information in structured text format
+- Rank projects based on user contributions
+- Summarize top-ranked projects
+- Produce a chronological list of projects
+- Produce a chronological list of skills exercised
+- Resume document file
 
 
 ### Burnup Chart
