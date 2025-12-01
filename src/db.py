@@ -107,26 +107,29 @@ def ensure_db_initialized(conn: sqlite3.Connection) -> None:
 
 """ 
 
-Temporary, short term DB saving. Our returned data is changing so much that it makes more sense to save the entire summary as one data type rather than refactor it everytime something is added.
+Temporary, generic, short term DB saving. Our returned data is changing so much that it makes more sense to save the entire summary as one data type rather than refactor it everytime something is added.
 
 """
 # Saving method for just summaries. (save results needs refactoring with alternative analysis)
+def list_full_scans(db_path=DB_NAME):
+    """Return minimal info about each scan for selection menus."""
+    scans = get_all_full_scans(db_path)
+    return [{"summary_id": s["summary_id"], "timestamp": s["timestamp"], "analysis_mode": s["analysis_mode"]} for s in scans]
+
 
 def save_full_scan(
-    project_summaries: Sequence[Mapping[str, any]],
+    analysis_results: Mapping[str, any], 
     analysis_mode: str,
     user_consent: bool,
     db_path: str = DB_NAME
 ) -> None:
     """
-    Saves the entire scan (all projects) as one JSON blob in the
-    'full_scan_summaries' table. Each row has a unique auto-increment summary_id.
+    Save a full scan, including summaries, resume bullets, skills over time, and chronological projects.
     """
-    
-    if not project_summaries:
+    if not analysis_results or "project_summaries" not in analysis_results:
         return
 
-    # Convert datetime fields to ISO strings
+    # Serialize datetime fields in projects
     def _serialize_project(p):
         p_copy = p.copy()
         for key in ["first_modified", "last_modified"]:
@@ -134,22 +137,54 @@ def save_full_scan(
                 p_copy[key] = p_copy[key].isoformat()
         return p_copy
 
-    serialized_projects = [_serialize_project(p) for p in project_summaries]
-    projects_json = json.dumps(serialized_projects, ensure_ascii=False)
-    timestamp = datetime.now().isoformat()
-    consent_str = "Yes" if user_consent else "No"
+    serialized_projects = [
+        _serialize_project(p) for p in analysis_results["project_summaries"]
+    ]
+
+    full_scan_data = {
+        "project_summaries": serialized_projects,
+        "resume_summaries": analysis_results.get("resume_summaries", []),
+        "skills_chronological": analysis_results.get("skills_chronological", []),
+        "projects_chronological": analysis_results.get("projects_chronological", []),
+        "analysis_mode": analysis_mode,
+        "user_consent": "Yes" if user_consent else "No",
+        "timestamp": datetime.now().isoformat()
+    }
 
     with sqlite3.connect(db_path) as conn:
         ensure_db_initialized(conn)
         conn.execute(
             """
-            INSERT INTO full_scan_summaries
-            (timestamp, analysis_mode, user_consent, project_summaries_json)
+            INSERT INTO full_scan_summaries (timestamp, analysis_mode, user_consent, project_summaries_json)
             VALUES (?, ?, ?, ?)
             """,
-            (timestamp, analysis_mode, consent_str, projects_json)
+            (
+                full_scan_data["timestamp"],
+                analysis_mode,
+                full_scan_data["user_consent"],
+                json.dumps(full_scan_data, ensure_ascii=False),
+            )
         )
         conn.commit()
+
+def get_all_full_scans(db_path=DB_NAME):
+    """Return all full scans stored in the DB as a list of dicts."""
+    import sqlite3, json
+
+    with sqlite3.connect(db_path) as conn:
+        conn.row_factory = sqlite3.Row
+        cursor = conn.execute("SELECT * FROM full_scan_summaries ORDER BY timestamp DESC")
+        rows = cursor.fetchall()
+        results = []
+        for row in rows:
+            results.append({
+                "summary_id": row["summary_id"],
+                "timestamp": row["timestamp"],
+                "analysis_mode": row["analysis_mode"],
+                "user_consent": row["user_consent"],
+                "project_summaries_json": json.loads(row["project_summaries_json"]) if row["project_summaries_json"] else {}
+            })
+        return results
 
 
 

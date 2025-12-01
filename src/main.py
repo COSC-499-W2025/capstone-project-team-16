@@ -9,6 +9,7 @@ from permission_manager import (
 from file_parser import get_input_file_path
 from metadata_extractor import base_extraction, detailed_extraction, load_filters
 from alternative_analysis import analyze_projects
+
 import db 
 import sqlite3
 
@@ -73,7 +74,7 @@ def scan_manager():
         choice = input("Choose an option: ").strip()
 
         if choice == "1":
-            view_project_analyses()
+            view_full_scan_details()
 
         elif choice == "2":
             view_resume_items()
@@ -91,15 +92,105 @@ def scan_manager():
 # Scan Manager helpers
 # ----------------------
 
-def view_project_analyses():
-    from db import get_all_summaries
-    summaries = get_all_summaries()
-    if not summaries:
-        print("No project analyses found.")
+def view_full_scan_details():
+    from db import list_full_scans, get_all_full_scans
+    import json
+
+    scans = list_full_scans()
+    if not scans:
+        print("No scans found.")
         return
 
-    for s in summaries:
-        print(f"- {s['project_name']} (Score: {s['score']}, Files: {s['total_files']}, Date: {s['scan_date']})")
+    print("Select a scan to view:")
+    for i, s in enumerate(scans, start=1):
+        print(f"{i}. {s['timestamp']} ({s['analysis_mode']})")
+
+    choice = input("Enter number (0 to cancel): ").strip()
+    if not choice.isdigit() or int(choice) == 0:
+        print("Canceled.")
+        return
+    idx = int(choice) - 1
+    if idx < 0 or idx >= len(scans):
+        print("Invalid selection.")
+        return
+
+    scan = get_all_full_scans()[idx]
+    data = scan["project_summaries_json"]
+
+    project_summaries = data.get("project_summaries", [])
+    resume_summaries = data.get("resume_summaries", [])
+    skills_chronological = data.get("skills_chronological", [])
+    projects_chronological = data.get("projects_chronological", [])
+
+    print("\n============================")
+    print(" FULL SCAN DETAILS")
+    print("============================")
+    print(f"Timestamp: {scan['timestamp']}")
+    print(f"Mode: {scan['analysis_mode']}")
+    print(f"User Consent: {scan['user_consent']}")
+    print("============================\n")
+
+    # -------------------------
+    # 1. Ranked Project Table
+    # -------------------------
+    if project_summaries:
+        print("\nRanked Projects")
+        print("-" * 150)
+        print(
+            f"\n{'Project':30} "
+            f"{'Files':>6} {'Days':>6} {'Code':>6} {'Test':>6} "
+            f"{'Doc':>6} {'Des':>6} "
+            f"{'Langs':25} {'Frameworks':25} "
+            f"{'Collab':>7} {'Score':>7}"
+        )
+        print("-" * 150)
+
+        for p in project_summaries:
+            print(
+                f"{p['project'][:30]:30} "
+                f"{p['total_files']:6} {p['duration_days']:6} {p['code_files']:6} "
+                f"{p['test_files']:6} {p['doc_files']:6} {p['design_files']:6} "
+                f"{p['languages'][:25]:25} {p['frameworks'][:25]:25} "
+                f"{p['is_collaborative']:>7} {p['score']:7.1f}"
+            )
+
+    # -------------------------
+    # 2. Chronological Projects
+    # -------------------------
+    if projects_chronological:
+        print("\nProjects in Chronological Order")
+        print("-" * 80)
+        for p in projects_chronological:
+            print(
+                f"- {p['name']}: {p['first_used']} → {p['last_used']}"
+            )
+
+    # -------------------------
+    # 3. Skills Over Time
+    # -------------------------
+    if skills_chronological:
+        print("\nSkills Exercised Over Time")
+        print("-" * 80)
+        for s in skills_chronological:
+            print(
+                f"- {s['first_used']} → {s['last_used']}: {s['skill']}"
+            )
+
+    # -------------------------
+    # 4. Resume Summaries
+    # -------------------------
+    if resume_summaries:
+        print("\nTop Project Résumé Summaries")
+        print("-" * 80)
+        for bullet in resume_summaries:
+            print(f"- {bullet}")
+
+    print("\nEnd of scan.\n")
+
+
+
+
+
 
 
 def view_resume_items():
@@ -175,19 +266,16 @@ def orchestrator(config):
         "TODO: pass advanced parameters for scanning"
         detailed_data = detailed_extraction(scraped_data)
 
-    # Step 5: Run analysis on the extracted metadata
+    # Step 5: Run analysis on the extracted metadata and save data to DB
     from db import save_full_scan  
 
-    project_summaries = analyze_projects(scraped_data, filters, detailed_data=detailed_data)
+    analysis_results = analyze_projects(scraped_data, filters, detailed_data=detailed_data)
 
-    # Save results to DB (if applicable)
     try:
-        save_full_scan(project_summaries, analysis_mode, config.consent )
+        save_full_scan(analysis_results, analysis_mode, config.consent)
         print("Scan successfully saved.")
     except Exception as e:
         print(f"[WARN] Could not store project analysis: {e}")
-
-    print("\nReturning to home screen...\n")
 
    
 
