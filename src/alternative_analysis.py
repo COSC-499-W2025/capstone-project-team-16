@@ -6,6 +6,8 @@ import os
 from datetime import datetime
 from collections import defaultdict, Counter
 import csv
+from resume_generator import generate_resume
+
 
 
 
@@ -572,7 +574,7 @@ def analyze_projects(extracted_data, filters, detailed_data=None, write_csv=True
     TOP_N = 3
     top_projects = project_summaries[:TOP_N]
 
-    print(f"\nTop {TOP_N} projects (résumé-style summaries)")
+    print(f"\nTop {TOP_N} projects (Summaries)")
     print("-" * 80)
     resume_summaries = []
 
@@ -582,7 +584,7 @@ def analyze_projects(extracted_data, filters, detailed_data=None, write_csv=True
         print(f"- {line}")
 
     # --------------------------------------------------------
-    # CSV OUTPUT (need to change to a resume doc from csv)
+    # CSV OUTPUT (we might not need this anymore since we have word doc now. can delete later. just here for now.)
     # --------------------------------------------------------
     if write_csv:
         os.makedirs("out", exist_ok=True)
@@ -621,6 +623,17 @@ def analyze_projects(extracted_data, filters, detailed_data=None, write_csv=True
             writer.writerows(project_summaries)
 
         print(f"saved file to {out_path}")
+    
+    # --------------------------------------------------------
+    # To make text and doc file from analysis
+    # --------------------------------------------------------
+    generate_resume(
+        project_summaries,
+        chronological_projects,
+        skills_output
+    )
 
-        # we still just return project_summaries so main.py doesn't break
+    # we still just return project_summaries so main.py doesn't break
     return project_summaries
+
+
