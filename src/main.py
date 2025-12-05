@@ -132,11 +132,11 @@ def view_full_scan_details():
         print("\nRanked Projects")
         print("-" * 150)
         print(
-            f"\n{'Project':30} "
-            f"{'Files':>6} {'Days':>6} {'Code':>6} {'Test':>6} "
-            f"{'Doc':>6} {'Des':>6} "
-            f"{'Langs':25} {'Frameworks':25} "
-            f"{'Collab':>7} {'Score':>7}"
+        f"\n{'Project':30} "
+        f"{'Files':>6} {'Days':>6} {'Code':>6} {'Test':>6} "
+        f"{'Doc':>6} {'Des':>6} "
+        f"Languages Frameworks "
+        f"{'Collab':>7} {'Score':>7}"
         )
         print("-" * 150)
 
@@ -145,9 +145,10 @@ def view_full_scan_details():
                 f"{p['project'][:30]:30} "
                 f"{p['total_files']:6} {p['duration_days']:6} {p['code_files']:6} "
                 f"{p['test_files']:6} {p['doc_files']:6} {p['design_files']:6} "
-                f"{p['languages'][:25]:25} {p['frameworks'][:25]:25} "
+                f"{p['languages']} {p['frameworks']} "
                 f"{p['is_collaborative']:>7} {p['score']:7.1f}"
             )
+
 
     # -------------------------
     # 2. Chronological Projects
@@ -236,19 +237,18 @@ def orchestrator(config):
         print("No files selected. Returning to home.")
         return
 
-    # Step 4: Extract metadata
+    # Step 4: Load filters and extract metadata
     filters = load_filters()
     scraped_data = base_extraction(file_list, filters)
 
     detailed_data = None
     if analysis_mode == "advanced":
-        "TODO: pass advanced parameters for scanning"
-        detailed_data = detailed_extraction(scraped_data)
+        detailed_data = detailed_extraction(scraped_data, advanced_options)
 
     # Step 5: Run analysis on the extracted metadata and save data to DB
     from db import save_full_scan  
 
-    analysis_results = analyze_projects(scraped_data, filters, detailed_data=detailed_data)
+    analysis_results = analyze_projects(scraped_data, filters, advanced_options, detailed_data)
 
     try:
         save_full_scan(analysis_results, analysis_mode, config.consent)
