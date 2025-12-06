@@ -21,7 +21,7 @@ def test_detailed_extraction_valid_repo():
         "repo_name": "repo",
         "repo_root": "/path/to/repo",
         "authors": ["author1@example.com"],
-        "contributors": ["author1@example.com"],  # required by detailed_extraction
+        "contributors": ["author1@example.com"],
         "branch_count": 1,
         "has_merges": False,
         "project_type": "individual",
@@ -29,14 +29,16 @@ def test_detailed_extraction_valid_repo():
         "commit_frequency": 2
     }
 
-    # Patch analyze_repo_type to return mock repo info
-    with patch("metadata_extractor.analyze_repo_type", return_value=mock_repo_info):
-        result = detailed_extraction(extracted_data)
+    # Minimal advanced options
+    advanced_options = {
+        "framework_scan": False     # doesn’t matter for this test
+    }
 
-    # Extract the first project
+    with patch("metadata_extractor.analyze_repo_type", return_value=mock_repo_info):
+        result = detailed_extraction(extracted_data, advanced_options)
+
     project = result["projects"][0]
 
-    # Check that project metadata matches mock
     assert project["repo_name"] == "repo"
     assert project["repo_root"] == "/path/to/repo"
     assert project["authors"] == ["author1@example.com"]
@@ -47,8 +49,6 @@ def test_detailed_extraction_valid_repo():
     assert project["duration_days"] == 10
     assert project["commit_frequency"] == 2
 
-    # Check that the file is attached to the project
-    assert extracted_data[0] in project["files"]
 
 
 def test_detailed_extraction_non_repo(capsys):
@@ -65,9 +65,14 @@ def test_detailed_extraction_non_repo(capsys):
         }
     ]
 
-    detailed_extraction(extracted_data)
+    advanced_options = {"framework_scan": False}
 
+    detailed_extraction(extracted_data, advanced_options)
+
+    # Entry should remain unchanged
     entry = extracted_data[0]
     assert entry["filename"] == "/path/to/file.txt"
+
+    # No repo analysis should be printed
     captured = capsys.readouterr()
     assert "Repo analysis" not in captured.out

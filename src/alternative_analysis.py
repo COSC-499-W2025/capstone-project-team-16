@@ -186,8 +186,16 @@ def _project_resume_summary(p: dict) -> str:
 # --------------------------------------------------------
 # MAIN ANALYSIS FUNCTION
 # --------------------------------------------------------
-def analyze_projects(extracted_data, filters, detailed_data=None, write_csv=True):
-   
+def analyze_projects(extracted_data, filters, advanced_options, detailed_data=None, write_csv=True ):
+    if advanced_options is None:
+    # default: everything ON
+        advanced_options = {
+            "programming_scan": True,
+            "framework_scan": True,
+            "skills_gen": True,
+            "resume_gen": True
+        }
+
 
     # not heavily used now, but keep in case we want ext->lang fallback later
     lang_map = filters.get("languages", {})
@@ -251,17 +259,31 @@ def analyze_projects(extracted_data, filters, detailed_data=None, write_csv=True
         if not clean_files:
             continue
 
+
+
+        
+
         # duration: based on first + last modified timestamps
         mod_times = [_to_datetime(f["last_modified"]) for f in clean_files]
         first_mod = min(mod_times)
         last_mod = max(mod_times)
         duration_days = (last_mod - first_mod).days + 1
+        frameworks = set()
 
         # counters + sets
         activity_counts = Counter()
         langs = set()
-        frameworks = set()
         skills = set()
+
+
+        # --- Detect frameworks from detailed_data ---
+        if advanced_options.get("framework_scan", True):
+            # Load frameworks detected by the extractor (if any)
+            if detailed_data:
+                for project_meta in detailed_data.get("projects", []):
+                    if project_meta["repo_name"] == proj_name and "frameworks" in project_meta:
+                        frameworks.update(project_meta["frameworks"])
+                        break
 
         # repo / git infos (from detailed_extraction / repo_extractor)
         repo_names = set()
@@ -290,30 +312,35 @@ def analyze_projects(extracted_data, filters, detailed_data=None, write_csv=True
                 langs.add(lang)
 
             # frameworks
-            fw = _detect_framework(filename)
-            if fw != "None":
-                frameworks.add(fw)
+            if advanced_options.get("framework_scan", True):
+                # If frameworks weren't detected by the extractor, fallback per file
+                if not frameworks and f.get("category") == "framework":
+                    fw = _detect_framework(filename)
+                    if fw and fw != "None":
+                        frameworks.add(fw)
 
-            # skills
-            s = _skill_from_ext(ext)
-            if s:
-                skills.add(s)
 
-                # track global usage for chronological skill list
-                file_time = _to_datetime(f["last_modified"])
-                info = skill_usage.get(s)
-                if info is None:
-                    skill_usage[s] = {
-                        "first": file_time,
-                        "last": file_time,
-                        "count": 1,
-                    }
-                else:
-                    if file_time < info["first"]:
-                        info["first"] = file_time
-                    if file_time > info["last"]:
-                        info["last"] = file_time
-                    info["count"] += 1
+            if advanced_options.get("skills_gen", True):
+                # skills
+                s = _skill_from_ext(ext)
+                if s:
+                    skills.add(s)
+
+                    # track global usage for chronological skill list
+                    file_time = _to_datetime(f["last_modified"])
+                    info = skill_usage.get(s)
+                    if info is None:
+                        skill_usage[s] = {
+                            "first": file_time,
+                            "last": file_time,
+                            "count": 1,
+                        }
+                    else:
+                        if file_time < info["first"]:
+                            info["first"] = file_time
+                        if file_time > info["last"]:
+                            info["last"] = file_time
+                        info["count"] += 1
 
             # attach repo metadata if this file belongs to a git repo
             repo_meta = file_to_repo.get(filename)
@@ -458,8 +485,8 @@ def analyze_projects(extracted_data, filters, detailed_data=None, write_csv=True
                 "doc_files": doc_files,
                 "design_files": design_files,
                 "languages": ", ".join(sorted(langs)) if langs else "Unknown",
-                "frameworks": ", ".join(sorted(frameworks)) if frameworks else "None",
-                "skills": ", ".join(sorted(skills)) if skills else "None",
+                "frameworks": ", ".join(sorted(frameworks)) if frameworks else "NA",
+                "skills": ", ".join(sorted(skills)) if skills else "NA",
                 "is_collaborative": "Yes" if is_collab else "No",
                 # GIT / REPO FIELDS (for advanced mode & reports)
                 "repo_name": repo_name,
@@ -487,13 +514,14 @@ def analyze_projects(extracted_data, filters, detailed_data=None, write_csv=True
     # sort projects so biggest score first
     project_summaries.sort(key=lambda x: x["score"], reverse=True)
 
+   
     print(
-    f"\n{'Project':30} "
-    f"{'Files':>6} {'Days':>6} {'Code':>6} {'Test':>6} "
-    f"{'Doc':>6} {'Des':>6} "
-    f"{'Langs':25} {'Frameworks':25} "
-    f"{'Collab':>7} {'Score':>7}"
-)
+        f"\n{'Project':30} "
+        f"{'Files':>6} {'Days':>6} {'Code':>6} {'Test':>6} "
+        f"{'Doc':>6} {'Des':>6} "
+        f"Languages Frameworks "
+        f"{'Collab':>7} {'Score':>7}"
+        )
     print("-" * 150)
 
     for p in project_summaries:
@@ -501,9 +529,9 @@ def analyze_projects(extracted_data, filters, detailed_data=None, write_csv=True
             f"{p['project'][:30]:30} "
             f"{p['total_files']:6} {p['duration_days']:6} {p['code_files']:6} "
             f"{p['test_files']:6} {p['doc_files']:6} {p['design_files']:6} "
-            f"{p['languages'][:25]:25} {p['frameworks'][:25]:25} "
+            f"{p['languages']} {p['frameworks']} "
             f"{p['is_collaborative']:>7} {p['score']:7.1f}"
-    )
+        )
 
 
     # --------------------------------------------------------
@@ -536,37 +564,40 @@ def analyze_projects(extracted_data, filters, detailed_data=None, write_csv=True
     # --------------------------------------------------------
     # OUTPUT PART 3: chronological list of skills exercised
     # --------------------------------------------------------
-    print("\nSkills exercised over time")
-    print("-" * 80)
+    
+    
+    if advanced_options.get("skill_gen", True):
+        print("\nSkills exercised over time")
+        print("-" * 80)
 
-    skills_chrono = sorted(
-        (
-            {
-                "skill": skill,
-                "first_used": info["first"],
-                "last_used": info["last"],
-                "count": info["count"],
-            }
-            for skill, info in skill_usage.items()
-        ),
-        key=lambda x: x["first_used"],
-    )
+        skills_chrono = sorted(
+            (
+                {
+                    "skill": skill,
+                    "first_used": info["first"],
+                    "last_used": info["last"],
+                    "count": info["count"],
+                }
+                for skill, info in skill_usage.items()
+            ),
+            key=lambda x: x["first_used"],
+        )
 
-    skills_output = []
-    for row in skills_chrono:
-        first_date = row["first_used"].date().isoformat()
-        last_date = row["last_used"].date().isoformat()
-        skills_output.append(
-            {
-                "skill": row["skill"],
-                "first_used": first_date,
-                "last_used": last_date,
-            }
-        )
-        print(
-            f"- {first_date} → {last_date}: {row['skill']} "
-            f"(used in {row['count']} files)"
-        )
+        skills_output = []
+        for row in skills_chrono:
+            first_date = row["first_used"].date().isoformat()
+            last_date = row["last_used"].date().isoformat()
+            skills_output.append(
+                {
+                    "skill": row["skill"],
+                    "first_used": first_date,
+                    "last_used": last_date,
+                }
+            )
+            print(
+                f"- {first_date} → {last_date}: {row['skill']} "
+                f"(used in {row['count']} files)"
+            )
 
     # --------------------------------------------------------
     # OUTPUT PART 4: resume style summaries of top projects
@@ -627,11 +658,13 @@ def analyze_projects(extracted_data, filters, detailed_data=None, write_csv=True
     # --------------------------------------------------------
     # To make text and doc file from analysis
     # --------------------------------------------------------
-    generate_resume(
-        project_summaries,
-        chronological_projects,
-        skills_output
-    )
+
+    if advanced_options.get("resume_gen", True):
+        generate_resume(
+            project_summaries,
+            chronological_projects,
+            skills_output
+        )
 
         # we still just return project_summaries so main.py doesn't break
     return {

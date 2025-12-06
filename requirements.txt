@@ -6,3 +6,5 @@ Pygments==2.19.2
 pytest==8.4.2
 GitPython==3.1.43
 python-docx==1.2.0
+toml
+pyyaml
