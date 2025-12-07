@@ -201,8 +201,11 @@ def generate_resume(
     )
     top_projects = sorted_projects[:3]
 
-    txt_path = os.path.join("out", "resume_output.txt")
-    docx_path = os.path.join("out", "portfolio_resume.docx")
+    from file_parser import OUTPUT_DIR
+
+    txt_path = os.path.join(OUTPUT_DIR, "resume_output.txt")
+    docx_path = os.path.join(OUTPUT_DIR, "portfolio_resume.docx")
+
 
     _write_txt_summary(txt_path, top_projects, chronological_projects, skills_output)
     _write_docx_resume(docx_path, top_projects, chronological_projects, skills_output)

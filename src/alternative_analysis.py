@@ -565,8 +565,8 @@ def analyze_projects(extracted_data, filters, advanced_options, detailed_data=No
     # OUTPUT PART 3: chronological list of skills exercised
     # --------------------------------------------------------
     
-    
-    if advanced_options.get("skill_gen", True):
+    skills_output = []
+    if advanced_options.get("skills_gen", True):
         print("\nSkills exercised over time")
         print("-" * 80)
 
@@ -583,7 +583,7 @@ def analyze_projects(extracted_data, filters, advanced_options, detailed_data=No
             key=lambda x: x["first_used"],
         )
 
-        skills_output = []
+        
         for row in skills_chrono:
             first_date = row["first_used"].date().isoformat()
             last_date = row["last_used"].date().isoformat()
@@ -618,8 +618,9 @@ def analyze_projects(extracted_data, filters, advanced_options, detailed_data=No
     # CSV OUTPUT (we might not need this anymore since we have word doc now. can delete later. just here for now.)
     # --------------------------------------------------------
     if write_csv:
-        os.makedirs("out", exist_ok=True)
-        out_path = os.path.join("out", "project_contribution_summary.csv")
+        from file_parser import OUTPUT_DIR
+        os.makedirs(OUTPUT_DIR, exist_ok=True)
+        out_path = os.path.join(OUTPUT_DIR, "project_contribution_summary.csv")
 
         with open(out_path, "w", newline="", encoding="utf-8") as f:
             writer = csv.DictWriter(
