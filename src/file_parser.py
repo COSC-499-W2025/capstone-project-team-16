@@ -3,25 +3,58 @@ import zipfile
 import tempfile
 
 
-def get_input_file_path():
+
+# --------------------------------------------------------
+# Directories (absolute paths for Docker/local consistency)
+# --------------------------------------------------------
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+INPUT_DIR = os.path.join(PROJECT_ROOT, "input")
+OUTPUT_DIR = os.path.join(PROJECT_ROOT, "output")
+
+# Ensure folders exist
+os.makedirs(INPUT_DIR, exist_ok=True)
+os.makedirs(OUTPUT_DIR, exist_ok=True)
+
+def get_input_file_path(input_dir=INPUT_DIR):
     """
-    Prompts the user for a zip file path and returns the extracted file tree.
+    Lists ZIP files in input_dir and lets the user select one.
+    Prompts user to add files if none exist.
+    Returns extracted file tree or None.
     """
     while True:
-        print("Please provide the path to your zipped project folder: ")
-        print("Example: C:/Users/YourName/Documents/project.zip")
-        zip_path = input("File path: ")
+        zip_files = [f for f in os.listdir(input_dir) if f.lower().endswith(".zip")]
 
-        if not zip_path:
-            print("No path was entered.")
+        if not zip_files:
+            print(f"No zip files found in '{input_dir}'.")
+            print("Drop your zipped project(s) in the 'input' folder at the project root and press Enter to continue...")
+            input()
+            zip_files = [f for f in os.listdir(input_dir) if f.lower().endswith(".zip")]
+            if not zip_files:
+                print("Still no zip files found. Returning to home.")
+                return None
+
+        print("Select a zip file:")
+        for i, f in enumerate(zip_files, start=1):
+            print(f"{i}. {f}")
+
+        choice = input("Enter number (or 0 to cancel): ").strip()
+        if not choice.isdigit():
+            print("Invalid input. Enter a number.")
             continue
 
-        file_tree = check_file_validity(zip_path)
-        if file_tree:
-            print("Valid zip file detected.")
-            return file_tree
+        idx = int(choice)
+        if idx == 0:
+            return None
+        if 1 <= idx <= len(zip_files):
+            zip_path = os.path.join(input_dir, zip_files[idx - 1])
+            file_tree = check_file_validity(zip_path)
+            if file_tree:
+                print("Valid zip file detected.")
+                return file_tree
+            else:
+                print("Invalid zip file. Try again.")
         else:
-            print("Invalid zip file detected. Please enter a valid zip file.")
+            print("Number out of range.")
 
 
 def check_file_validity(zip_path):

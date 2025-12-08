@@ -1,12 +1,25 @@
 import sqlite3
 import json
 import uuid
+import os
 from datetime import datetime
 from typing import Any, Mapping, Sequence, Optional, List, Dict
 
-# Creates table to store project scan summaries + analysis metadata
-# Default database file name
-DB_NAME = "skillscope.db"
+# Default DB file name
+DEFAULT_DB_FILENAME = "skillscope.db"
+
+# Determine writable DB directory
+# Can override with environment variable (useful in Docker)
+DB_DIR = os.environ.get("SKILLSCOPE_DB_DIR")
+if not DB_DIR:
+    # Local default: create 'data' folder next to src
+    DB_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "data"))
+
+# Ensure the folder exists
+os.makedirs(DB_DIR, exist_ok=True)
+
+# Full DB path
+DB_NAME = os.path.join(DB_DIR, DEFAULT_DB_FILENAME)
 
 # Creates table to store project scan summaries + analysis metadata
 # ----------------------
