@@ -59,7 +59,11 @@ def get_advanced_options() -> dict:
     """
     print("\nAdvanced Analysis Options:")
     options = {}
-    options["programming_scan"] = get_yes_no("Include programming scan?")
-    options["framework_scan"] = get_yes_no("Include framework scan?")
+    options["programming_scan"] = get_yes_no("Include programming analysis?")
+    options["framework_scan"] = get_yes_no("Include framework detection?")
+    options["skills_gen"] = get_yes_no("Generate skills used?")
+    options["resume_gen"] = get_yes_no("Generate resume?")
+    
+    
     # Add more options here as needed
     return options

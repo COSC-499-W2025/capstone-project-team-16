@@ -1,162 +1,172 @@
+import os
+import tempfile
+import zipfile
 import pytest
 from unittest.mock import patch
-from file_parser import get_input_file_path
+from file_parser import get_input_file_path, check_file_validity
 
+# ----------------------------------------------------------
+# Helper to create a dummy zip file
+# ----------------------------------------------------------
+def create_dummy_zip(zip_path, files=None):
+    files = files or {"file.txt": b"hello world"}
+    with zipfile.ZipFile(zip_path, "w") as z:
+        for name, content in files.items():
+            z.writestr(name, content)
 
-def test_valid_path_first_try(monkeypatch, capsys):
-    test_path = '/valid/path/project.zip'
-    monkeypatch.setattr('builtins.input', lambda _: test_path)
+# ----------------------------------------------------------
+# Tests for get_input_file_path
+# ----------------------------------------------------------
+def test_valid_zip_selected_first_try(capsys):
+    """
+    SCENARIO: One valid zip exists in input folder
+    EXPECTED: Function detects zip immediately and returns file tree
+    """
+    with tempfile.TemporaryDirectory() as tmpdir:
+        zip_file = os.path.join(tmpdir, "project.zip")
+        create_dummy_zip(zip_file)
 
-    mock_file_tree = [
-        {"filename": "file1.txt", "size": 1024, "last_modified": (2024, 1, 1, 12, 0, 0)},
-        {"filename": "file2.py", "size": 2048, "last_modified": (2024, 1, 2, 13, 0, 0)},
-    ]
+        with patch("builtins.input", lambda _: "1"):
+            result = get_input_file_path(input_dir=tmpdir)
 
-    with patch('file_parser.check_file_validity', return_value=mock_file_tree):
-        result = get_input_file_path()
+        assert result is not None
+        captured = capsys.readouterr()
+        assert "Valid zip file detected" in captured.out
 
-    # ASSERT
-    assert result == mock_file_tree
+def test_no_zip_then_user_adds_one(capsys):
+    """
+    SCENARIO: Input folder initially empty
+    EXPECTED: Function prompts, then detects newly added zip
+    """
+    with tempfile.TemporaryDirectory() as tmpdir:
+        zip_file = os.path.join(tmpdir, "project.zip")
+        # Patch input to create zip after first Enter press
+        inputs = iter(["", "1"])
+        def fake_input(prompt=""):
+            if next(inputs) == "":
+                create_dummy_zip(zip_file)
+                return ""
+            return "1"
+
+        with patch("builtins.input", fake_input):
+            result = get_input_file_path(input_dir=tmpdir)
+
+        assert result is not None
+        captured = capsys.readouterr()
+        assert "No zip files found" in captured.out
+        assert "Valid zip file detected" in captured.out
+
+def test_cancel_selection(capsys):
+    """
+    SCENARIO: User cancels selection by entering 0
+    EXPECTED: Returns None
+    """
+    with tempfile.TemporaryDirectory() as tmpdir:
+        zip_file = os.path.join(tmpdir, "project.zip")
+        create_dummy_zip(zip_file)
+
+        with patch("builtins.input", lambda _: "0"):
+            result = get_input_file_path(input_dir=tmpdir)
+
+        assert result is None
+        captured = capsys.readouterr()
+        assert "Select a zip file" in captured.out
+
+def test_invalid_number_then_valid(capsys):
+    """
+    SCENARIO: User enters number out of range first, then valid selection
+    EXPECTED: Function loops and eventually returns correct file tree
+    """
+    with tempfile.TemporaryDirectory() as tmpdir:
+        zip_file = os.path.join(tmpdir, "project.zip")
+        create_dummy_zip(zip_file)
+
+        inputs = iter(["99", "1"])
+        with patch("builtins.input", lambda _: next(inputs)):
+            result = get_input_file_path(input_dir=tmpdir)
+
+        assert result is not None
+        captured = capsys.readouterr()
+        assert "Number out of range" in captured.out
+        assert "Valid zip file detected" in captured.out
+
+def test_empty_input_folder_returns_none(capsys):
+    """
+    SCENARIO: Input folder remains empty after prompting
+    EXPECTED: Function returns None
+    """
+    with tempfile.TemporaryDirectory() as tmpdir:
+        # Patch input and os.listdir to simulate empty folder
+        with patch("builtins.input", side_effect=["", ""]):
+            with patch("os.listdir", return_value=[]):
+                result = get_input_file_path(input_dir=tmpdir)
+
+    # Function should return None
+    assert result is None
 
     captured = capsys.readouterr()
-    assert "Valid zip file detected" in captured.out
+    assert "No zip files found" in captured.out
+    assert "Returning to home" in captured.out
 
 
-def test_empty_input_then_valid_path(monkeypatch, capsys):
+# ----------------------------------------------------------
+# Tests for check_file_validity
+# ----------------------------------------------------------
+def test_valid_zip_file():
     """
-    SCENARIO: User presses Enter without typing, then enters valid path
-    EXPECTED: Function loops back and asks again, then returns valid path
-
-    WHAT WE'RE TESTING:
-    - Does the function handle empty input?
-    - Does it print an error message?
-    - Does it loop and ask again?
-    - Does it eventually accept valid input?
+    SCENARIO: Valid zip provided
+    EXPECTED: Returns file tree
     """
+    with tempfile.TemporaryDirectory() as tmpdir:
+        zip_file = os.path.join(tmpdir, "project.zip")
+        create_dummy_zip(zip_file, {"a.txt": b"1", "b.txt": b"2"})
 
-    user_inputs = iter(['', '/valid/path/project.zip'])
-    monkeypatch.setattr('builtins.input', lambda _: next(user_inputs))
+        file_tree = check_file_validity(zip_file)
+        assert isinstance(file_tree, list)
+        assert len(file_tree) == 2
+        assert all("filename" in f for f in file_tree)
 
-    mock_file_tree = [
-        {"filename": "readme.txt", "size": 512, "last_modified": (2024, 1, 1, 12, 0, 0)}
-    ]
+def test_nonexistent_file(capsys):
+    """
+    SCENARIO: File path does not exist
+    EXPECTED: Returns None
+    """
+    file_tree = check_file_validity("/nonexistent/file.zip")
+    assert file_tree is None
+    captured = capsys.readouterr()
+    assert "Path does not exist" in captured.out
 
-    with patch('file_parser.check_file_validity', return_value=mock_file_tree):
-        result = get_input_file_path()
-        assert result == mock_file_tree
+def test_not_a_zip_file(capsys):
+    """
+    SCENARIO: File exists but is not a zip
+    EXPECTED: Returns None
+    """
+    with tempfile.TemporaryDirectory() as tmpdir:
+        fake_file = os.path.join(tmpdir, "file.txt")
+        with open(fake_file, "w") as f:
+            f.write("hello")
+        file_tree = check_file_validity(fake_file)
+        assert file_tree is None
+        captured = capsys.readouterr()
+        assert "not a zip file" in captured.out.lower()
+
+def test_empty_zip_file(capsys):
+    """
+    SCENARIO: Zip file exists but contains no files
+    EXPECTED: check_file_validity returns None and prints a message
+    """
+    with tempfile.TemporaryDirectory() as tmpdir:
+        zip_path = os.path.join(tmpdir, "empty.zip")
+        
+        # Create an actual empty zip file
+        with zipfile.ZipFile(zip_path, 'w') as zf:
+            pass  # no files added
+
+        # Call the function
+        file_tree = check_file_validity(zip_path)
+
+        # ASSERT: should be None
+        assert file_tree is None
 
         captured = capsys.readouterr()
-        assert "No path was entered." in captured.out
-        assert "Valid zip file detected" in captured.out
-
-
-def test_invalid_path_then_valid_path(monkeypatch, capsys):
-    """
-    SCENARIO: User enters invalid path and then a valid one
-    EXPECTED: Function loops back and asks again, then returns valid path
-
-    WHAT WE'RE TESTING:
-    - Does the function handle invalid input?
-    - Does it print an error message?
-    - Does it loop and ask again?
-    - Does it eventually accept valid input?
-    """
-
-    user_inputs = iter(['/invalid/path.zip', '/valid/path.zip'])
-    monkeypatch.setattr('builtins.input', lambda _: next(user_inputs))
-
-    mock_file_tree = [
-        {"filename": "main.py", "size": 2048, "last_modified": (2024, 1, 1, 12, 0, 0)}
-    ]
-
-    with patch('file_parser.check_file_validity', side_effect=[None, mock_file_tree]):
-        result = get_input_file_path()
-        assert result == mock_file_tree
-
-        captured = capsys.readouterr()
-        assert "Invalid zip file detected" in captured.out
-        assert "Valid zip file detected" in captured.out
-
-
-def test_multiple_invalid_path_then_valid_path(monkeypatch, capsys):
-    """
-    SCENARIO: User enters multiple invalid paths and then a valid one
-    EXPECTED: Function loops back and asks again until a valid path is entered,
-              then returns valid path
-
-    WHAT WE'RE TESTING:
-    - Does the function persist through multiple failures?
-    - Does it eventually accept valid input?
-    - Does it handle a mix of empty and invalid inputs?
-    """
-
-    # ARRANGE - User tries 4 times before success
-    user_inputs = iter(['', '/bad/path.txt', '/nonexistent.zip', '/finally/valid.zip'])
-    monkeypatch.setattr('builtins.input', lambda _: next(user_inputs))
-
-    mock_file_tree = [
-        {"filename": "success.txt", "size": 100, "last_modified": (2024, 1, 1, 12, 0, 0)}
-    ]
-
-    with patch('file_parser.check_file_validity', side_effect=[None, None, mock_file_tree]):
-        result = get_input_file_path()
-        assert result == mock_file_tree
-
-        captured = capsys.readouterr()
-        assert "No path was entered." in captured.out
-        assert captured.out.count("Invalid zip file detected") == 2
-        assert "Valid zip file detected" in captured.out
-
-
-def test_file_tree_assignment(monkeypatch, capsys):
-    """
-    SCENARIO: Valid zip with multiple files
-    EXPECTED: File tree returned from get_input_file_path matches the value
-              from check_file_validity.
-
-    WHAT WE'RE TESTING:
-    - Does get_input_file_path correctly return the file tree provided by
-      check_file_validity?
-    """
-    monkeypatch.setattr('builtins.input', lambda _: '/test/archive.zip')
-
-    mock_file_tree = [
-        {"filename": "docs/readme.md", "size": 1024, "last_modified": (2024, 1, 1, 12, 0, 0)},
-        {"filename": "src/main.py", "size": 2048, "last_modified": (2024, 1, 2, 13, 0, 0)},
-        {"filename": "tests/test.py", "size": 512, "last_modified": (2024, 1, 3, 14, 0, 0)},
-    ]
-
-    with patch('file_parser.check_file_validity', return_value=mock_file_tree):
-        result = get_input_file_path()
-        assert result == mock_file_tree
-
-        captured = capsys.readouterr()
-        assert "Valid zip file detected" in captured.out
-
-
-def test_empty_zip_file(monkeypatch, capsys):
-    """
-    SCENARIO: check_file_validity reports an "empty" or invalid zip on first call,
-              then a valid one on second call.
-    EXPECTED: Function prints invalid message, loops, then returns the valid file tree.
-
-    WHAT WE'RE TESTING:
-    - Does the function handle a failed validation (e.g., empty zip)?
-    - Does it loop and accept a subsequent valid zip?
-    """
-
-    user_inputs = iter(['/empty/archive.zip', '/valid/archive.zip'])
-    monkeypatch.setattr('builtins.input', lambda _: next(user_inputs))
-
-    valid_file_tree = [
-        {"filename": "file.txt", "size": 100, "last_modified": (2024, 1, 1, 12, 0, 0)}
-    ]
-
-    # First call: invalid/empty (None). Second: valid file tree.
-    with patch('file_parser.check_file_validity', side_effect=[None, valid_file_tree]):
-        result = get_input_file_path()
-        assert result == valid_file_tree
-
-        captured = capsys.readouterr()
-        assert "Invalid zip file detected" in captured.out
-        assert "Valid zip file detected" in captured.out
+        assert "Zip file is valid, but empty." in captured.out

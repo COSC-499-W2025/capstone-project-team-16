@@ -1,0 +1,12 @@
+
+
+services:
+  skillscope:
+    build: .
+    volumes:
+      - ./src:/app/src:ro            # code (read-only)
+      - ./input:/app/input           # user ZIPs
+      - ./output:/app/output         # scan results
+      - ./data:/app/data             # DB folder (host-mounted)
+    working_dir: /app/src
+    command: ["python", "main.py"]

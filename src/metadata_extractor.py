@@ -1,5 +1,7 @@
-import json
 import os
+import json
+import toml  
+import yaml  
 from repository_extractor import analyze_repo_type
 
 # We should do a shallow extraction regardless of the file type, and selectively deal with larger categorical extractions later
@@ -115,74 +117,93 @@ def base_extraction(file_list, filters):
 
 def detect_frameworks(framework_file_entry):
     """
-    Given a framework file entry, extract the ecosystem and dependencies.
+    Given a framework file entry, extract dependencies.
+    Returns a list of dependency names.
     """
     filename = os.path.basename(framework_file_entry["filename"]).lower()
     full_path = framework_file_entry["filename"]
-    result = {"ecosystem": None, "detected": []}
+    dependencies = []
 
-    # ---- PYTHON ----
-    if filename in ("requirements.txt", "environment.yml", "pipfile", "pyproject.toml"):
-        result["ecosystem"] = "python"
+    try:
+        # ---- PYTHON ----
+        if filename in ("requirements.txt", "environment.yml", "pipfile", "pyproject.toml"):
+            if filename.endswith(".yml") or filename.endswith(".yaml"):
+                with open(full_path, "r", encoding="utf-8") as f:
+                    data = yaml.safe_load(f)
+                for pkg in data.get("dependencies", []):
+                    dependencies.append(pkg)
+            else:
+                with open(full_path, "r", encoding="utf-8") as f:
+                    lines = f.read().splitlines()
+                for line in lines:
+                    if line and not line.startswith("#"):
+                        pkg = line.split("==")[0].split(">=")[0].strip()
+                        if pkg:
+                            dependencies.append(pkg)
 
-        try:
-            with open(full_path, "r", encoding="utf-8") as f:
-                lines = f.read().splitlines()
-
-            for line in lines:
-                if line and not line.startswith("#"):
-                    pkg = line.split("==")[0].split(">=")[0].strip()
-                    if pkg:
-                        result["detected"].append(pkg)
-
-        except Exception:
-            pass  # No crash — this runs inside extraction
-
-    # ---- NODE ----
-    elif filename == "package.json":
-        result["ecosystem"] = "node"
-        try:
+        # ---- NODE ----
+        elif filename == "package.json":
             with open(full_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
-
             deps = data.get("dependencies", {})
             dev = data.get("devDependencies", {})
+            dependencies.extend(list(deps.keys()))
+            dependencies.extend(list(dev.keys()))
 
-            result["detected"] = list(deps.keys()) + list(dev.keys())
+        # ---- RUST ----
+        elif filename in ("cargo.toml", "Cargo.toml"):
+            with open(full_path, "r", encoding="utf-8") as f:
+                data = toml.load(f)
+            deps = data.get("dependencies", {})
+            dependencies.extend(list(deps.keys()))
 
-        except Exception:
-            pass
+        # ---- GO ----
+        elif filename == "go.mod":
+            with open(full_path, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if line.startswith("require "):
+                        pkg = line.replace("require", "").strip().split()[0]
+                        dependencies.append(pkg)
 
-    # ---- RUST ----
-    elif filename == "cargo.toml":
-        result["ecosystem"] = "rust"
+        # ---- JAVA (Maven) ----
+        elif filename == "pom.xml":
+            dependencies.append("See pom.xml")  # TODO: implement
 
-    # ---- GO ----
-    elif filename == "go.mod":
-        result["ecosystem"] = "go"
+        # ---- JAVA (Gradle) ----
+        elif filename in ("build.gradle", "settings.gradle"):
+            dependencies.append("See build.gradle")  # TODO: implement
 
-    # ---- JAVA (Maven) ----
-    elif filename == "pom.xml":
-        result["ecosystem"] = "java"
+        # ---- RUBY ----
+        elif filename.lower() == "gemfile":
+            with open(full_path, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if line.startswith("gem "):
+                        pkg = line.split()[1].strip("\"'")
+                        dependencies.append(pkg)
 
-    # ---- JAVA (Gradle) ----
-    elif filename == "build.gradle":
-        result["ecosystem"] = "java"
+        # ---- DOCKER ----
+        elif filename.lower() in ("dockerfile", "docker-compose.yml"):
+            dependencies.append("Dockerfile dependencies")  # TODO: implement
 
-    # ---- RUBY ----
-    elif filename == "gemfile":
-        result["ecosystem"] = "ruby"
+    except Exception:
+        pass  # silently skip errors for extraction
 
-    # ---- DOCKER ----
-    elif filename == "dockerfile":
-        result["ecosystem"] = "docker"
-
-    return result
+    return dependencies
 
 
 # Handle detailed extractions. Loops through extracted data and handles it based on category
-def detailed_extraction(extracted_data):
+def detailed_extraction(extracted_data, advanced_options):
     repositories = []
+    if advanced_options is None:
+    # default: everything ON
+        advanced_options = {
+            "programming_scan": True,
+            "framework_scan": True,
+            "skills_gen": True,
+            "resume_gen": True
+        }
 
       # Identify repo roots and gather repo metadata
     for entry in extracted_data:
@@ -211,16 +232,21 @@ def detailed_extraction(extracted_data):
     for project in repositories:
         root = project["repo_root"]
 
+        # initialize a set to accumulate dependencies
+        project_dependencies = set()
+
         for file_entry in extracted_data:
             # If file path starts with the repo root, it's part of that project
             if file_entry["filename"].startswith(root):
                 project["files"].append(file_entry)
 
-                # If the file is a detected framework, then analyze it.
-                if file_entry["category"] == "framework":
-                    framework_info = detect_frameworks(file_entry)
-                    project.setdefault("frameworks", []).append(framework_info)
+                # If the file is a framework file, extract dependencies from it
+                if file_entry["category"] == "framework" and advanced_options.get("framework_scan", True):
+                    deps = detect_frameworks(file_entry)  # returns a list
+                    project_dependencies.update(deps)  # accumulate in a set
 
+        # Store the final list of dependencies in the project
+        project["frameworks"] = list(project_dependencies)
 
             
         # Return both structures
@@ -228,4 +254,3 @@ def detailed_extraction(extracted_data):
         "files": extracted_data,
         "projects": repositories
     }
-

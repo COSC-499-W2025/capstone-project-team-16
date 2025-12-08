@@ -1,0 +1,26 @@
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+venv/
+.env
+
+# Git
+.git/
+.gitignore
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Build artifacts or temporary files
+*.log
+*.tmp
+*.swp
+
+# Generated files/folders
+src/out/
+src/skillscope.db
