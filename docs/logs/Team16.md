@@ -51,10 +51,12 @@
 >>>>>>> 42bf0ee (Added Ethan portion to week 14 team log and screenshots for burnup and completed)
 
 ### Test Report
-![Screenshot](<screenshots/Team16/Test1W12.png>)
+![Screenshot](<screenshots/Team16/Test1W14.png>)
 
 ### Tests
-- Unit tests added to DB
+- Unit Tests All Pass
+  - Updated tests: Framework detection and detailed analysis tests were rewritten to reflect the new behavior, including list-based dependency returns and handling of ecosystem-specific files. Tests now cover Python, Node, Rust, Go, Java, Ruby, and Docker framework files
+  - Reworked test_parser to align with the new input/output structure and improved test reliability.
 - Extensive manual testing
 ## Running Tests
 
