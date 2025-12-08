@@ -33,6 +33,26 @@ Future Additions: REST API and front-end (Term 2)
 
 Output Format (Milestone 1): Text-based (CSV, JSON, or plain text)
 
+## How to Run
+
+In the repository root after cloning, run the following commands in your command line:
+
+```bash
+docker compose build
+docker compose run --rm skillscope
+```
+
+Alternatively, if you have issues with Docker, you can run the project locally.
+
+First, install the dependencies from `requirements.txt`:
+```bash
+pip install -r requirements.txt
+```
+Then, run the application from the project root:
+```bash
+python src/main.py
+```
+
 ## System Functionality — Milestone 1
 
 The system must be able to:
