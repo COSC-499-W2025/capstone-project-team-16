@@ -237,3 +237,15 @@ Please use the provided folder structure for your project. You are free to organ
 
 Please use a branching workflow, and once an item is ready, do remember to issue a PR, review, and merge it into the master branch.
 Be sure to keep your docs and README.md up-to-date.
+
+### Updated Data Flow Diagram for Milestone 1 (DFD) – Level 1
+
+<img width="1975" height="1170" alt="updated of DFD-Level 1 drawio (1)" src="https://github.com/user-attachments/assets/14ec4e46-c23c-4c49-9bbd-95c5f74e174c" />
+
+
+### Updated System Architecture Diagram for Milestone 1
+
+<img width="1871" height="921" alt="updated Team 16 Architecture drawio" src="https://github.com/user-attachments/assets/efea0795-d092-4fb0-94ed-402e41511690" />
+
+
+
