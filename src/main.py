@@ -130,23 +130,31 @@ def view_full_scan_details():
     # -------------------------
     if project_summaries:
         print("\nRanked Projects")
-        print("-" * 150)
         print(
-        f"\n{'Project':30} "
-        f"{'Files':>6} {'Days':>6} {'Code':>6} {'Test':>6} "
-        f"{'Doc':>6} {'Des':>6} "
-        f"Languages Frameworks "
-        f"{'Collab':>7} {'Score':>7}"
+            f"\n{'Project':<30} "
+            f"{'Files':>6} {'Days':>6} {'Code':>6} {'Test':>6} "
+            f"{'Doc':>6} {'Des':>6} "
+            f"{'Languages':<25} {'Frameworks':<40} "
+            f"{'Collab':>7} {'Score':>7}"
         )
-        print("-" * 150)
+        print("-" * 155)
 
         for p in project_summaries:
+            # Truncate long language/framework lists for display
+            langs_str = p.get("languages", "")
+            if len(langs_str) > 25:
+                langs_str = langs_str[:22] + "..."
+
+            fw_str = p.get("frameworks", "")
+            if len(fw_str) > 40:
+                fw_str = fw_str[:37] + "..."
+
             print(
-                f"{p['project'][:30]:30} "
-                f"{p['total_files']:6} {p['duration_days']:6} {p['code_files']:6} "
-                f"{p['test_files']:6} {p['doc_files']:6} {p['design_files']:6} "
-                f"{p['languages']} {p['frameworks']} "
-                f"{p['is_collaborative']:>7} {p['score']:7.1f}"
+                f"{p.get('project', 'Unknown')[:30]:<30} "
+                f"{p.get('total_files', 0):6} {p.get('duration_days', 0):6} {p.get('code_files', 0):6} "
+                f"{p.get('test_files', 0):6} {p.get('doc_files', 0):6} {p.get('design_files', 0):6} "
+                f"{langs_str:<25} {fw_str:<40} "
+                f"{p.get('is_collaborative', 'No'):>7} {p.get('score', 0):7.1f}"
             )
 
 

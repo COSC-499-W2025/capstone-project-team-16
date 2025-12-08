@@ -268,7 +268,7 @@ def analyze_projects(extracted_data, filters, advanced_options, detailed_data=No
         first_mod = min(mod_times)
         last_mod = max(mod_times)
         duration_days = (last_mod - first_mod).days + 1
-        frameworks = set()
+        
 
         # counters + sets
         activity_counts = Counter()
@@ -276,14 +276,23 @@ def analyze_projects(extracted_data, filters, advanced_options, detailed_data=No
         skills = set()
 
 
-        # --- Detect frameworks from detailed_data ---
-        if advanced_options.get("framework_scan", True):
-            # Load frameworks detected by the extractor (if any)
-            if detailed_data:
-                for project_meta in detailed_data.get("projects", []):
-                    if project_meta["repo_name"] == proj_name and "frameworks" in project_meta:
-                        frameworks.update(project_meta["frameworks"])
-                        break
+        # --- Extract frameworks from detailed_data only ---
+        frameworks = set()
+        if advanced_options.get("framework_scan", True) and detailed_data:
+            project_meta = next(
+                (p for p in detailed_data.get("projects", []) if p.get("repo_name") == proj_name),
+                None,
+            )
+            if project_meta and "frameworks" in project_meta:
+                # just take them as-is
+                frameworks.update(project_meta["frameworks"])
+
+        # if no frameworks detected, assign "NA"
+        if not frameworks:
+            frameworks.add("NA")
+
+
+
 
         # repo / git infos (from detailed_extraction / repo_extractor)
         repo_names = set()
@@ -311,13 +320,7 @@ def analyze_projects(extracted_data, filters, advanced_options, detailed_data=No
             if lang != "Unknown":
                 langs.add(lang)
 
-            # frameworks
-            if advanced_options.get("framework_scan", True):
-                # If frameworks weren't detected by the extractor, fallback per file
-                if not frameworks and f.get("category") == "framework":
-                    fw = _detect_framework(filename)
-                    if fw and fw != "None":
-                        frameworks.add(fw)
+
 
 
             if advanced_options.get("skills_gen", True):
@@ -406,6 +409,10 @@ def analyze_projects(extracted_data, filters, advanced_options, detailed_data=No
         )
         commit_frequency = next(iter(commit_freqs), "Unknown")
 
+        # if no frameworks detected, assign "NA"
+        if not frameworks:
+            frameworks.add("NA")
+
         # collab guess: .git present OR multiple authors/contributors
         is_collab = (
             any(".git" in f["filename"] for f in files)
@@ -485,7 +492,7 @@ def analyze_projects(extracted_data, filters, advanced_options, detailed_data=No
                 "doc_files": doc_files,
                 "design_files": design_files,
                 "languages": ", ".join(sorted(langs)) if langs else "Unknown",
-                "frameworks": ", ".join(sorted(frameworks)) if frameworks else "NA",
+                "frameworks": ", ".join(sorted(frameworks)),
                 "skills": ", ".join(sorted(skills)) if skills else "NA",
                 "is_collaborative": "Yes" if is_collab else "No",
                 # GIT / REPO FIELDS (for advanced mode & reports)
@@ -514,22 +521,30 @@ def analyze_projects(extracted_data, filters, advanced_options, detailed_data=No
     # sort projects so biggest score first
     project_summaries.sort(key=lambda x: x["score"], reverse=True)
 
-   
     print(
-        f"\n{'Project':30} "
+        f"\n{'Project':<30} "
         f"{'Files':>6} {'Days':>6} {'Code':>6} {'Test':>6} "
         f"{'Doc':>6} {'Des':>6} "
-        f"Languages Frameworks "
+        f"{'Languages':<25} {'Frameworks':<40} "
         f"{'Collab':>7} {'Score':>7}"
-        )
-    print("-" * 150)
+    )
+    print("-" * 155)
 
     for p in project_summaries:
+        # Truncate long language/framework lists for display
+        langs_str = p["languages"]
+        if len(langs_str) > 25:
+            langs_str = langs_str[:22] + "..."
+
+        fw_str = p["frameworks"]
+        if len(fw_str) > 40:
+            fw_str = fw_str[:37] + "..."
+
         print(
-            f"{p['project'][:30]:30} "
+            f"{p['project'][:30]:<30} "
             f"{p['total_files']:6} {p['duration_days']:6} {p['code_files']:6} "
             f"{p['test_files']:6} {p['doc_files']:6} {p['design_files']:6} "
-            f"{p['languages']} {p['frameworks']} "
+            f"{langs_str:<25} {fw_str:<40} "
             f"{p['is_collaborative']:>7} {p['score']:7.1f}"
         )
 
