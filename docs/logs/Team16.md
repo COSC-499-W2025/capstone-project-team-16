@@ -5,8 +5,6 @@
 ### Milestone Goals Recap
 - Finish up milestone 1 requirements
 - Integrate other people's work
-<<<<<<< HEAD
-<<<<<<< HEAD
 - Clean up code
 - Fully integrate metadata extractor and analysis
 
@@ -18,17 +16,16 @@
 - Extrapolate individual contributions in collaborative projects
 =======
 =======
->>>>>>> fddf6f8710c6bfb7e16962bf748250b18752780d
+
 - Package program
 
 ### Features in Project Plan
 - Integrate Scan Variables into Analysis
 - Dockerize project
 - Fix framework detection not being extracted from projects in analyzer
-<<<<<<< HEAD
->>>>>>> 42bf0ee (Added Ethan portion to week 14 team log and screenshots for burnup and completed)
+
 =======
->>>>>>> fddf6f8710c6bfb7e16962bf748250b18752780d
+
 
 
 ### Burnup Chart
@@ -38,8 +35,7 @@
 | La Wunn| LaWunn|
 | Amani |lugger33 |
 
-<<<<<<< HEAD
-<<<<<<< HEAD
+
 ![Screenshot](<screenshots/Team16/BurnupW12.png>)
 
 ### Completed Tasks Table
@@ -49,7 +45,7 @@
 ![Screenshot](<screenshots/Team16/TasksW12.png>)
 =======
 =======
->>>>>>> fddf6f8710c6bfb7e16962bf748250b18752780d
+
 ![Screenshot](<screenshots/Team16/BurnupW14.png>)
 
 ### Completed Tasks Table
@@ -57,10 +53,9 @@
 
 ### In Progress Tasks Table
 
-<<<<<<< HEAD
->>>>>>> 42bf0ee (Added Ethan portion to week 14 team log and screenshots for burnup and completed)
+
 =======
->>>>>>> fddf6f8710c6bfb7e16962bf748250b18752780d
+
 
 ### Test Report
 ![Screenshot](<screenshots/Team16/Test1W14.png>)
@@ -78,15 +73,13 @@
 4. Run `pip install -r requirements.txt`.
 5. In the root of the repositiory, enter `pytest` to run all tests.
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 
 
 
 =======
->>>>>>> 42bf0ee (Added Ethan portion to week 14 team log and screenshots for burnup and completed)
+
 =======
->>>>>>> fddf6f8710c6bfb7e16962bf748250b18752780d
+
 ## Milestone: 2025-NOV-23 to 2025-NOV-30
 
 
