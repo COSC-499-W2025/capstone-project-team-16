@@ -245,7 +245,7 @@ Be sure to keep your docs and README.md up-to-date.
 
 ### Updated System Architecture Diagram for Milestone 1
 
-<img width="1871" height="921" alt="updated Team 16 Architecture drawio" src="https://github.com/user-attachments/assets/efea0795-d092-4fb0-94ed-402e41511690" />
 
+<img width="1380" height="761" alt="arch" src="https://github.com/user-attachments/assets/c7413025-ea89-48c3-b1a4-22cf30c396cd" />
 
 
