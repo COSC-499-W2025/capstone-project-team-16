@@ -240,11 +240,11 @@ def detailed_extraction(extracted_data, advanced_options):
             if file_entry["filename"].startswith(root):
                 project["files"].append(file_entry)
 
-                # If the file is a framework, extract dependencies
-            if file_entry["category"] == "framework" and advanced_options.get("framework_scan", True):
-                deps = detect_frameworks(file_entry)  # returns a list
-                project_dependencies.update(deps)  # accumulate in a set
-        
+                # If the file is a framework file, extract dependencies from it
+                if file_entry["category"] == "framework" and advanced_options.get("framework_scan", True):
+                    deps = detect_frameworks(file_entry)  # returns a list
+                    project_dependencies.update(deps)  # accumulate in a set
+
         # Store the final list of dependencies in the project
         project["frameworks"] = list(project_dependencies)
 
@@ -254,4 +254,3 @@ def detailed_extraction(extracted_data, advanced_options):
         "files": extracted_data,
         "projects": repositories
     }
-

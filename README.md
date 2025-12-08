@@ -1,4 +1,4 @@
-# Team 16 - Secure Scan
+# Team 16 - Skill Scope
 ## Project Overview (Milestone 1)
 
 This project aims to extract and analyze various personal projects on a user's machine such as code, documents, notes, design sketches, and media files to identify meaningful insights into an individual’s work contributions, creative process, and project evolution.
@@ -214,6 +214,8 @@ Finally, the processed results are passed to the export dashboard where they are
 Description:
 
 Our WBS outlines the main phases of our project and breaks them into manageable tasks. It includes project management, system design, backend development, output/export development, testing, and documentation. This structure helps organize the team’s work, clarify responsibilities, and plan the project timeline more effectively.
+### Team Contract
+#### [View Team Contract (PDF)](docs/contract/Team_Contract_Signed.pdf)
 
 # Project Structure
 Please use the provided folder structure for your project. You are free to organize any additional internal folder structure as required by the project. 
