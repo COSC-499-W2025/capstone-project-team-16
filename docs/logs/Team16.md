@@ -14,6 +14,18 @@
 - Meta Data Extractor
 - Extract contribution metrics, such as project duration and contribution frequency
 - Extrapolate individual contributions in collaborative projects
+=======
+=======
+
+- Package program
+
+### Features in Project Plan
+- Integrate Scan Variables into Analysis
+- Dockerize project
+- Fix framework detection not being extracted from projects in analyzer
+
+=======
+
 
 
 ### Burnup Chart
@@ -23,6 +35,7 @@
 | La Wunn| LaWunn|
 | Amani |lugger33 |
 
+
 ![Screenshot](<screenshots/Team16/BurnupW12.png>)
 
 ### Completed Tasks Table
@@ -30,12 +43,27 @@
 
 ### In Progress Tasks Table
 ![Screenshot](<screenshots/Team16/TasksW12.png>)
+=======
+=======
+
+![Screenshot](<screenshots/Team16/BurnupW14.png>)
+
+### Completed Tasks Table
+![Screenshot](<screenshots/Team16/DoneTasksW14.png>)
+
+### In Progress Tasks Table
+
+
+=======
+
 
 ### Test Report
-![Screenshot](<screenshots/Team16/Test1W12.png>)
+![Screenshot](<screenshots/Team16/Test1W14.png>)
 
 ### Tests
-- Unit tests added to DB
+- Unit Tests All Pass
+  - Updated tests: Framework detection and detailed analysis tests were rewritten to reflect the new behavior, including list-based dependency returns and handling of ecosystem-specific files. Tests now cover Python, Node, Rust, Go, Java, Ruby, and Docker framework files
+  - Reworked test_parser to align with the new input/output structure and improved test reliability.
 - Extensive manual testing
 ## Running Tests
 
@@ -47,6 +75,10 @@
 
 
 
+
+=======
+
+=======
 
 ## Milestone: 2025-NOV-23 to 2025-NOV-30
 
