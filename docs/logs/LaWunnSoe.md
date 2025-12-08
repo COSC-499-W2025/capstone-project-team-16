@@ -410,3 +410,59 @@
 
 ### Additional Context (Optional)
 - N/A
+- 
+
+## 2025-Nov 30 to 2025-Dec-7
+
+### Type of Tasks Worked On
+
+
+
+
+
+
+### Recap of Week's Goals
+
+- Finish up milestone 1 requirements
+- Integrate other people's work
+- Clean up code
+- DFD
+- Architecture diagram
+
+### Features Assigned (Project Plan)
+
+- DFD
+- Architecture diagram
+
+
+
+### Tasks from Project Board
+| Feature | Task | Status (Completed/In Progress) | Notes |
+|------|------|-------------------------------|-------|
+
+| DFD diagram | DFD | complete | … |
+| Architecture diagram | Architecture diagram | complete | … |
+
+
+
+
+
+### Completed/In-Progress Tasks (Last 2 Weeks)
+
+- Provide alternative analyses if external services are not permitted
+- Distinguish between individual and collaborative projects 
+- For coding projects, identify the programming language and framework used
+- Extract contribution metrics, such as project duration and contribution frequency by activity type (e.g., code, test, design, documentation)
+- Demo
+- Output project information in structured text format
+- Rank projects based on user contributions
+- Summarize top-ranked projects
+- Produce a chronological list of projects
+- Produce a chronological list of skills exercised
+- Resume document file
+- DFD
+- Architecture diagram
+
+### Additional Context (Optional)
+- N/A
+
