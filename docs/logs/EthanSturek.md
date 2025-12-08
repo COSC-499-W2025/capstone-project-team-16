@@ -1,4 +1,47 @@
 # Personal Log - Ethan Sturek
+## 2025-NOV-30 to 2025-DEC-07
+
+
+### Type of Tasks Worked On
+![Screenshot](<screenshots/Ethan/Week 14.png>)
+
+### Recap of Week's Goals
+- Finish up milestone 1 requirements
+- Integrate other people's work
+- Package program
+
+
+### Features Assigned (Project Plan)
+- Integrate Scan Variables into Analysis
+- Dockerize project
+- Fix framework detection not being extracted from projects in analyzer
+- Milestone 1 Demo
+- Team Contract
+
+### Tasks from Project Board
+| Feature | Task | Status (Completed/In Progress) | Notes |
+|------|------|-------------------------------|-------|
+| Integrate Scan Variables into Analysis | Integrate Scan Variables into Analysis | Completed | All is working now. Program now responds to different user options |
+| Dockerize project | Dockerize project | Completed | Packaging completed. Runs locally and in Docker now. |
+| Fix framework detection not being extracted from projects in analyzer | Fix framework detection not being extracted from projects in analyzer | Completed | Frameworks now properly display after being extracted |
+| Milestone 1 Demo Video | Milestone 1 Demo Video | Completed | Video Created showcasing Milestone 1 |
+| Team Contract | Team Contract | Completed | Contract created, signed and approved by other team members |
+
+
+### Completed Tasks (Last 2 Weeks)
+- Integrate Scan Variables into Analysis
+- Dockerize project
+- Fix framework detection not being extracted from projects in analyzer
+- Milestone 1 Demo
+- Team Contract
+
+
+### In-Progress Tasks 
+
+
+### Additional Context (Optional)
+- NA
+
 ## 2025-NOV-23 to 2025-NOV-30
 
 
@@ -13,15 +56,9 @@
 
 
 ### Features Assigned (Project Plan)
-- Refactor Main
-- For coding projects, identify framework used
-- Scan Preferences
-- Add more feedback to user
-- Meta Data Extractor
-- Home Screen
-- Repository Extraction
-- Integrate database within System
 - Integrate Scan Variables into Analysis
+- Dockerize project
+- Fix framework detection not being extracted from projects in analyzer
 
 ### Tasks from Project Board
 | Feature | Task | Status (Completed/In Progress) | Notes |
