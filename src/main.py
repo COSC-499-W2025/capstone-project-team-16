@@ -251,7 +251,7 @@ def orchestrator(config):
 
     detailed_data = None
     if analysis_mode == "advanced":
-        detailed_data = detailed_extraction(scraped_data, advanced_options)
+        detailed_data = detailed_extraction(scraped_data, advanced_options, filters)
 
     # Step 5: Run analysis on the extracted metadata and save data to DB
     from db import save_full_scan  

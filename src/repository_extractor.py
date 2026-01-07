@@ -29,7 +29,6 @@ def analyze_repo_type(repo_path):
             # Extract authors and their edited files
             author_counts = Counter()
             author_files = defaultdict(set)
-            author_loc = defaultdict(lambda: {"insertions": 0, "deletions": 0})
             # author -> extension -> {insertions, deletions}
             author_loc = defaultdict(lambda: defaultdict(lambda: {"insertions": 0, "deletions": 0}))
 
@@ -40,9 +39,6 @@ def analyze_repo_type(repo_path):
                     # c.stats.files provides a dict of changed files
                     stats = c.stats.files
                     author_files[email].update(stats.keys())
-                    for stat in stats.values():
-                        author_loc[email]["insertions"] += stat.get("insertions", 0)
-                        author_loc[email]["deletions"] += stat.get("deletions", 0)
                     for filepath, stat in stats.items():
                         _, ext = os.path.splitext(filepath)
                         ext = ext.lower() if ext else "no_extension"
