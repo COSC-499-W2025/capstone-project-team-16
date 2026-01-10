@@ -194,7 +194,7 @@ def detect_frameworks(framework_file_entry):
 
 
 # Handle detailed extractions. Loops through extracted data and handles it based on category
-def detailed_extraction(extracted_data, advanced_options):
+def detailed_extraction(extracted_data, advanced_options, filters=None):
     repositories = []
     if advanced_options is None:
     # default: everything ON
@@ -211,6 +211,20 @@ def detailed_extraction(extracted_data, advanced_options):
             repo_info = analyze_repo_type(entry)
 
             if repo_info and repo_info.get("is_valid", False):
+                
+                # Enrich contributor stats with categories (e.g. .py -> source_code)
+                if filters and "contributors" in repo_info:
+                    ext_map = filters.get("extensions", {})
+                    for contrib in repo_info["contributors"]:
+                        loc_by_cat = {}
+                        for ext, stats in contrib.get("loc_by_type", {}).items():
+                            cat = ext_map.get(ext.lower(), "uncategorized")
+                            if cat not in loc_by_cat:
+                                loc_by_cat[cat] = {"insertions": 0, "deletions": 0}
+                            loc_by_cat[cat]["insertions"] += stats.get("insertions", 0)
+                            loc_by_cat[cat]["deletions"] += stats.get("deletions", 0)
+                        contrib["loc_by_category"] = loc_by_cat
+
                 # Create a new project object
                 repositories.append({
                     "repo_name": repo_info["repo_name"],

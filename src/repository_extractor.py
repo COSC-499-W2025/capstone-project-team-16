@@ -2,7 +2,7 @@
 # Recieves entry marked as repo. .git file is only dealt with at the moment
 
 from git import Repo
-from collections import Counter
+from collections import Counter, defaultdict
 from datetime import datetime
 import os
 
@@ -26,8 +26,26 @@ def analyze_repo_type(repo_path):
             # Collect all commits across all branches
             commits = list(repo.iter_commits('--all'))
 
-            # Extract authors from commit metadata (email is more reliable than name)
-            author_counts = Counter(c.author.email for c in commits)
+            # Extract authors and their edited files
+            author_counts = Counter()
+            author_files = defaultdict(set)
+            # author -> extension -> {insertions, deletions}
+            author_loc = defaultdict(lambda: defaultdict(lambda: {"insertions": 0, "deletions": 0}))
+
+            for c in commits:
+                email = c.author.email
+                author_counts[email] += 1
+                try:
+                    # c.stats.files provides a dict of changed files
+                    stats = c.stats.files
+                    author_files[email].update(stats.keys())
+                    for filepath, stat in stats.items():
+                        _, ext = os.path.splitext(filepath)
+                        ext = ext.lower() if ext else "no_extension"
+                        author_loc[email][ext]["insertions"] += stat.get("insertions", 0)
+                        author_loc[email][ext]["deletions"] += stat.get("deletions", 0)
+                except Exception:
+                    pass
 
             # Commit count per user lets us compute contribution percentage
             total_commits = sum(author_counts.values())
@@ -36,10 +54,18 @@ def analyze_repo_type(repo_path):
             contributors = []
             for author, count in author_counts.items():
                 percent = (count / total_commits) * 100 if total_commits > 0 else 0
+                
+                total_insertions = sum(d["insertions"] for d in author_loc[author].values())
+                total_deletions = sum(d["deletions"] for d in author_loc[author].values())
+
                 contributors.append({
                     "name": author,
                     "commit_count": count,
-                    "contribution_percentage": round(percent, 1)
+                    "contribution_percentage": round(percent, 1),
+                    "files_edited": sorted(list(author_files[author])),
+                    "insertions": total_insertions,
+                    "deletions": total_deletions,
+                    "loc_by_type": dict(author_loc[author])
                 })
 
             # Branch list for repo-level metadata

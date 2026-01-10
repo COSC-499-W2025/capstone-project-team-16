@@ -33,6 +33,26 @@ Future Additions: REST API and front-end (Term 2)
 
 Output Format (Milestone 1): Text-based (CSV, JSON, or plain text)
 
+## How to Run
+
+In the repository root after cloning, run the following commands in your command line:
+
+```bash
+docker compose build
+docker compose run --rm skillscope
+```
+
+Alternatively, if you have issues with Docker, you can run the project locally.
+
+First, install the dependencies from `requirements.txt`:
+```bash
+pip install -r requirements.txt
+```
+Then, run the application from the project root:
+```bash
+python src/main.py
+```
+
 ## System Functionality — Milestone 1
 
 The system must be able to:
@@ -237,3 +257,15 @@ Please use the provided folder structure for your project. You are free to organ
 
 Please use a branching workflow, and once an item is ready, do remember to issue a PR, review, and merge it into the master branch.
 Be sure to keep your docs and README.md up-to-date.
+
+### Updated Data Flow Diagram for Milestone 1 (DFD) – Level 1
+
+<img width="1975" height="1170" alt="updated of DFD-Level 1 drawio (1)" src="https://github.com/user-attachments/assets/14ec4e46-c23c-4c49-9bbd-95c5f74e174c" />
+
+
+### Updated System Architecture Diagram for Milestone 1
+
+
+<img width="1380" height="761" alt="arch" src="https://github.com/user-attachments/assets/c7413025-ea89-48c3-b1a4-22cf30c396cd" />
+
+

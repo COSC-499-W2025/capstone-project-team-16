@@ -96,7 +96,7 @@ def _write_docx_resume(
     top_projects: list[dict],
     chronological_projects: list[dict],
     skills_output: list[dict],
-) -> None:
+) -> str:
 
     """
     Word document
@@ -184,7 +184,16 @@ def _write_docx_resume(
     foot_run.italic = True
     foot_run.font.size = Pt(8)
 
-    doc.save(docx_path)
+    try:
+        doc.save(docx_path)
+        return docx_path
+    except PermissionError:
+        print(f"\n[WARN] Could not save to '{docx_path}' because it is open in another program.")
+        base, ext = os.path.splitext(docx_path)
+        new_path = f"{base}_{int(datetime.now().timestamp())}{ext}"
+        print(f"Saving to fallback: '{new_path}'")
+        doc.save(new_path)
+        return new_path
 
 
 def generate_resume(
@@ -208,7 +217,7 @@ def generate_resume(
 
 
     _write_txt_summary(txt_path, top_projects, chronological_projects, skills_output)
-    _write_docx_resume(docx_path, top_projects, chronological_projects, skills_output)
+    final_docx_path = _write_docx_resume(docx_path, top_projects, chronological_projects, skills_output)
 
     print(f"saved résumé text to {txt_path}")
-    print(f"saved résumé document to {docx_path}")
+    print(f"saved résumé document to {final_docx_path}")
