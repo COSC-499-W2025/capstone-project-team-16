@@ -268,4 +268,22 @@ Be sure to keep your docs and README.md up-to-date.
 
 <img width="1380" height="761" alt="arch" src="https://github.com/user-attachments/assets/c7413025-ea89-48c3-b1a4-22cf30c396cd" />
 
+### Large Test Dataset (External)
+
+Due to GitHub file size limits, the full stress-test ZIP archive is not committed
+to the repository.
+
+This dataset was used for manual and performance testing of:
+- ZIP validation
+- File parsing
+- Repository analysis
+- Contributor scoring
+
+## Download link
+ https://drive.google.com/file/d/1-9tQJhX9-cK3kk-2KdwOifr74SMqY5RG/view?usp=sharing
+
+## Notes
+- This file is **not required** to run tests.
+
+
 
