@@ -9,6 +9,37 @@ import csv
 from resume_generator import generate_resume
 
 
+# for contributions
+
+
+def _normalize_name(name: str) -> str:
+    return (name or "").strip().lower()
+
+def _get_contrib_pct(contrib_obj) -> float:
+    
+    if not isinstance(contrib_obj, dict):
+        return 0.0
+    pct = contrib_obj.get("contribution_percentage")
+    try:
+        return float(pct)
+    except Exception:
+        return 0.0
+    
+#just helpers for printing stuff out
+def _is_noise_contributor(name: str) -> bool:
+    n = (name or "").lower()
+    return (
+        "bot" in n
+        or "noreply.github.com" in n
+        or "github-classroom" in n
+    )
+
+def _display_name(person_key: str) -> str:
+    # person_key is normalized already, but keep it readable
+    return person_key
+
+def _fmt_pct(x: float) -> str:
+    return f"{x:5.1f}%"
 
 
 # --------------------------------------------------------
@@ -467,6 +498,40 @@ def analyze_projects(extracted_data, filters, advanced_options, detailed_data=No
             + commit_bonus
         )
 
+        # -----------------------------------------
+        # per-contributor adjusted project score
+        # -----------------------------------------
+        per_contributor_scores = {}
+        per_contributor_pct = {}
+
+        project_meta = None
+        if detailed_data:
+            project_meta = next(
+                (p for p in detailed_data.get("projects", []) if p.get("repo_name") == proj_name),
+                None,
+            )
+
+        contributors_raw = project_meta.get("contributors", []) if project_meta else []
+
+        for c in contributors_raw:
+            if isinstance(c, dict):
+                name = c.get("name") or c.get("email") or ""
+                key = _normalize_name(name)
+                if not key:
+                    continue
+
+                pct = _get_contrib_pct(c)
+                per_contributor_pct[key] = pct
+                per_contributor_scores[key] = score * (pct / 100.0)
+
+            elif c:
+                key = _normalize_name(str(c))
+                if key:
+                    per_contributor_pct[key] = 0.0
+                    per_contributor_scores[key] = 0.0
+
+
+
         # print repo info to terminal in advanced mode
         if detailed_data:
             print_repo_summary(
@@ -512,8 +577,62 @@ def analyze_projects(extracted_data, filters, advanced_options, detailed_data=No
                 "last_modified": last_mod,
                 # final score used for ranking (NEW)
                 "score": score,
+                "per_contributor_scores": per_contributor_scores,
+                "per_contributor_pct": per_contributor_pct,
+
             }
         )
+
+    # -----------------------------------------
+    # rankings per contributor (after collecting all projects)
+    # -----------------------------------------
+    contributor_rankings = {}
+    all_people = set()
+
+    for p in project_summaries:
+        all_people.update((p.get("per_contributor_scores") or {}).keys())
+
+    for person in sorted(all_people):
+        contributor_rankings[person] = sorted(
+            project_summaries,
+            key=lambda x: (x.get("per_contributor_scores") or {}).get(person, 0.0),
+            reverse=True
+        )
+
+    # -----------------------------------------
+            # -----------------------------------------
+    # NEW: rank contributors by total adjusted score
+    # -----------------------------------------
+    contributor_totals = []  # (person, total_adj, total_pct, projects_count)
+
+    for person in sorted(all_people):
+        if _is_noise_contributor(person):
+            continue
+
+        total_adj = 0.0
+        total_pct = 0.0
+        projects_count = 0
+
+        for p in project_summaries:
+            pct = (p.get("per_contributor_pct") or {}).get(person, 0.0)
+            adj = (p.get("per_contributor_scores") or {}).get(person, 0.0)
+
+            if pct > 0:
+                projects_count += 1
+                total_pct += pct
+                total_adj += adj
+
+        contributor_totals.append((person, total_adj, total_pct, projects_count))
+
+    contributor_totals.sort(key=lambda x: x[1], reverse=True)
+
+    print("\n=== Contributor Leaderboard (by total adjusted score) ===")
+    print(f"{'Rank':>4}  {'Contributor':<28} {'Projects':>8} {'TotalAdj':>10} {'TotalPct':>9}")
+    print("-" * 70)
+
+    for i, (person, total_adj, total_pct, projects_count) in enumerate(contributor_totals, start=1):
+        print(f"{i:4}  {person[:28]:<28} {projects_count:8} {total_adj:10.1f} {total_pct:8.1f}%")
+
 
     # --------------------------------------------------------
     # OUTPUT PART 1: ranked project table
@@ -614,7 +733,7 @@ def analyze_projects(extracted_data, filters, advanced_options, detailed_data=No
                 f"(used in {row['count']} files)"
             )
 
-    # --------------------------------------------------------
+        # --------------------------------------------------------
     # OUTPUT PART 4: resume style summaries of top projects
     # --------------------------------------------------------
     TOP_N = 3
@@ -628,6 +747,42 @@ def analyze_projects(extracted_data, filters, advanced_options, detailed_data=No
         line = _project_resume_summary(p)
         resume_summaries.append(line)
         print(f"- {line}")
+
+    # --------------------------------------------------------
+    # OUTPUT PART 5: Per-Contributor Rankings (per person)
+    # --------------------------------------------------------
+    print("\n=== Contributor Contribution Breakdown ===")
+
+    TOP_N_PER_PERSON = 3
+    MIN_PCT_TO_SHOW = 0.1  # hide tiny noise like 0.0%
+
+    for person, ranked in contributor_rankings.items():
+        if _is_noise_contributor(person):
+            continue
+
+        rows = []
+        for p in ranked:
+            pct = (p.get("per_contributor_pct") or {}).get(person, 0.0)
+            if pct >= MIN_PCT_TO_SHOW:
+                adj = (p.get("per_contributor_scores") or {}).get(person, 0.0)
+                rows.append((p["project"], pct, adj, p["score"]))
+
+        if not rows:
+            continue
+
+        print(f"\n-- {_display_name(person)} --")
+        print(f"{'Project':<32} {'Pct':>7} {'AdjScore':>10} {'Base':>10}")
+        print("-" * 65)
+
+        for project, pct, adj, base in rows[:TOP_N_PER_PERSON]:
+            print(
+                f"{project[:32]:<32} "
+                f"{_fmt_pct(pct):>7} "
+                f"{adj:10.1f} "
+                f"{base:10.1f}"
+            )
+
+
 
     # --------------------------------------------------------
     # CSV OUTPUT (we might not need this anymore since we have word doc now. can delete later. just here for now.)
@@ -667,7 +822,11 @@ def analyze_projects(extracted_data, filters, advanced_options, detailed_data=No
                 ],
             )
             writer.writeheader()
-            writer.writerows(project_summaries)
+            writer.writerows(
+                [{k: v for k, v in p.items() if k in writer.fieldnames}
+                    for p in project_summaries]
+            )
+
 
         print(f"saved file to {out_path}")
     
@@ -688,4 +847,5 @@ def analyze_projects(extracted_data, filters, advanced_options, detailed_data=No
     "resume_summaries": resume_summaries,        # résumé-style top projects
     "skills_chronological": skills_output,      # skills exercised over time
     "projects_chronological": chronological_projects,  # projects in chronological order
+    "contributor_rankings": contributor_rankings,
 }
