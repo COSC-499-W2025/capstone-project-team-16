@@ -1,5 +1,5 @@
 # Personal Log - Ethan Sturek
-## 2025-DEC-07 to 2025-JAN-11
+## 2025-DEC-07 to 2026-JAN-11
 
 
 ### Type of Tasks Worked On
