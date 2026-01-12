@@ -1,4 +1,44 @@
 # Team Log - Team 16
+## Milestone: 2025-DEC-07 to 2026-JAN-11
+
+
+### Milestone Goals Recap
+- Establish milestone 1 changes needed
+- Extract more in depth data per user
+
+### Features in Project Plan
+- Specific skill contribution based on contributor
+
+
+### Burnup Chart
+| Name | Username |
+|----------------|----------------|
+| Ethan Sturek | ethansturek |
+| La Wunn| LaWunn|
+| Amani |lugger33 |
+
+![Screenshot](<screenshots/Team16/BurnupW15.png>)
+
+### Completed Tasks Table
+![Screenshot](<screenshots/Team16/DoneTasksW15.png>)
+
+### In Progress Tasks Table
+![Screenshot](<screenshots/Team16/TasksW15.png>)
+
+### Test Report
+![Screenshot](<screenshots/Team16/Test1W15.png>)
+
+### Tests
+- Unit tests all run without issues
+- Extensive manual testing
+## Running Tests
+
+1.  Run `python -m venv venv` to create a virtual environment.
+2. On Windows run `venv/Scripts/activate`.
+3. On Mac run `venv/bin/activate`.
+4. Run `pip install -r requirements.txt`.
+5. In the root of the repositiory, enter `pytest` to run all tests.
+
 ## Milestone: 2025-NOV-30 to 2025-DEC-07
 
 
