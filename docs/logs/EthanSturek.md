@@ -1,4 +1,34 @@
 # Personal Log - Ethan Sturek
+## 2025-DEC-07 to 2026-JAN-11
+
+
+### Type of Tasks Worked On
+![Screenshot](<screenshots/Ethan/Week 15.png>)
+
+### Recap of Week's Goals
+- Establish milestone 1 changes needed
+- Extract more in depth data per user
+
+
+### Features Assigned (Project Plan)
+- Specific skill contribution based on contributor
+  
+### Tasks from Project Board
+| Feature | Task | Status (Completed/In Progress) | Notes |
+|------|------|-------------------------------|-------|
+| Specific skill contribution based on contributor | Specific skill contribution based on contributor | Completed | Complete per user contributions have been added including files worked on, types of activities and detailed insertions and deletions |
+
+
+
+### Completed Tasks (Last 2 Weeks)
+- Specific skill contribution based on contributor
+
+
+### In-Progress Tasks 
+- Portfolio on a per contributor basis
+- Save and retrieve contributor data
+
+
 ## 2025-NOV-30 to 2025-DEC-07
 
 
