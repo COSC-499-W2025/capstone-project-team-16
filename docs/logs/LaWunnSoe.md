@@ -466,3 +466,50 @@
 ### Additional Context (Optional)
 - N/A
 
+## 2026-Jan-4 to 2026-Jan-11
+
+### Type of Tasks Worked On
+
+
+
+<img width="983" height="576" alt="Screenshot 2026-01-11 at 9 53 58 PM" src="https://github.com/user-attachments/assets/7069bf30-02a1-4db9-9930-09ec476fe38a" />
+
+
+
+
+### Recap of Week's Goals
+
+- Stuff we need to fix from Milestone 1
+
+  - Upload test zip
+  - Rank projects with each person contribution
+  - Specific skill contribution based of contributor (who had which skill, ex java, python)
+  - Portfolio for each user/contributor -> make it individual
+  - Formet top 3 projects part better (hard to see, looks like an error message)
+  - Different users, retrieve users from repo(ex- gmail and name) and make them into different profiles
+
+
+### Features Assigned (Project Plan)
+
+- Rank projects with each person contributions
+- Upload test zip
+
+
+
+### Tasks from Project Board
+| Feature | Task | Status (Completed/In Progress) | Notes |
+|------|------|-------------------------------|-------|
+
+| Rank projects with each person contributions | Rank projects with each person contributions | complete | … |
+| Upload test zip | Upload test zip | complete | … |
+
+
+
+### Completed/In-Progress Tasks (Last 2 Weeks)
+
+- Rank projects with each person contributions
+
+### Additional Context (Optional)
+- N/A
+- 
+
