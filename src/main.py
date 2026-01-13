@@ -9,7 +9,7 @@ from permission_manager import (
 from file_parser import get_input_file_path
 from metadata_extractor import base_extraction, detailed_extraction, load_filters
 from alternative_analysis import analyze_projects
-from resume_generator import generate_contributor_portfolio
+from resume_generator import generate_contributor_portfolio, generate_resume
 import db 
 import sqlite3
 
@@ -67,8 +67,9 @@ def scan_manager():
     while True:
         print("\n===== SCAN MANAGER =====")
         print("1. View stored project analyses")
-        print("2. Delete stored scans")
-        print("3. Return to home screen")
+        print("2. Generate Resume/Portfolio")
+        print("3. Delete stored scans")
+        print("4. Return to home screen")
 
         choice = input("Choose an option: ").strip()
 
@@ -76,9 +77,12 @@ def scan_manager():
             view_full_scan_details()
 
         elif choice == "2":
-            delete_full_scan()
+            generate_portfolio_menu()
 
         elif choice == "3":
+            delete_full_scan()
+
+        elif choice == "4":
             break
 
         else:
@@ -191,40 +195,67 @@ def view_full_scan_details():
             print(f"- {bullet}")
 
     # -------------------------
-    # 5. Contributor Portfolio Generation
+    # 5. Contributor Leaderboard
     # -------------------------
-    if contributor_profiles:
-        print("\n------------------------------------------------")
-        print(" OPTION: Generate Individual Contributor Portfolio")
-        print("------------------------------------------------")
-        print("Do you want to generate a portfolio for a specific contributor? (Y/N)")
-        if input("> ").strip().upper() == "Y":
-            # List contributors
-            contributors = sorted(contributor_profiles.keys())
-            # Filter out bots/noise if possible (simple check)
-            contributors = [c for c in contributors if "bot" not in c.lower() and "noreply" not in c.lower()]
+    contributor_totals = {}  # name -> {adj, pct, count}
+
+    for p in project_summaries:
+        pc_scores = p.get("per_contributor_scores", {})
+        pc_pcts = p.get("per_contributor_pct", {})
+
+        all_contributors = set(pc_scores.keys()) | set(pc_pcts.keys())
+
+        for person in all_contributors:
+            # Filter noise
+            n = person.lower()
+            if "bot" in n or "noreply" in n or "github-classroom" in n:
+                continue
+
+            if person not in contributor_totals:
+                contributor_totals[person] = {"adj": 0.0, "pct": 0.0, "count": 0}
+
+            score = pc_scores.get(person, 0.0)
+            pct = pc_pcts.get(person, 0.0)
+
+            if pct > 0:
+                contributor_totals[person]["count"] += 1
+                contributor_totals[person]["adj"] += score
+                contributor_totals[person]["pct"] += pct
+
+    leaderboard = []
+    for person, stats in contributor_totals.items():
+        leaderboard.append((person, stats["adj"], stats["pct"], stats["count"]))
+
+    # Sort by total adjusted score
+    leaderboard.sort(key=lambda x: x[1], reverse=True)
+
+    if leaderboard:
+        print("\n=== Contributor Leaderboard (by total adjusted score) ===")
+        print(f"{'Rank':>4}  {'Contributor':<28} {'Projects':>8} {'TotalAdj':>10} {'TotalPct':>9}")
+        print("-" * 70)
+        for i, (person, total_adj, total_pct, projects_count) in enumerate(leaderboard, start=1):
+            print(f"{i:4}  {person[:28]:<28} {projects_count:8} {total_adj:10.1f} {total_pct:8.1f}%")
+
+        # -------------------------
+        # 6. Contributor Breakdown
+        # -------------------------
+        print("\n=== Contributor Contribution Breakdown ===")
+        for person, _, _, _ in leaderboard:
+            person_projects = []
+            for p in project_summaries:
+                pct = p.get("per_contributor_pct", {}).get(person, 0.0)
+                if pct >= 0.1:
+                    adj = p.get("per_contributor_scores", {}).get(person, 0.0)
+                    base = p.get("score", 0.0)
+                    person_projects.append((p["project"], pct, adj, base))
             
-            print("\nSelect a contributor:")
-            for i, c in enumerate(contributors, 1):
-                print(f"{i}. {c}")
-            
-            sel = input("\nEnter number (0 to cancel): ").strip()
-            if sel.isdigit():
-                idx = int(sel) - 1
-                if 0 <= idx < len(contributors):
-                    target_user = contributors[idx]
-                    profile = contributor_profiles[target_user]
-                    
-                    # Need a map of project_name -> project_data for the generator
-                    all_projects_map = {p["project"]: p for p in project_summaries}
-                    
-                    out_path = generate_contributor_portfolio(target_user, profile, all_projects_map)
-                    if out_path:
-                        print(f"\nSUCCESS: Portfolio saved to:\n{out_path}")
-                elif idx != -1:
-                    print("Invalid selection.")
-            else:
-                print("Canceled.")
+            person_projects.sort(key=lambda x: x[2], reverse=True)
+            if person_projects:
+                print(f"\n-- {person} --")
+                print(f"{'Project':<32} {'Pct':>7} {'AdjScore':>10} {'Base':>10}")
+                print("-" * 65)
+                for proj, pct, adj, base in person_projects[:3]:
+                    print(f"{proj[:32]:<32} {pct:5.1f}% {adj:10.1f} {base:10.1f}")
 
     print("\nEnd of scan view.\n")
 
@@ -259,6 +290,92 @@ def delete_full_scan():
         print("Scan deleted." if success else "Failed to delete scan.")
     else:
         print("Deletion canceled.")
+
+
+def generate_portfolio_menu():
+    from db import list_full_scans, get_all_full_scans
+    
+    scans = list_full_scans()
+    if not scans:
+        print("No scans found.")
+        return
+
+    print("\nSelect a scan to generate portfolio from:")
+    for i, s in enumerate(scans, start=1):
+        print(f"{i}. {s['timestamp']} ({s['analysis_mode']})")
+
+    choice = input("Enter number (0 to cancel): ").strip()
+    if not choice.isdigit() or int(choice) == 0:
+        print("Canceled.")
+        return
+    idx = int(choice) - 1
+    if idx < 0 or idx >= len(scans):
+        print("Invalid selection.")
+        return
+
+    scan = get_all_full_scans()[idx]
+    data = scan["project_summaries_json"]
+    
+    print("\n------------------------------------------------")
+    print(" GENERATION OPTIONS")
+    print("------------------------------------------------")
+    print("1. Full Project Resume (Summary of all projects)")
+    print("2. Individual Contributor Portfolio")
+    
+    gen_choice = input("Enter number (0 to cancel): ").strip()
+    
+    if gen_choice == "1":
+        # Generate full resume
+        generate_resume(
+            data.get("project_summaries", []),
+            data.get("projects_chronological", []),
+            data.get("skills_chronological", [])
+        )
+        input("\nPress Enter to continue...")
+        return
+
+    elif gen_choice != "2":
+        print("Canceled.")
+        return
+
+    # --- Contributor Portfolio Logic ---
+    contributor_profiles = data.get("contributor_profiles", {})
+    project_summaries = data.get("project_summaries", [])
+
+    if not contributor_profiles:
+        print("No contributor data found in this scan.")
+        return
+
+    # List contributors
+    contributors = sorted(contributor_profiles.keys())
+    # Filter out bots/noise
+    contributors = [c for c in contributors if "bot" not in c.lower() and "noreply" not in c.lower()]
+    
+    if not contributors:
+        print("No valid contributors found.")
+        return
+
+    print("\nSelect a contributor:")
+    for i, c in enumerate(contributors, 1):
+        print(f"{i}. {c}")
+    
+    sel = input("\nEnter number (0 to cancel): ").strip()
+    if sel.isdigit():
+        idx = int(sel) - 1
+        if 0 <= idx < len(contributors):
+            target_user = contributors[idx]
+            profile = contributor_profiles[target_user]
+            
+            # Need a map of project_name -> project_data for the generator
+            all_projects_map = {p["project"]: p for p in project_summaries}
+            
+            out_path = generate_contributor_portfolio(target_user, profile, all_projects_map)
+            if out_path:
+                print(f"\nSUCCESS: Portfolio saved to:\n{out_path}")
+        elif idx != -1:
+            print("Invalid selection.")
+    else:
+        print("Canceled.")
 
 
 # --------------------------------------------------------

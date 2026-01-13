@@ -7,7 +7,7 @@ from docx import Document
 from docx.shared import Pt
 
 
-def _build_project_line(p: dict) -> str:
+def build_project_line(p: dict) -> str:
     """
     building a short resmume desc about a project.
     (same idea as in alternative_analysis, but kept local so this
@@ -65,7 +65,7 @@ def _write_txt_summary(
     lines.append("Top Projects")
     lines.append("-" * 40)
     for p in top_projects:
-        lines.append(f"- {_build_project_line(p)}")
+        lines.append(f"- {build_project_line(p)}")
     lines.append("")
 
     # Project timeline
@@ -144,7 +144,7 @@ def _write_docx_resume(
                 para.add_run(f"  ({first_date} – {last_date})")
 
             # Second line (same bullet) – description
-            para.add_run("\n" + _build_project_line(p))
+            para.add_run("\n" + build_project_line(p))
 
     doc.add_paragraph()  # spacing
 
@@ -184,16 +184,15 @@ def _write_docx_resume(
     foot_run.italic = True
     foot_run.font.size = Pt(8)
 
-    try:
-        doc.save(docx_path)
-        return docx_path
-    except PermissionError:
-        print(f"\n[WARN] Could not save to '{docx_path}' because it is open in another program.")
-        base, ext = os.path.splitext(docx_path)
-        new_path = f"{base}_{int(datetime.now().timestamp())}{ext}"
-        print(f"Saving to fallback: '{new_path}'")
-        doc.save(new_path)
-        return new_path
+    while True:
+        try:
+            doc.save(docx_path)
+            return docx_path
+        except PermissionError:
+            print(f"\n[!] Could not save to '{docx_path}' because it is open.")
+            print("Please close the file and press Enter to retry, or type 'cancel' to stop.")
+            if input("> ").strip().lower() == "cancel":
+                return None
 
 
 def generate_resume(
@@ -239,27 +238,51 @@ def generate_contributor_portfolio(
     
     doc = Document()
     
-    # Title
-    title = doc.add_heading(f"Portfolio: {contributor_name}", level=0)
-    title.runs[0].font.size = Pt(20)
-    doc.add_paragraph(f"Generated on {datetime.now().strftime('%Y-%m-%d')}")
+    # --- Header ---
+    # Try to make the name look a bit better (e.g. capitalize words)
+    if "@" in contributor_name:
+        # If email, use local part as name
+        display_name = contributor_name.split("@")[0].replace(".", " ").replace("_", " ").title()
+    else:
+        display_name = contributor_name.replace(".", " ").replace("_", " ").title()
+    
+    title = doc.add_heading(f"Portfolio: {display_name}", level=0)
+    title.runs[0].font.size = Pt(24)
+    doc.add_paragraph(f"Generated on {datetime.now().strftime('%B %d, %Y')}")
+    
+    # --- Professional Summary ---
+    doc.add_heading("Professional Summary", level=1)
+    
+    skills = profile_data.get("skills", [])
+    projects_ref = profile_data.get("projects", [])
+    
+    if "@" in contributor_name:
+        summary_text = f"Contributor ({contributor_name}) with active contributions across {len(projects_ref)} project(s)."
+    else:
+        summary_text = f"Contributor with active contributions across {len(projects_ref)} project(s)."
+
+    if skills:
+        top_skills = ", ".join(skills[:5])
+        summary_text += f" Demonstrated technical proficiency in: {top_skills}."
+    doc.add_paragraph(summary_text)
     doc.add_paragraph()
 
-    # Skills Section
-    doc.add_heading("Demonstrated Skills", level=1)
-    skills = profile_data.get("skills", [])
+    # --- Technical Skills ---
+    doc.add_heading("Technical Skills", level=1)
     if skills:
-        doc.add_paragraph(", ".join(skills))
+        p = doc.add_paragraph()
+        p.add_run("Languages & Technologies: ").bold = True
+        p.add_run(", ".join(skills))
     else:
         doc.add_paragraph("No specific skills detected from file extensions.")
     doc.add_paragraph()
 
-    # Projects Section
+    # --- Project Contributions ---
     doc.add_heading("Project Contributions", level=1)
     
     # Get project details and sort by their contribution score
     user_projects = []
-    for p_ref in profile_data.get("projects", []):
+    for p_ref in projects_ref:
         p_name = p_ref["name"]
         if p_name in all_projects_map:
             full_p = all_projects_map[p_name]
@@ -282,21 +305,59 @@ def generate_contributor_portfolio(
                 continue
 
             p_name = p["project"]
-            duration = p.get("duration_days", 0)
             
-            para = doc.add_paragraph(style="List Bullet")
-            run = para.add_run(f"{p_name}")
-            run.bold = True
-            para.add_run(f" ({pct:.1f}% contribution)")
+            # Format Dates
+            start_date = p.get("first_modified")
+            end_date = p.get("last_modified")
+            date_str = ""
+            
+            def _fmt_d(d):
+                if isinstance(d, str):
+                    try: return datetime.fromisoformat(d).strftime('%Y-%m-%d')
+                    except: return d
+                if isinstance(d, datetime):
+                    return d.strftime('%Y-%m-%d')
+                return str(d)
+
+            if start_date and end_date:
+                date_str = f" ({_fmt_d(start_date)} – {_fmt_d(end_date)})"
+
+            # Project Header
+            p_head = doc.add_heading(level=2)
+            p_head.add_run(p_name).bold = True
+            if date_str:
+                p_head.add_run(date_str).font.size = Pt(11)
+            
+            # Stats
+            stats_p = doc.add_paragraph()
+            stats_p.add_run(f"Contribution: {pct:.1f}%").bold = True
+            stats_p.add_run(f"  |  Impact Score: {p['user_score']:.1f}")
             
             # Description
-            desc = _build_project_line(p)
-            # We can tweak the description slightly or just append it
-            para.add_run(f"\n{desc}")
+            desc = build_project_line(p)
+            doc.add_paragraph(desc)
             
-    try:
-        doc.save(docx_path)
-        return docx_path
-    except Exception as e:
-        print(f"Error saving portfolio: {e}")
-        return None
+            # Specific Skills Used in this project
+            # The key in per_contributor_skills matches the contributor_name (normalized)
+            pcs = p.get("per_contributor_skills", {})
+            my_skills = pcs.get(contributor_name, [])
+            
+            if my_skills:
+                s_p = doc.add_paragraph()
+                s_p.add_run("Skills Applied: ").italic = True
+                s_p.add_run(", ".join(my_skills))
+            
+            doc.add_paragraph() # spacing
+            
+    while True:
+        try:
+            doc.save(docx_path)
+            return docx_path
+        except PermissionError:
+            print(f"\n[!] Could not save to '{docx_path}' because it is open.")
+            print("Please close the file and press Enter to retry, or type 'cancel' to stop.")
+            if input("> ").strip().lower() == "cancel":
+                return None
+        except Exception as e:
+            print(f"Error saving portfolio: {e}")
+            return None
