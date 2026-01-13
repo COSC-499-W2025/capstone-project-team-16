@@ -221,3 +221,82 @@ def generate_resume(
 
     print(f"saved résumé text to {txt_path}")
     print(f"saved résumé document to {final_docx_path}")
+
+
+def generate_contributor_portfolio(
+    contributor_name: str,
+    profile_data: dict,
+    all_projects_map: dict
+) -> str:
+    """
+    Generates a specific portfolio Word doc for a single contributor.
+    """
+    from file_parser import OUTPUT_DIR
+    
+    safe_name = "".join(c for c in contributor_name if c.isalnum() or c in (' ', '_', '-')).strip()
+    filename = f"Portfolio_{safe_name}.docx"
+    docx_path = os.path.join(OUTPUT_DIR, filename)
+    
+    doc = Document()
+    
+    # Title
+    title = doc.add_heading(f"Portfolio: {contributor_name}", level=0)
+    title.runs[0].font.size = Pt(20)
+    doc.add_paragraph(f"Generated on {datetime.now().strftime('%Y-%m-%d')}")
+    doc.add_paragraph()
+
+    # Skills Section
+    doc.add_heading("Demonstrated Skills", level=1)
+    skills = profile_data.get("skills", [])
+    if skills:
+        doc.add_paragraph(", ".join(skills))
+    else:
+        doc.add_paragraph("No specific skills detected from file extensions.")
+    doc.add_paragraph()
+
+    # Projects Section
+    doc.add_heading("Project Contributions", level=1)
+    
+    # Get project details and sort by their contribution score
+    user_projects = []
+    for p_ref in profile_data.get("projects", []):
+        p_name = p_ref["name"]
+        if p_name in all_projects_map:
+            full_p = all_projects_map[p_name]
+            # Combine ref data with full data
+            merged = full_p.copy()
+            merged["user_pct"] = p_ref["pct"]
+            merged["user_score"] = p_ref["score"]
+            user_projects.append(merged)
+
+    # Sort by the user's specific impact (score)
+    user_projects.sort(key=lambda x: x["user_score"], reverse=True)
+
+    if not user_projects:
+        doc.add_paragraph("No project contributions found.")
+    else:
+        for p in user_projects:
+            pct = p["user_pct"]
+            # Skip negligible contributions
+            if pct < 0.1:
+                continue
+
+            p_name = p["project"]
+            duration = p.get("duration_days", 0)
+            
+            para = doc.add_paragraph(style="List Bullet")
+            run = para.add_run(f"{p_name}")
+            run.bold = True
+            para.add_run(f" ({pct:.1f}% contribution)")
+            
+            # Description
+            desc = _build_project_line(p)
+            # We can tweak the description slightly or just append it
+            para.add_run(f"\n{desc}")
+            
+    try:
+        doc.save(docx_path)
+        return docx_path
+    except Exception as e:
+        print(f"Error saving portfolio: {e}")
+        return None

@@ -9,7 +9,7 @@ from permission_manager import (
 from file_parser import get_input_file_path
 from metadata_extractor import base_extraction, detailed_extraction, load_filters
 from alternative_analysis import analyze_projects
-
+from resume_generator import generate_contributor_portfolio
 import db 
 import sqlite3
 
@@ -117,6 +117,7 @@ def view_full_scan_details():
     resume_summaries = data.get("resume_summaries", [])
     skills_chronological = data.get("skills_chronological", [])
     projects_chronological = data.get("projects_chronological", [])
+    contributor_profiles = data.get("contributor_profiles", {})
 
     print("\n============================")
     print(" FULL SCAN DETAILS")
@@ -189,8 +190,43 @@ def view_full_scan_details():
         for bullet in resume_summaries:
             print(f"- {bullet}")
 
-    print("\nEnd of scan.\n")
+    # -------------------------
+    # 5. Contributor Portfolio Generation
+    # -------------------------
+    if contributor_profiles:
+        print("\n------------------------------------------------")
+        print(" OPTION: Generate Individual Contributor Portfolio")
+        print("------------------------------------------------")
+        print("Do you want to generate a portfolio for a specific contributor? (Y/N)")
+        if input("> ").strip().upper() == "Y":
+            # List contributors
+            contributors = sorted(contributor_profiles.keys())
+            # Filter out bots/noise if possible (simple check)
+            contributors = [c for c in contributors if "bot" not in c.lower() and "noreply" not in c.lower()]
+            
+            print("\nSelect a contributor:")
+            for i, c in enumerate(contributors, 1):
+                print(f"{i}. {c}")
+            
+            sel = input("\nEnter number (0 to cancel): ").strip()
+            if sel.isdigit():
+                idx = int(sel) - 1
+                if 0 <= idx < len(contributors):
+                    target_user = contributors[idx]
+                    profile = contributor_profiles[target_user]
+                    
+                    # Need a map of project_name -> project_data for the generator
+                    all_projects_map = {p["project"]: p for p in project_summaries}
+                    
+                    out_path = generate_contributor_portfolio(target_user, profile, all_projects_map)
+                    if out_path:
+                        print(f"\nSUCCESS: Portfolio saved to:\n{out_path}")
+                elif idx != -1:
+                    print("Invalid selection.")
+            else:
+                print("Canceled.")
 
+    print("\nEnd of scan view.\n")
 
 
 def delete_full_scan():

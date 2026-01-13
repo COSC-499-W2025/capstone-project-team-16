@@ -247,6 +247,11 @@ def analyze_projects(extracted_data, filters, advanced_options, detailed_data=No
     
     projects = defaultdict(list)
 
+    contributor_profiles = defaultdict(lambda: {
+        "skills": set(),
+        "projects": []
+    })
+
     for row in extracted_data:
         filename = row["filename"]
 
@@ -524,6 +529,19 @@ def analyze_projects(extracted_data, filters, advanced_options, detailed_data=No
                 per_contributor_pct[key] = pct
                 per_contributor_scores[key] = score * (pct / 100.0)
 
+                # Capture skills from repo data (loc_by_type)
+                loc_map = c.get("loc_by_type", {})
+                for ext in loc_map:
+                    skill = _skill_from_ext(ext)
+                    if skill:
+                        contributor_profiles[key]["skills"].add(skill)
+                
+                contributor_profiles[key]["projects"].append({
+                    "name": proj_name,
+                    "pct": pct,
+                    "score": score * (pct / 100.0)
+                })
+
             elif c:
                 key = _normalize_name(str(c))
                 if key:
@@ -792,43 +810,58 @@ def analyze_projects(extracted_data, filters, advanced_options, detailed_data=No
         os.makedirs(OUTPUT_DIR, exist_ok=True)
         out_path = os.path.join(OUTPUT_DIR, "project_contribution_summary.csv")
 
-        with open(out_path, "w", newline="", encoding="utf-8") as f:
-            writer = csv.DictWriter(
-                f,
-                fieldnames=[
-                    "project",
-                    "total_files",
-                    "duration_days",
-                    "code_files",
-                    "test_files",
-                    "doc_files",
-                    "design_files",
-                    "languages",
-                    "frameworks",
-                    "skills",
-                    "is_collaborative",
-                    "repo_name",
-                    "repo_root",
-                    "authors",
-                    "contributors",
-                    "branch_count",
-                    "has_merges",
-                    "project_type",
-                    "repo_duration_days",
-                    "commit_frequency",
-                    "first_modified",
-                    "last_modified",
-                    "score",
-                ],
-            )
-            writer.writeheader()
-            writer.writerows(
-                [{k: v for k, v in p.items() if k in writer.fieldnames}
-                    for p in project_summaries]
-            )
+        try:
+            with open(out_path, "w", newline="", encoding="utf-8") as f:
+                writer = csv.DictWriter(
+                    f,
+                    fieldnames=[
+                        "project",
+                        "total_files",
+                        "duration_days",
+                        "code_files",
+                        "test_files",
+                        "doc_files",
+                        "design_files",
+                        "languages",
+                        "frameworks",
+                        "skills",
+                        "is_collaborative",
+                        "repo_name",
+                        "repo_root",
+                        "authors",
+                        "contributors",
+                        "branch_count",
+                        "has_merges",
+                        "project_type",
+                        "repo_duration_days",
+                        "commit_frequency",
+                        "first_modified",
+                        "last_modified",
+                        "score",
+                        "per_contributor_scores",
+                        "per_contributor_pct",
+                    ],
+                )
+                writer.writeheader()
+                writer.writerows(
+                    [{k: v for k, v in p.items() if k in writer.fieldnames}
+                        for p in project_summaries]
+                )
+
+            print(f"saved file to {out_path}")
+        except PermissionError:
+            print(f"\n[WARN] Could not save CSV to '{out_path}' because it is open in another program.")
+        except Exception as e:
+            print(f"\n[WARN] Could not save CSV: {e}")
 
 
-        print(f"saved file to {out_path}")
+    # Serialize contributor profiles (sets to lists)
+    final_contributor_profiles = {}
+    for k, v in contributor_profiles.items():
+        final_contributor_profiles[k] = {
+            "skills": sorted(list(v["skills"])),
+            "projects": v["projects"]
+        }
     
     # --------------------------------------------------------
     # To make text and doc file from analysis
@@ -848,4 +881,5 @@ def analyze_projects(extracted_data, filters, advanced_options, detailed_data=No
     "skills_chronological": skills_output,      # skills exercised over time
     "projects_chronological": chronological_projects,  # projects in chronological order
     "contributor_rankings": contributor_rankings,
+    "contributor_profiles": final_contributor_profiles,
 }
