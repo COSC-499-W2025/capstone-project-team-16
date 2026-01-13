@@ -265,7 +265,7 @@ def print_project_rankings(project_summaries, file=None):
     print(
         f"\n{'Project':<30} "
         f"{'Files':>6} {'Days':>6} {'Code':>6} {'Test':>6} "
-        f"{'Doc':>6} {'Des':>6} "
+        f"{'Doc':>6} {'Assets':>6} "
         f"{'Languages':<25} {'Frameworks':<40} "
         f"{'Collab':>7} {'Score':>7}", file=file
     )
