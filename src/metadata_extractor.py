@@ -19,6 +19,7 @@ def load_filters(filename=None):
             data = json.load(f)
 
          # Build extension to category mapping
+        # Categories (e.g. "documentation", "assets") are defined in the JSON file
         ext_to_category = {}
         for category, extensions in data["categories"].items():
             for ext in extensions:

@@ -6,6 +6,13 @@ import os
 from datetime import datetime
 from collections import defaultdict, Counter
 from resume_generator import build_project_line
+from scan_manager import (
+    print_project_rankings,
+    print_chronological_projects,
+    print_skills_timeline,
+    print_resume_summaries,
+    print_contributor_stats
+)
 
 
 # for contributions
@@ -24,22 +31,6 @@ def _get_contrib_pct(contrib_obj) -> float:
     except Exception:
         return 0.0
     
-#just helpers for printing stuff out
-def _is_noise_contributor(name: str) -> bool:
-    n = (name or "").lower()
-    return (
-        "bot" in n
-        or "noreply.github.com" in n
-        or "github-classroom" in n
-    )
-
-def _display_name(person_key: str) -> str:
-    # person_key is normalized already, but keep it readable
-    return person_key
-
-def _fmt_pct(x: float) -> str:
-    return f"{x:5.1f}%"
-
 
 # --------------------------------------------------------
 # print for repo metadata
@@ -114,6 +105,10 @@ def _to_datetime(dt_value):
 
 # figure out if this file is code / test / docs / design
 def _detect_activity(category: str, filename: str) -> str:
+    """
+    Classifies the type of work based on file category and name.
+    The 'category' argument is derived from 'extractor_filters.json' in metadata_extractor.py.
+    """
     low = filename.lower()
 
     # anything with 'test' in name or common test patterns
@@ -163,13 +158,13 @@ def _skill_from_ext(ext: str):
         return "JavaScript / Frontend"
 
     if ext in (".html", ".css"):
-        return "Web Dev"
+        return "Web Development"
 
     if ext in (".java",):
-        return "Java Stuff"
+        return "Java Development"
 
     if ext in (".md", ".pdf", ".docx", ".txt"):
-        return "Docs / Writing"
+        return "Documentation"
 
     return None
 
@@ -580,81 +575,16 @@ def analyze_projects(extracted_data, filters, advanced_options, detailed_data=No
             reverse=True
         )
 
-    # -----------------------------------------
-            # -----------------------------------------
-    # NEW: rank contributors by total adjusted score
-    # -----------------------------------------
-    contributor_totals = []  # (person, total_adj, total_pct, projects_count)
-
-    for person in sorted(all_people):
-        if _is_noise_contributor(person):
-            continue
-
-        total_adj = 0.0
-        total_pct = 0.0
-        projects_count = 0
-
-        for p in project_summaries:
-            pct = (p.get("per_contributor_pct") or {}).get(person, 0.0)
-            adj = (p.get("per_contributor_scores") or {}).get(person, 0.0)
-
-            if pct > 0:
-                projects_count += 1
-                total_pct += pct
-                total_adj += adj
-
-        contributor_totals.append((person, total_adj, total_pct, projects_count))
-
-    contributor_totals.sort(key=lambda x: x[1], reverse=True)
-
-    print("\n=== Contributor Leaderboard (by total adjusted score) ===")
-    print(f"{'Rank':>4}  {'Contributor':<28} {'Projects':>8} {'TotalAdj':>10} {'TotalPct':>9}")
-    print("-" * 70)
-
-    for i, (person, total_adj, total_pct, projects_count) in enumerate(contributor_totals, start=1):
-        print(f"{i:4}  {person[:28]:<28} {projects_count:8} {total_adj:10.1f} {total_pct:8.1f}%")
-
 
     # --------------------------------------------------------
     # OUTPUT PART 1: ranked project table
     # --------------------------------------------------------
     # sort projects so biggest score first
     project_summaries.sort(key=lambda x: x["score"], reverse=True)
-
-    print(
-        f"\n{'Project':<30} "
-        f"{'Files':>6} {'Days':>6} {'Code':>6} {'Test':>6} "
-        f"{'Doc':>6} {'Des':>6} "
-        f"{'Languages':<25} {'Frameworks':<40} "
-        f"{'Collab':>7} {'Score':>7}"
-    )
-    print("-" * 155)
-
-    for p in project_summaries:
-        # Truncate long language/framework lists for display
-        langs_str = p["languages"]
-        if len(langs_str) > 25:
-            langs_str = langs_str[:22] + "..."
-
-        fw_str = p["frameworks"]
-        if len(fw_str) > 40:
-            fw_str = fw_str[:37] + "..."
-
-        print(
-            f"{p['project'][:30]:<30} "
-            f"{p['total_files']:6} {p['duration_days']:6} {p['code_files']:6} "
-            f"{p['test_files']:6} {p['doc_files']:6} {p['design_files']:6} "
-            f"{langs_str:<25} {fw_str:<40} "
-            f"{p['is_collaborative']:>7} {p['score']:7.1f}"
-        )
+    print_project_rankings(project_summaries)
 
 
     # --------------------------------------------------------
-    # OUTPUT PART 2: chronological list of projects
-    # --------------------------------------------------------
-    print("\nProjects in chronological order (by first activity)")
-    print("-" * 80)
-
     projects_chrono = sorted(
         project_summaries,
         key=lambda x: x["first_modified"],
@@ -671,10 +601,7 @@ def analyze_projects(extracted_data, filters, advanced_options, detailed_data=No
                 "last_used": last_date,
             }
         )
-        print(
-            f"- {p['project']}: {first_date} → {last_date} "
-            f"({p['duration_days']} days, score {p['score']:.1f})"
-        )
+    print_chronological_projects(chronological_projects)
 
     # --------------------------------------------------------
     # OUTPUT PART 3: chronological list of skills exercised
@@ -682,9 +609,6 @@ def analyze_projects(extracted_data, filters, advanced_options, detailed_data=No
     
     skills_output = []
     if advanced_options.get("skills_gen", True):
-        print("\nSkills exercised over time")
-        print("-" * 80)
-
         skills_chrono = sorted(
             (
                 {
@@ -709,60 +633,25 @@ def analyze_projects(extracted_data, filters, advanced_options, detailed_data=No
                     "last_used": last_date,
                 }
             )
-            print(
-                f"- {first_date} → {last_date}: {row['skill']} "
-                f"(used in {row['count']} files)"
-            )
-
+        print_skills_timeline(skills_output)
         # --------------------------------------------------------
     # OUTPUT PART 4: resume style summaries of top projects
     # --------------------------------------------------------
     TOP_N = 3
     top_projects = project_summaries[:TOP_N]
 
-    print(f"\nTop {TOP_N} projects (Summaries)")
-    print("-" * 80)
     resume_summaries = []
 
     for p in top_projects:
         line = build_project_line(p)
         resume_summaries.append(line)
-        print(f"- {line}")
+    
+    print_resume_summaries(resume_summaries)
 
     # --------------------------------------------------------
     # OUTPUT PART 5: Per-Contributor Rankings (per person)
     # --------------------------------------------------------
-    print("\n=== Contributor Contribution Breakdown ===")
-
-    TOP_N_PER_PERSON = 3
-    MIN_PCT_TO_SHOW = 0.1  # hide tiny noise like 0.0%
-
-    for person, ranked in contributor_rankings.items():
-        if _is_noise_contributor(person):
-            continue
-
-        rows = []
-        for p in ranked:
-            pct = (p.get("per_contributor_pct") or {}).get(person, 0.0)
-            if pct >= MIN_PCT_TO_SHOW:
-                adj = (p.get("per_contributor_scores") or {}).get(person, 0.0)
-                rows.append((p["project"], pct, adj, p["score"]))
-
-        if not rows:
-            continue
-
-        print(f"\n-- {_display_name(person)} --")
-        print(f"{'Project':<32} {'Pct':>7} {'AdjScore':>10} {'Base':>10}")
-        print("-" * 65)
-
-        for project, pct, adj, base in rows[:TOP_N_PER_PERSON]:
-            print(
-                f"{project[:32]:<32} "
-                f"{_fmt_pct(pct):>7} "
-                f"{adj:10.1f} "
-                f"{base:10.1f}"
-            )
-
+    print_contributor_stats(project_summaries)
 
 
     # Serialize contributor profiles (sets to lists)
@@ -776,6 +665,24 @@ def analyze_projects(extracted_data, filters, advanced_options, detailed_data=No
     # --------------------------------------------------------
     # To make text and doc file from analysis
     # --------------------------------------------------------
+    
+    from file_parser import OUTPUT_DIR
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    txt_path = os.path.join(OUTPUT_DIR, "scan_summary.txt")
+    
+    try:
+        with open(txt_path, "w", encoding="utf-8") as f:
+            print(f"Scan Report - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}", file=f)
+            print("=" * 60, file=f)
+            
+            print_project_rankings(project_summaries, file=f)
+            print_chronological_projects(chronological_projects, file=f)
+            print_skills_timeline(skills_output, file=f)
+            print_resume_summaries(resume_summaries, file=f)
+            print_contributor_stats(project_summaries, file=f)
+        print(f"Saved scan summary to {txt_path}")
+    except Exception as e:
+        print(f"Could not save text summary: {e}")
 
     return {
     "project_summaries": project_summaries,

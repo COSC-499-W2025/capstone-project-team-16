@@ -1,4 +1,6 @@
 import json
+import os
+from datetime import datetime
 from db import list_full_scans, get_full_scan_by_id, delete_full_scan_by_id
 from permission_manager import get_yes_no
 from resume_generator import generate_resume, generate_contributor_portfolio
@@ -8,6 +10,7 @@ def scan_manager():
     Main entry point for the Scan Manager UI.
     Provides a loop for viewing, generating portfolios, and deleting past scans.
     """
+    # Continuous loop until the user chooses to return to the home screen
     while True:
         print("\n===== SCAN MANAGER =====")
         print("1. View stored project analyses")
@@ -43,6 +46,7 @@ def view_full_scan_details():
         print("No scans found.")
         return
 
+    # Display list of scans with index for selection
     # 1. List available scans (lightweight metadata only)
     print("Select a scan to view:")
     for i, s in enumerate(scans, start=1):
@@ -65,6 +69,7 @@ def view_full_scan_details():
         return
     data = scan["project_summaries_json"]
 
+    # Extract specific sections from the JSON blob
     project_summaries = data.get("project_summaries", [])
     resume_summaries = data.get("resume_summaries", [])
     skills_chronological = data.get("skills_chronological", [])
@@ -79,6 +84,7 @@ def view_full_scan_details():
     print(f"Mode: {scan['analysis_mode']}")
     print("============================\n")
 
+    # Print various sections of the report
     print_project_rankings(project_summaries)
     print_chronological_projects(projects_chronological)
     print_skills_timeline(skills_chronological)
@@ -86,6 +92,26 @@ def view_full_scan_details():
     print_contributor_stats(project_summaries)
 
     print("\nEnd of scan view.\n")
+
+    # Option to export the displayed report to a text file
+    if get_yes_no("Do you want to export this report to a text file?"):
+        from file_parser import OUTPUT_DIR
+        os.makedirs(OUTPUT_DIR, exist_ok=True)
+        filename = f"scan_report_{scan['timestamp'].replace(':', '-').replace(' ', '_')}.txt"
+        txt_path = os.path.join(OUTPUT_DIR, filename)
+        
+        try:
+            with open(txt_path, "w", encoding="utf-8") as f:
+                print(f"Scan Report - {scan['timestamp']}", file=f)
+                print("=" * 60, file=f)
+                print_project_rankings(project_summaries, file=f)
+                print_chronological_projects(projects_chronological, file=f)
+                print_skills_timeline(skills_chronological, file=f)
+                print_resume_summaries(resume_summaries, file=f)
+                print_contributor_stats(project_summaries, file=f)
+            print(f"Report saved to: {txt_path}")
+        except Exception as e:
+            print(f"Error saving report: {e}")
 
 
 def delete_full_scan():
@@ -97,6 +123,7 @@ def delete_full_scan():
         print("No saved scans found to delete.")
         return
 
+    # Display list for deletion
     print("\nSelect a scan to delete:")
     for i, s in enumerate(scans, start=1):
         print(f"{i}. [{s['timestamp']}]  Mode: {s['analysis_mode']}")
@@ -113,6 +140,7 @@ def delete_full_scan():
 
     scan = scans[idx]
 
+    # Confirm before deletion
     if get_yes_no(f"Are you sure you want to delete the scan from {scan['timestamp']}?"):
         success = delete_full_scan_by_id(scan["summary_id"])
         print("Scan deleted." if success else "Failed to delete scan.")
@@ -132,6 +160,7 @@ def generate_portfolio_menu():
         print("No scans found.")
         return
 
+    # Select scan first
     print("\nSelect a scan to generate portfolio from:")
     for i, s in enumerate(scans, start=1):
         print(f"{i}. {s['timestamp']} ({s['analysis_mode']})")
@@ -153,6 +182,7 @@ def generate_portfolio_menu():
         return
     data = scan["project_summaries_json"]
     
+    # Choose generation type
     print("\n------------------------------------------------")
     print(" GENERATION OPTIONS")
     print("------------------------------------------------")
@@ -162,7 +192,7 @@ def generate_portfolio_menu():
     gen_choice = input("Enter number (0 to cancel): ").strip()
     
     if gen_choice == "1":
-        # Generate full resume
+        # Generate full resume (all projects summary)
         generate_resume(
             data.get("project_summaries", []),
             data.get("projects_chronological", []),
@@ -224,18 +254,22 @@ def is_noise(name):
     n = (name or "").lower()
     return "bot" in n or "noreply" in n or "github-classroom" in n
 
-def print_project_rankings(project_summaries):
+def print_project_rankings(project_summaries, file=None):
+    """
+    Prints a table of projects ranked by score.
+    Supports redirection to a file via the 'file' argument.
+    """
     if not project_summaries:
         return
-    print("\nRanked Projects")
+    print("\nRanked Projects", file=file)
     print(
         f"\n{'Project':<30} "
         f"{'Files':>6} {'Days':>6} {'Code':>6} {'Test':>6} "
         f"{'Doc':>6} {'Des':>6} "
         f"{'Languages':<25} {'Frameworks':<40} "
-        f"{'Collab':>7} {'Score':>7}"
+        f"{'Collab':>7} {'Score':>7}", file=file
     )
-    print("-" * 155)
+    print("-" * 155, file=file)
 
     for p in project_summaries:
         # Truncate long language/framework lists for display
@@ -252,34 +286,47 @@ def print_project_rankings(project_summaries):
             f"{p.get('total_files', 0):6} {p.get('duration_days', 0):6} {p.get('code_files', 0):6} "
             f"{p.get('test_files', 0):6} {p.get('doc_files', 0):6} {p.get('design_files', 0):6} "
             f"{langs_str:<25} {fw_str:<40} "
-            f"{p.get('is_collaborative', 'No'):>7} {p.get('score', 0):7.1f}"
+            f"{p.get('is_collaborative', 'No'):>7} {p.get('score', 0):7.1f}", file=file
         )
 
-def print_chronological_projects(projects_chronological):
+def print_chronological_projects(projects_chronological, file=None):
+    """
+    Prints a list of projects ordered by start date.
+    """
     if not projects_chronological:
         return
-    print("\nProjects in Chronological Order")
-    print("-" * 80)
+    print("\nProjects in Chronological Order", file=file)
+    print("-" * 80, file=file)
     for p in projects_chronological:
-        print(f"- {p['name']}: {p['first_used']} → {p['last_used']}")
+        print(f"- {p['name']}: {p['first_used']} → {p['last_used']}", file=file)
 
-def print_skills_timeline(skills_chronological):
+def print_skills_timeline(skills_chronological, file=None):
+    """
+    Prints a timeline of when specific skills were first and last used.
+    """
     if not skills_chronological:
         return
-    print("\nSkills Exercised Over Time")
-    print("-" * 80)
+    print("\nSkills Exercised Over Time", file=file)
+    print("-" * 80, file=file)
     for s in skills_chronological:
-        print(f"- {s['first_used']} → {s['last_used']}: {s['skill']}")
+        print(f"- {s['first_used']} → {s['last_used']}: {s['skill']}", file=file)
 
-def print_resume_summaries(resume_summaries):
+def print_resume_summaries(resume_summaries, file=None):
+    """
+    Prints generated resume bullet points for top projects.
+    """
     if not resume_summaries:
         return
-    print("\nTop Project Résumé Summaries")
-    print("-" * 80)
+    print("\nTop Project Résumé Summaries", file=file)
+    print("-" * 80, file=file)
     for bullet in resume_summaries:
-        print(f"- {bullet}")
+        print(f"- {bullet}", file=file)
 
-def print_contributor_stats(project_summaries):
+def print_contributor_stats(project_summaries, file=None):
+    """
+    Calculates and prints a leaderboard of contributors based on their impact scores,
+    followed by a breakdown of their contributions per project.
+    """
     contributor_totals = {}  # name -> {adj, pct, count}
 
     for p in project_summaries:
@@ -289,6 +336,7 @@ def print_contributor_stats(project_summaries):
         all_contributors = set(pc_scores.keys()) | set(pc_pcts.keys())
 
         for person in all_contributors:
+            # Skip bots
             if is_noise(person):
                 continue
 
@@ -298,25 +346,29 @@ def print_contributor_stats(project_summaries):
             score = pc_scores.get(person, 0.0)
             pct = pc_pcts.get(person, 0.0)
 
+            # Aggregate stats if they have a non-zero contribution
             if pct > 0:
                 contributor_totals[person]["count"] += 1
                 contributor_totals[person]["adj"] += score
                 contributor_totals[person]["pct"] += pct
 
+    # Convert to list for sorting
     leaderboard = []
     for person, stats in contributor_totals.items():
         leaderboard.append((person, stats["adj"], stats["pct"], stats["count"]))
 
     leaderboard.sort(key=lambda x: x[1], reverse=True)
 
+    # Print Leaderboard Table
     if leaderboard:
-        print("\n=== Contributor Leaderboard (by total adjusted score) ===")
-        print(f"{'Rank':>4}  {'Contributor':<28} {'Projects':>8} {'TotalAdj':>10} {'TotalPct':>9}")
-        print("-" * 70)
+        print("\n=== Contributor Leaderboard (by total adjusted score) ===", file=file)
+        print(f"{'Rank':>4}  {'Contributor':<28} {'Projects':>8} {'TotalAdj':>10} {'TotalPct':>9}", file=file)
+        print("-" * 70, file=file)
         for i, (person, total_adj, total_pct, projects_count) in enumerate(leaderboard, start=1):
-            print(f"{i:4}  {person[:28]:<28} {projects_count:8} {total_adj:10.1f} {total_pct:8.1f}%")
+            print(f"{i:4}  {person[:28]:<28} {projects_count:8} {total_adj:10.1f} {total_pct:8.1f}%", file=file)
 
-        print("\n=== Contributor Contribution Breakdown ===")
+        # Print Detailed Breakdown per Person
+        print("\n=== Contributor Contribution Breakdown ===", file=file)
         for person, _, _, _ in leaderboard:
             person_projects = []
             for p in project_summaries:
@@ -328,8 +380,8 @@ def print_contributor_stats(project_summaries):
             
             person_projects.sort(key=lambda x: x[2], reverse=True)
             if person_projects:
-                print(f"\n-- {person} --")
-                print(f"{'Project':<32} {'Pct':>7} {'AdjScore':>10} {'Base':>10}")
-                print("-" * 65)
+                print(f"\n-- {person} --", file=file)
+                print(f"{'Project':<32} {'Pct':>7} {'AdjScore':>10} {'Base':>10}", file=file)
+                print("-" * 65, file=file)
                 for proj, pct, adj, base in person_projects[:3]:
-                    print(f"{proj[:32]:<32} {pct:5.1f}% {adj:10.1f} {base:10.1f}")
+                    print(f"{proj[:32]:<32} {pct:5.1f}% {adj:10.1f} {base:10.1f}", file=file)
