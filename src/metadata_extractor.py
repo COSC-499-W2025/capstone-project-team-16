@@ -48,7 +48,6 @@ def load_filters(filename=None):
 
 # Loads filters and builds metadata
 def base_extraction(file_list, filters):
-    #extensions, languages = load_filters()
     extracted_data = []
     extensions = filters.get("extensions", {})
     languages = filters.get("languages", {})

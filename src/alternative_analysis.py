@@ -5,7 +5,6 @@ import json
 import os
 from datetime import datetime
 from collections import defaultdict, Counter
-import csv
 from resume_generator import build_project_line
 
 
@@ -178,7 +177,7 @@ def _skill_from_ext(ext: str):
 # --------------------------------------------------------
 # MAIN ANALYSIS FUNCTION
 # --------------------------------------------------------
-def analyze_projects(extracted_data, filters, advanced_options, detailed_data=None, write_csv=True ):
+def analyze_projects(extracted_data, filters, advanced_options, detailed_data=None):
     if advanced_options is None:
     # default: everything ON
         advanced_options = {
@@ -764,66 +763,6 @@ def analyze_projects(extracted_data, filters, advanced_options, detailed_data=No
                 f"{base:10.1f}"
             )
 
-
-
-    # --------------------------------------------------------
-    # CSV OUTPUT (we might not need this anymore since we have word doc now. can delete later. just here for now.)
-    # --------------------------------------------------------
-    if write_csv:
-        from file_parser import OUTPUT_DIR
-        os.makedirs(OUTPUT_DIR, exist_ok=True)
-        out_path = os.path.join(OUTPUT_DIR, "project_contribution_summary.csv")
-
-        while True:
-            try:
-                with open(out_path, "w", newline="", encoding="utf-8") as f:
-                    writer = csv.DictWriter(
-                        f,
-                        fieldnames=[
-                            "project",
-                            "total_files",
-                            "duration_days",
-                            "code_files",
-                            "test_files",
-                            "doc_files",
-                            "design_files",
-                            "languages",
-                            "frameworks",
-                            "skills",
-                            "is_collaborative",
-                            "repo_name",
-                            "repo_root",
-                            "authors",
-                            "contributors",
-                            "branch_count",
-                            "has_merges",
-                            "project_type",
-                            "repo_duration_days",
-                            "commit_frequency",
-                            "first_modified",
-                            "last_modified",
-                            "score",
-                            "per_contributor_scores",
-                            "per_contributor_pct",
-                            "per_contributor_skills",
-                        ],
-                    )
-                    writer.writeheader()
-                    writer.writerows(
-                        [{k: v for k, v in p.items() if k in writer.fieldnames}
-                            for p in project_summaries]
-                    )
-
-                print(f"saved file to {out_path}")
-                break
-            except PermissionError:
-                print(f"\n[!] Could not save CSV to '{out_path}' because it is open.")
-                print("Please close the file and press Enter to retry, or type 'cancel' to skip.")
-                if input("> ").strip().lower() == "cancel":
-                    break
-            except Exception as e:
-                print(f"\n[WARN] Could not save CSV: {e}")
-                break
 
 
     # Serialize contributor profiles (sets to lists)
