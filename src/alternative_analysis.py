@@ -6,7 +6,7 @@ import os
 from datetime import datetime
 from collections import defaultdict, Counter
 import csv
-from resume_generator import generate_resume
+from resume_generator import build_project_line
 
 
 # for contributions
@@ -176,45 +176,6 @@ def _skill_from_ext(ext: str):
 
 
 # --------------------------------------------------------
-# this is to build resume for a project
-# --------------------------------------------------------
-def _project_resume_summary(p: dict) -> str:
-    """build a short sentence about a project."""
-    name = p["project"]
-    langs = p.get("languages", "Unknown")
-    frameworks = p.get("frameworks", "None")
-    duration = p.get("duration_days", 0)
-    code_files = p.get("code_files", 0)
-    test_files = p.get("test_files", 0)
-    project_type = p.get("project_type", "software")
-
-    pieces = []
-
-    # main clause
-    main = f"Contributed to a {project_type.lower()} project '{name}'"
-    if langs and langs != "Unknown":
-        main += f" using {langs}"
-    pieces.append(main)
-
-    # details
-    details = []
-    if code_files:
-        details.append(f"{code_files} code files")
-    if test_files:
-        details.append(f"{test_files} test files")
-    if duration:
-        details.append(f"over {duration} days")
-
-    if details:
-        pieces.append("working on " + ", ".join(details))
-
-    if frameworks and frameworks != "None":
-        pieces.append(f"with frameworks such as {frameworks}")
-
-    return "; ".join(pieces) + "."
-
-
-# --------------------------------------------------------
 # MAIN ANALYSIS FUNCTION
 # --------------------------------------------------------
 def analyze_projects(extracted_data, filters, advanced_options, detailed_data=None, write_csv=True ):
@@ -246,6 +207,11 @@ def analyze_projects(extracted_data, filters, advanced_options, detailed_data=No
     # group files by project prefer Git repo name (repo_name) when we have it, otherwise fall back to guessing from the path
     
     projects = defaultdict(list)
+
+    contributor_profiles = defaultdict(lambda: {
+        "skills": set(),
+        "projects": []
+    })
 
     for row in extracted_data:
         filename = row["filename"]
@@ -503,6 +469,7 @@ def analyze_projects(extracted_data, filters, advanced_options, detailed_data=No
         # -----------------------------------------
         per_contributor_scores = {}
         per_contributor_pct = {}
+        per_contributor_skills = defaultdict(set)
 
         project_meta = None
         if detailed_data:
@@ -523,6 +490,20 @@ def analyze_projects(extracted_data, filters, advanced_options, detailed_data=No
                 pct = _get_contrib_pct(c)
                 per_contributor_pct[key] = pct
                 per_contributor_scores[key] = score * (pct / 100.0)
+
+                # Capture skills from repo data (loc_by_type)
+                loc_map = c.get("loc_by_type", {})
+                for ext in loc_map:
+                    skill = _skill_from_ext(ext)
+                    if skill:
+                        contributor_profiles[key]["skills"].add(skill)
+                        per_contributor_skills[key].add(skill)
+                
+                contributor_profiles[key]["projects"].append({
+                    "name": proj_name,
+                    "pct": pct,
+                    "score": score * (pct / 100.0)
+                })
 
             elif c:
                 key = _normalize_name(str(c))
@@ -579,6 +560,7 @@ def analyze_projects(extracted_data, filters, advanced_options, detailed_data=No
                 "score": score,
                 "per_contributor_scores": per_contributor_scores,
                 "per_contributor_pct": per_contributor_pct,
+                "per_contributor_skills": {k: sorted(list(v)) for k, v in per_contributor_skills.items()},
 
             }
         )
@@ -744,7 +726,7 @@ def analyze_projects(extracted_data, filters, advanced_options, detailed_data=No
     resume_summaries = []
 
     for p in top_projects:
-        line = _project_resume_summary(p)
+        line = build_project_line(p)
         resume_summaries.append(line)
         print(f"- {line}")
 
@@ -792,60 +774,75 @@ def analyze_projects(extracted_data, filters, advanced_options, detailed_data=No
         os.makedirs(OUTPUT_DIR, exist_ok=True)
         out_path = os.path.join(OUTPUT_DIR, "project_contribution_summary.csv")
 
-        with open(out_path, "w", newline="", encoding="utf-8") as f:
-            writer = csv.DictWriter(
-                f,
-                fieldnames=[
-                    "project",
-                    "total_files",
-                    "duration_days",
-                    "code_files",
-                    "test_files",
-                    "doc_files",
-                    "design_files",
-                    "languages",
-                    "frameworks",
-                    "skills",
-                    "is_collaborative",
-                    "repo_name",
-                    "repo_root",
-                    "authors",
-                    "contributors",
-                    "branch_count",
-                    "has_merges",
-                    "project_type",
-                    "repo_duration_days",
-                    "commit_frequency",
-                    "first_modified",
-                    "last_modified",
-                    "score",
-                ],
-            )
-            writer.writeheader()
-            writer.writerows(
-                [{k: v for k, v in p.items() if k in writer.fieldnames}
-                    for p in project_summaries]
-            )
+        while True:
+            try:
+                with open(out_path, "w", newline="", encoding="utf-8") as f:
+                    writer = csv.DictWriter(
+                        f,
+                        fieldnames=[
+                            "project",
+                            "total_files",
+                            "duration_days",
+                            "code_files",
+                            "test_files",
+                            "doc_files",
+                            "design_files",
+                            "languages",
+                            "frameworks",
+                            "skills",
+                            "is_collaborative",
+                            "repo_name",
+                            "repo_root",
+                            "authors",
+                            "contributors",
+                            "branch_count",
+                            "has_merges",
+                            "project_type",
+                            "repo_duration_days",
+                            "commit_frequency",
+                            "first_modified",
+                            "last_modified",
+                            "score",
+                            "per_contributor_scores",
+                            "per_contributor_pct",
+                            "per_contributor_skills",
+                        ],
+                    )
+                    writer.writeheader()
+                    writer.writerows(
+                        [{k: v for k, v in p.items() if k in writer.fieldnames}
+                            for p in project_summaries]
+                    )
+
+                print(f"saved file to {out_path}")
+                break
+            except PermissionError:
+                print(f"\n[!] Could not save CSV to '{out_path}' because it is open.")
+                print("Please close the file and press Enter to retry, or type 'cancel' to skip.")
+                if input("> ").strip().lower() == "cancel":
+                    break
+            except Exception as e:
+                print(f"\n[WARN] Could not save CSV: {e}")
+                break
 
 
-        print(f"saved file to {out_path}")
+    # Serialize contributor profiles (sets to lists)
+    final_contributor_profiles = {}
+    for k, v in contributor_profiles.items():
+        final_contributor_profiles[k] = {
+            "skills": sorted(list(v["skills"])),
+            "projects": v["projects"]
+        }
     
     # --------------------------------------------------------
     # To make text and doc file from analysis
     # --------------------------------------------------------
 
-    if advanced_options.get("resume_gen", True):
-        generate_resume(
-            project_summaries,
-            chronological_projects,
-            skills_output
-        )
-
-        # we still just return project_summaries so main.py doesn't break
     return {
     "project_summaries": project_summaries,
     "resume_summaries": resume_summaries,        # résumé-style top projects
     "skills_chronological": skills_output,      # skills exercised over time
     "projects_chronological": chronological_projects,  # projects in chronological order
     "contributor_rankings": contributor_rankings,
+    "contributor_profiles": final_contributor_profiles,
 }

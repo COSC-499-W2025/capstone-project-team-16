@@ -159,6 +159,7 @@ def save_full_scan(
         "resume_summaries": analysis_results.get("resume_summaries", []),
         "skills_chronological": analysis_results.get("skills_chronological", []),
         "projects_chronological": analysis_results.get("projects_chronological", []),
+        "contributor_profiles": analysis_results.get("contributor_profiles", {}),
         "analysis_mode": analysis_mode,
         "user_consent": "Yes" if user_consent else "No",
         "timestamp": datetime.now().isoformat()
@@ -450,6 +451,3 @@ def delete_project_insights(project_id: str, db_path: str = DB_NAME) -> bool:
         cursor = conn.execute("DELETE FROM project_summaries WHERE project_id = ?", (project_id,))
         conn.commit()
         return cursor.rowcount > 0
-
-
-
