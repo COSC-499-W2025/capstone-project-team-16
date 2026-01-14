@@ -47,6 +47,90 @@ def _build_project_line(p: dict) -> str:
     return "; ".join(pieces) + "."
 
 
+def _truncate_list(value: str, limit: int = 3) -> str:
+    if not value or value in ("Unknown", "None", "NA"):
+        return "NA"
+    parts = [p.strip() for p in value.split(",") if p.strip()]
+    if len(parts) <= limit:
+        return ", ".join(parts)
+    return ", ".join(parts[:limit]) + f" (+{len(parts) - limit} more)"
+
+
+def _build_project_header(p: dict) -> str:
+    name = p["project"]
+    tech = _build_project_tech(p)
+    if tech and tech != "NA":
+        return f"{name} | Tech: {tech}"
+    return name
+
+
+def _build_project_tech(p: dict) -> str:
+    langs = _truncate_list(p.get("languages", "Unknown"))
+    frameworks = _truncate_list(p.get("frameworks", "None"))
+    tech = ", ".join([x for x in (langs, frameworks) if x and x != "NA"])
+    return tech if tech else "NA"
+
+
+def _build_project_details(p: dict) -> str:
+    duration = p.get("duration_days", 0)
+    code_files = p.get("code_files", 0)
+    test_files = p.get("test_files", 0)
+    project_type = p.get("project_type", "software")
+
+    parts = []
+    if project_type and project_type != "Unknown":
+        parts.append(f"Type: {project_type.lower()}")
+    if code_files:
+        parts.append(f"Code: {code_files} files")
+    if test_files:
+        parts.append(f"Tests: {test_files} files")
+    if duration:
+        parts.append(f"Duration: {duration} days")
+
+    return "Details: " + ", ".join(parts) if parts else "Details: NA"
+
+
+def _build_impact_snapshot(p: dict) -> str:
+    code_files = p.get("code_files", 0)
+    test_files = p.get("test_files", 0)
+    duration = p.get("duration_days", 0)
+    parts = []
+    if code_files:
+        parts.append(f"{code_files} code files")
+    if test_files:
+        parts.append(f"{test_files} tests")
+    if duration:
+        parts.append(f"{duration} days")
+    return "Impact: " + " • ".join(parts) if parts else "Impact: NA"
+
+
+def _build_highlights(projects: list[dict]) -> list[str]:
+    if not projects:
+        return []
+    total_projects = len(projects)
+    top_lang = None
+    lang_counts = {}
+    longest = None
+
+    for p in projects:
+        langs = [x.strip() for x in (p.get("languages") or "").split(",") if x.strip()]
+        for lang in langs:
+            lang_counts[lang] = lang_counts.get(lang, 0) + 1
+        d = p.get("duration_days", 0)
+        if longest is None or d > longest:
+            longest = d
+
+    if lang_counts:
+        top_lang = max(lang_counts, key=lang_counts.get)
+
+    highlights = [f"Projects analyzed: {total_projects}"]
+    if top_lang:
+        highlights.append(f"Most used language: {top_lang}")
+    if longest:
+        highlights.append(f"Longest project: {longest} days")
+    return highlights
+
+
 def _write_txt_summary(
     txt_path: str,
     top_projects: list[dict],
@@ -57,19 +141,29 @@ def _write_txt_summary(
     plain-text summary for debugging / quick copy paste. we can remove this if we don't need a text file.
     """
     lines: list[str] = []
-    lines.append("PROJECT PORTFOLIO SUMMARY")
+    lines.append("PROJECT PORTFOLIO SUMMARY ✨")
     lines.append("=" * 60)
     lines.append("")
 
+    # Highlights
+    lines.append("Highlights ⭐")
+    lines.append("-" * 40)
+    for h in _build_highlights(top_projects):
+        lines.append(f"- {h}")
+    lines.append("")
+
     # Top projects
-    lines.append("Top Projects")
+    lines.append("Top Projects 🔥")
     lines.append("-" * 40)
     for p in top_projects:
-        lines.append(f"- {_build_project_line(p)}")
+        header = _build_project_header(p)
+        lines.append(f"- {header}")
+        lines.append(f"  {_build_impact_snapshot(p)}")
+        lines.append(f"  {_build_project_details(p)}")
     lines.append("")
 
     # Project timeline
-    lines.append("Chronological Project Timeline")
+    lines.append("Chronological Project Timeline ⏳")
     lines.append("-" * 40)
     for p in chronological_projects:
         lines.append(
@@ -78,7 +172,7 @@ def _write_txt_summary(
     lines.append("")
 
     # Skills over time
-    lines.append("Skills Used Over Time")
+    lines.append("Skills Used Over Time ⚙️")
     lines.append("-" * 40)
     for row in skills_output:
         lines.append(
@@ -118,13 +212,26 @@ def _write_docx_resume(
     doc.add_paragraph()  # blank line
 
     # --- Top Projects section ---
-    doc.add_heading("Top Projects", level=1)
+    doc.add_heading("Top Projects ★", level=1)
+
+    highlights = _build_highlights(top_projects)
+    if highlights:
+        doc.add_paragraph("Highlights", style="Intense Quote")
+        for h in highlights:
+            doc.add_paragraph(h, style="List Bullet")
+        doc.add_paragraph()
 
     if not top_projects:
         doc.add_paragraph("No projects detected.", style="List Bullet")
     else:
+        table = doc.add_table(rows=1, cols=4)
+        hdr_cells = table.rows[0].cells
+        hdr_cells[0].text = "Project"
+        hdr_cells[1].text = "Dates"
+        hdr_cells[2].text = "Tech"
+        hdr_cells[3].text = "Impact"
+
         for p in top_projects:
-            # First line: bold project name + timeframe
             first_date = (
                 p.get("first_modified").date().isoformat()
                 if isinstance(p.get("first_modified"), datetime)
@@ -135,21 +242,20 @@ def _write_docx_resume(
                 if isinstance(p.get("last_modified"), datetime)
                 else ""
             )
+            dates = f"{first_date} – {last_date}" if first_date and last_date else ""
 
-            para = doc.add_paragraph(style="List Bullet")
-            run_name = para.add_run(p["project"])
-            run_name.bold = True
+            row_cells = table.add_row().cells
+            row_cells[0].text = p["project"]
+            row_cells[1].text = dates
+            row_cells[2].text = _build_project_tech(p)
+            row_cells[3].text = _build_impact_snapshot(p) + "\n" + _build_project_details(p)
 
-            if first_date and last_date:
-                para.add_run(f"  ({first_date} – {last_date})")
-
-            # Second line (same bullet) – description
-            para.add_run("\n" + _build_project_line(p))
+        doc.add_paragraph()
 
     doc.add_paragraph()  # spacing
 
     # --- Chronological Project Timeline ---
-    doc.add_heading("Project Timeline", level=1)
+    doc.add_heading("Project Timeline ⏳", level=1)
     for p in chronological_projects:
         para = doc.add_paragraph(style="List Bullet")
         para.add_run(p["name"]).bold = True
@@ -158,7 +264,7 @@ def _write_docx_resume(
     doc.add_paragraph()
 
     # --- Skills Used Over Time ---
-    doc.add_heading("Skills Used Over Time", level=1)
+    doc.add_heading("Skills Used Over Time ⚙️", level=1)
 
     if skills_output:
         table = doc.add_table(rows=1, cols=3)
