@@ -451,3 +451,27 @@ def delete_project_insights(project_id: str, db_path: str = DB_NAME) -> bool:
         cursor = conn.execute("DELETE FROM project_summaries WHERE project_id = ?", (project_id,))
         conn.commit()
         return cursor.rowcount > 0
+
+def get_full_scan_by_id(summary_id, db_path=DB_NAME):
+    """
+    Return a single full scan by ID, including the parsed JSON data.
+    Used when the user selects a specific scan to view or generate reports from.
+    """
+    with sqlite3.connect(db_path) as conn:
+        conn.row_factory = sqlite3.Row
+        row = conn.execute("SELECT * FROM full_scan_summaries WHERE summary_id = ?", (summary_id,)).fetchone()
+        if row:
+            # Load the JSON blob which contains the FULL scan data (projects, contributors, skills, etc.)
+            scan_data = json.loads(row["project_summaries_json"]) if row["project_summaries_json"] else {}
+            
+            # Debug: Verify keys loaded
+            # print(f"DEBUG: DB Loaded keys: {list(scan_data.keys())}")
+
+            return {
+                "summary_id": row["summary_id"],
+                "timestamp": row["timestamp"],
+                "analysis_mode": row["analysis_mode"],
+                "user_consent": row["user_consent"],
+                "scan_data": scan_data
+            }
+        return None
