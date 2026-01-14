@@ -191,12 +191,13 @@ def generate_portfolio_menu():
     
     if gen_choice == "1":
         # Generate full resume (all projects summary)
-        generate_resume(
+        txt_path, docx_path = generate_resume(
             data.get("project_summaries", []),
             data.get("projects_chronological", []),
-            data.get("skills_chronological", [])
+            data.get("skills_chronological", []),
+            scan_timestamp=scan["timestamp"]
         )
-        input("\nPress Enter to continue...")
+        print(f"\nSUCCESS: Resume saved to:\n{txt_path}\n{docx_path}")
         return
 
     elif gen_choice != "2":
