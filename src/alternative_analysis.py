@@ -185,6 +185,7 @@ def analyze_projects(extracted_data, filters, advanced_options, detailed_data=No
 
     # not heavily used now, but keep in case we want ext->lang fallback later
     lang_map = filters.get("languages", {})
+    ext_map = filters.get("extensions", {})
 
     # track global skill usage over time for chronological skills output
     skill_usage = {}  # skill -> {"first": datetime, "last": datetime, "count": int}
@@ -485,6 +486,31 @@ def analyze_projects(extracted_data, filters, advanced_options, detailed_data=No
                 per_contributor_pct[key] = pct
                 per_contributor_scores[key] = score * (pct / 100.0)
 
+                # Get the specific files this user edited
+                raw_files = c.get("files_edited", [])
+                # Filter out noise/system files
+                files_list = [
+                    f for f in raw_files 
+                    if "__pycache__" not in f 
+                    and not f.endswith((".pyc", ".DS_Store", ".pyd", ".pyo"))
+                    and "/.git/" not in f
+                ]
+                files_worked = len(files_list)
+                
+                # Calculate breakdown of user's work
+                u_code = 0
+                u_test = 0
+                u_doc = 0
+                u_design = 0
+                for fpath in files_list:
+                    _, ext = os.path.splitext(fpath)
+                    cat = ext_map.get(ext.lower(), "uncategorized")
+                    act = _detect_activity(cat, fpath)
+                    if act == "code": u_code += 1
+                    elif act == "test": u_test += 1
+                    elif act == "documentation": u_doc += 1
+                    elif act == "design": u_design += 1
+
                 # Capture skills from repo data (loc_by_type)
                 loc_map = c.get("loc_by_type", {})
                 for ext in loc_map:
@@ -496,7 +522,16 @@ def analyze_projects(extracted_data, filters, advanced_options, detailed_data=No
                 contributor_profiles[key]["projects"].append({
                     "name": proj_name,
                     "pct": pct,
-                    "score": score * (pct / 100.0)
+                    "score": score * (pct / 100.0),
+                    "files_worked": files_worked,
+                    "files_list": files_list,
+                    "user_code_files": u_code,
+                    "user_test_files": u_test,
+                    "user_doc_files": u_doc,
+                    "user_design_files": u_design,
+                    "insertions": c.get("insertions", 0),
+                    "deletions": c.get("deletions", 0),
+                    "commit_count": c.get("commit_count", 0)
                 })
 
             elif c:
@@ -661,6 +696,7 @@ def analyze_projects(extracted_data, filters, advanced_options, detailed_data=No
             "skills": sorted(list(v["skills"])),
             "projects": v["projects"]
         }
+
     
     # --------------------------------------------------------
     # To make text and doc file from analysis

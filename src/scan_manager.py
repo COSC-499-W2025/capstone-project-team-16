@@ -1,6 +1,4 @@
-import json
 import os
-from datetime import datetime
 from db import list_full_scans, get_full_scan_by_id, delete_full_scan_by_id
 from permission_manager import get_yes_no
 from resume_generator import generate_resume, generate_contributor_portfolio
@@ -50,7 +48,7 @@ def view_full_scan_details():
     # 1. List available scans (lightweight metadata only)
     print("Select a scan to view:")
     for i, s in enumerate(scans, start=1):
-        print(f"{i}. {s['timestamp']} ({s['analysis_mode']})")
+        print(f"{i}. [ID: {s['summary_id']}] {s['timestamp']} ({s['analysis_mode']})")
 
     choice = input("Enter number (0 to cancel): ").strip()
     if not choice.isdigit() or int(choice) == 0:
@@ -67,7 +65,7 @@ def view_full_scan_details():
     if not scan:
         print("Error: Could not retrieve scan data.")
         return
-    data = scan["project_summaries_json"]
+    data = scan["scan_data"]
 
     # Extract specific sections from the JSON blob
     project_summaries = data.get("project_summaries", [])
@@ -126,7 +124,7 @@ def delete_full_scan():
     # Display list for deletion
     print("\nSelect a scan to delete:")
     for i, s in enumerate(scans, start=1):
-        print(f"{i}. [{s['timestamp']}]  Mode: {s['analysis_mode']}")
+        print(f"{i}. [ID: {s['summary_id']}] {s['timestamp']} ({s['analysis_mode']})")
 
     choice = input("Enter number (or 0 to cancel): ").strip()
     if not choice.isdigit() or int(choice) == 0:
@@ -163,7 +161,7 @@ def generate_portfolio_menu():
     # Select scan first
     print("\nSelect a scan to generate portfolio from:")
     for i, s in enumerate(scans, start=1):
-        print(f"{i}. {s['timestamp']} ({s['analysis_mode']})")
+        print(f"{i}. [ID: {s['summary_id']}] {s['timestamp']} ({s['analysis_mode']})")
 
     choice = input("Enter number (0 to cancel): ").strip()
     if not choice.isdigit() or int(choice) == 0:
@@ -180,7 +178,7 @@ def generate_portfolio_menu():
     if not scan:
         print("Error: Could not retrieve scan data.")
         return
-    data = scan["project_summaries_json"]
+    data = scan["scan_data"]
     
     # Choose generation type
     print("\n------------------------------------------------")

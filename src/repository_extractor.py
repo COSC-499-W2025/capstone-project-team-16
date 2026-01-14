@@ -8,7 +8,6 @@ import os
 
 
 def analyze_repo_type(repo_path):
-    print("repo analyzing")
 
     # Only proceed if it is a .git folder indicating .git is likely a legitimate repository directory.
     # Return project dictionary containing all repo-level metadata.

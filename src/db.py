@@ -128,7 +128,7 @@ def save_full_scan(
                 full_scan_data["timestamp"],
                 analysis_mode,
                 full_scan_data["user_consent"],
-                json.dumps(full_scan_data, ensure_ascii=False),
+                json.dumps(full_scan_data, ensure_ascii=False, default=str),
             )
         )
         conn.commit()
@@ -142,12 +142,18 @@ def get_full_scan_by_id(summary_id, db_path=DB_NAME):
         conn.row_factory = sqlite3.Row
         row = conn.execute("SELECT * FROM full_scan_summaries WHERE summary_id = ?", (summary_id,)).fetchone()
         if row:
+            # Load the JSON blob which contains the FULL scan data (projects, contributors, skills, etc.)
+            scan_data = json.loads(row["project_summaries_json"]) if row["project_summaries_json"] else {}
+            
+            # Debug: Verify keys loaded
+            # print(f"DEBUG: DB Loaded keys: {list(scan_data.keys())}")
+
             return {
                 "summary_id": row["summary_id"],
                 "timestamp": row["timestamp"],
                 "analysis_mode": row["analysis_mode"],
                 "user_consent": row["user_consent"],
-                "project_summaries_json": json.loads(row["project_summaries_json"]) if row["project_summaries_json"] else {}
+                "scan_data": scan_data
             }
         return None
 
