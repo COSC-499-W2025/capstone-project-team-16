@@ -180,7 +180,155 @@ def save_full_scan(
             )
         )
         conn.commit()
+<<<<<<< HEAD
 
+def get_all_full_scans(db_path=DB_NAME):
+    """Return all full scans stored in the DB as a list of dicts."""
+    import sqlite3, json
+
+=======
+        
+def get_full_scan_by_id(summary_id, db_path=DB_NAME):
+    """
+    Return a single full scan by ID, including the parsed JSON data.
+    Used when the user selects a specific scan to view or generate reports from.
+    """
+>>>>>>> 3988b06 (Added delete_full_scan_by_id and delted unused table and insert)
+    with sqlite3.connect(db_path) as conn:
+        conn.row_factory = sqlite3.Row
+        cursor = conn.execute("SELECT * FROM full_scan_summaries ORDER BY timestamp DESC")
+        rows = cursor.fetchall()
+        results = []
+        for row in rows:
+            results.append({
+                "summary_id": row["summary_id"],
+                "timestamp": row["timestamp"],
+                "analysis_mode": row["analysis_mode"],
+                "user_consent": row["user_consent"],
+                "project_summaries_json": json.loads(row["project_summaries_json"]) if row["project_summaries_json"] else {}
+            })
+        return results
+    
+
+def delete_full_scan_by_id(summary_id, db_path=DB_NAME):
+    with sqlite3.connect(db_path) as conn:
+        conn.execute("DELETE FROM full_scan_summaries WHERE summary_id = ?", (summary_id,))
+        conn.commit()
+        return True
+
+
+
+
+# Full save results (needs to be reconfigured to support final data types)
+def save_results(
+    results_list: Sequence[Mapping[str, Any]],
+    user_consent: bool,
+    analysis_mode: str,
+    user_id: Optional[str] = None,
+    project_id: Optional[str] = None,
+    file_tree: Optional[Any] = None,
+    resume_bullets: Optional[Sequence[str]] = None,
+    db_path: str = DB_NAME
+) -> None:
+    """
+    Saves a list of project-analysis dictionaries to the SQLite database.
+    Each row includes:
+      - a unique project_id
+      - user_id (if available)
+      - analysis_data (JSON)
+      - file_tree (JSON)
+      - resume_bullets (JSON list)
+      - all the summary metrics (files, score, etc.)
+      - user_consent + analysis_mode
+    Backwards-compatible: existing callers can still use
+      save_results(results, user_consent, analysis_mode)
+    and omit the rest.
+    """
+    if not results_list:
+        return
+
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    consent_str = "Yes" if user_consent else "No"
+    rows = []
+
+    for p in results_list:
+        pid = p.get("project_id") or project_id or str(uuid.uuid4())
+        uid = p.get("user_id") or user_id or ""
+
+        # Analysis data JSON
+        raw_analysis = p.get("analysis_data", p)
+        analysis_data_str = raw_analysis if isinstance(raw_analysis, str) else json.dumps(raw_analysis)
+
+        # File tree JSON
+        ft_obj = p.get("file_tree", file_tree)
+        file_tree_str = ft_obj if isinstance(ft_obj, str) or ft_obj is None else json.dumps(ft_obj)
+
+        # Resume bullets JSON
+        rb_obj = p.get("resume_bullets", resume_bullets)
+        if rb_obj is None:
+            resume_bullets_str = json.dumps([])
+        elif isinstance(rb_obj, str):
+            resume_bullets_str = rb_obj
+        else:
+            resume_bullets_str = json.dumps(list(rb_obj))
+
+        rows.append((
+            timestamp,
+            p.get("project", "Unknown"),
+            p.get("total_files", 0),
+            p.get("duration_days", 0),
+            p.get("code_files", 0),
+            p.get("test_files", 0),
+            p.get("doc_files", 0),
+            p.get("design_files", 0),
+            p.get("languages", ""),
+            p.get("frameworks", ""),
+            p.get("skills", ""),
+            p.get("is_collaborative", "No"),
+            p.get("score", 0),
+            consent_str,
+            analysis_mode,
+            pid,
+            uid,
+            analysis_data_str,
+            file_tree_str,
+            resume_bullets_str,
+        ))
+
+    with sqlite3.connect(db_path) as conn:
+        ensure_db_initialized(conn)
+        conn.executemany(INSERT_SQL, rows)
+        conn.commit()
+
+# ----------------------
+# Generic helpers
+# ----------------------
+
+def get_all_summaries(db_path: str = DB_NAME) -> List[Dict[str, Any]]:
+    with sqlite3.connect(db_path) as conn:
+        ensure_db_initialized(conn)
+        conn.row_factory = sqlite3.Row
+        return [dict(row) for row in conn.execute("SELECT * FROM project_summaries").fetchall()]
+
+def get_summary_by_id(summary_id: int, db_path: str = DB_NAME) -> Optional[Dict[str, Any]]:
+    with sqlite3.connect(db_path) as conn:
+        ensure_db_initialized(conn)
+        conn.row_factory = sqlite3.Row
+        row = conn.execute("SELECT * FROM project_summaries WHERE id = ?", (summary_id,)).fetchone()
+        return dict(row) if row else None
+
+def delete_summary(summary_id: int, db_path: str = DB_NAME) -> bool:
+    with sqlite3.connect(db_path) as conn:
+        ensure_db_initialized(conn)
+        cursor = conn.execute("DELETE FROM project_summaries WHERE id = ?", (summary_id,))
+        conn.commit()
+        return cursor.rowcount > 0
+
+<<<<<<< HEAD
+=======
+
+
+#DEPRECIATED BELOW NEEDS TO BE DELETED
 def get_all_full_scans(db_path=DB_NAME):
     """Return all full scans stored in the DB as a list of dicts."""
     import sqlite3, json
@@ -315,6 +463,7 @@ def delete_summary(summary_id: int, db_path: str = DB_NAME) -> bool:
         conn.commit()
         return cursor.rowcount > 0
 
+>>>>>>> 3988b06 (Added delete_full_scan_by_id and delted unused table and insert)
 def update_summary(summary_id: int, fields: Mapping[str, Any], db_path: str = DB_NAME) -> bool:
     if not fields:
         return False
