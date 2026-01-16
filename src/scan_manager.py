@@ -61,7 +61,8 @@ def view_full_scan_details():
 
     # 2. Fetch the full heavy JSON data for the selected scan
     summary_id = scans[idx]["summary_id"]
-    scan = get_full_scan_by_id(summary_id)
+    #TEMP DELETE scan = get_full_scan_by_id(summary_id)
+    scan = None
     if not scan:
         print("Error: Could not retrieve scan data.")
         return
