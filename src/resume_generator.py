@@ -2,6 +2,7 @@
 
 import os
 from datetime import datetime
+from collections import Counter
 
 from docx import Document
 from docx.shared import Pt
@@ -9,11 +10,10 @@ from docx.shared import Pt
 
 def build_project_line(p: dict) -> str:
     """
-    building a short resmume desc about a project.
-    (same idea as in alternative_analysis, but kept local so this
-    file can be imported independently.)
+    Builds a short resume description about a project (General/Team view).
+    Used for the full resume summary.
     """
-    name = p["project"]
+    name = p.get("project", "Unknown")
     langs = p.get("languages", "Unknown")
     frameworks = p.get("frameworks", "None")
     duration = p.get("duration_days", 0)
@@ -24,9 +24,9 @@ def build_project_line(p: dict) -> str:
     pieces = []
 
     main = f"Contributed to project '{name}'"
-    if project_type and project_type != "Unknown":
+    if project_type and project_type.lower() != "unknown":
         main = f"Contributed to {project_type.lower()} project '{name}'"
-    if langs and langs != "Unknown":
+    if langs and langs.lower() != "unknown":
         main += f" using {langs}"
     pieces.append(main)
 
@@ -35,13 +35,14 @@ def build_project_line(p: dict) -> str:
         details.append(f"{code_files} code files")
     if test_files:
         details.append(f"{test_files} test files")
+
     if duration:
         details.append(f"over {duration} days")
 
     if details:
-        pieces.append("worked on " + ", ".join(details))
+        pieces.append("comprising " + ", ".join(details))
 
-    if frameworks and frameworks != "None":
+    if frameworks and frameworks not in ("None", "NA"):
         pieces.append(f"with frameworks such as {frameworks}")
 
     return "; ".join(pieces) + "."
@@ -63,6 +64,7 @@ def _write_txt_summary(
 
     # Top projects
     lines.append("Top Projects")
+    lines.append("Projects")
     lines.append("-" * 40)
     for p in top_projects:
         lines.append(f"- {build_project_line(p)}")
@@ -119,6 +121,7 @@ def _write_docx_resume(
 
     # --- Top Projects section ---
     doc.add_heading("Top Projects", level=1)
+    doc.add_heading("Projects", level=1)
 
     if not top_projects:
         doc.add_paragraph("No projects detected.", style="List Bullet")
@@ -199,7 +202,8 @@ def generate_resume(
     project_summaries: list[dict],
     chronological_projects: list[dict],
     skills_output: list[dict],
-) -> None:
+    scan_timestamp: str = None
+) -> tuple[str, str]:
     """
     Main entry point called from alternative_analysis.analyze_projects.
     """
@@ -207,33 +211,83 @@ def generate_resume(
     sorted_projects = sorted(
         project_summaries, key=lambda p: p.get("score", 0), reverse=True
     )
-    top_projects = sorted_projects[:3]
 
     from file_parser import OUTPUT_DIR
 
-    txt_path = os.path.join(OUTPUT_DIR, "resume_output.txt")
-    docx_path = os.path.join(OUTPUT_DIR, "portfolio_resume.docx")
+    suffix = ""
+    if scan_timestamp:
+        # Clean timestamp for filename
+        suffix = "_" + scan_timestamp.replace(":", "-").replace(" ", "_")
+
+    txt_path = os.path.join(OUTPUT_DIR, f"resume_output{suffix}.txt")
+    docx_path = os.path.join(OUTPUT_DIR, f"portfolio_resume{suffix}.docx")
+
+    _write_txt_summary(txt_path, sorted_projects, chronological_projects, skills_output)
+    final_docx_path = _write_docx_resume(docx_path, sorted_projects, chronological_projects, skills_output)
+
+    return txt_path, final_docx_path
 
 
-    _write_txt_summary(txt_path, top_projects, chronological_projects, skills_output)
-    final_docx_path = _write_docx_resume(docx_path, top_projects, chronological_projects, skills_output)
-
-    print(f"saved résumé text to {txt_path}")
-    print(f"saved résumé document to {final_docx_path}")
-
+def _build_personal_project_description(project_name, project_context, user_stats):
+    """
+    Constructs a sentence describing the user's specific contribution to a project.
+    """
+    # Context from the project as a whole
+    langs = project_context.get("languages", "Unknown")
+    frameworks = project_context.get("frameworks", "None")
+    
+    # User specific stats
+    u_files = user_stats.get("files_worked", 0)
+    u_code = user_stats.get("user_code_files", 0)
+    u_test = user_stats.get("user_test_files", 0)
+    u_doc = user_stats.get("user_doc_files", 0)
+    u_design = user_stats.get("user_design_files", 0)
+    
+    parts = []
+    parts.append(f"Contributed to '{project_name}'")
+    
+    if langs and langs != "Unknown":
+        parts.append(f"using {langs}")
+        
+    # Work breakdown
+    work_details = []
+    if u_code: work_details.append(f"{u_code} code files")
+    if u_test: work_details.append(f"{u_test} test files")
+    if u_doc: work_details.append(f"{u_doc} documents")
+    if u_design: work_details.append(f"{u_design} design assets")
+    
+    if work_details:
+        parts.append("working on " + ", ".join(work_details))
+    elif u_files:
+        parts.append(f"working on {u_files} files")
+        
+    if frameworks and frameworks not in ("None", "NA"):
+        parts.append(f"utilizing frameworks such as {frameworks}")
+        
+    return " ".join(parts) + "."
 
 def generate_contributor_portfolio(
     contributor_name: str,
     profile_data: dict,
-    all_projects_map: dict
+    all_projects_map: dict,
+    scan_timestamp: str = None
 ) -> str:
     """
     Generates a specific portfolio Word doc for a single contributor.
     """
+    if not profile_data:
+        print(f"Error: No profile data found for {contributor_name}")
+        return None
+
     from file_parser import OUTPUT_DIR
     
     safe_name = "".join(c for c in contributor_name if c.isalnum() or c in (' ', '_', '-')).strip()
-    filename = f"Portfolio_{safe_name}.docx"
+    
+    suffix = ""
+    if scan_timestamp:
+        suffix = "_" + scan_timestamp.replace(":", "-").replace(" ", "_")
+        
+    filename = f"Portfolio_{safe_name}{suffix}.docx"
     docx_path = os.path.join(OUTPUT_DIR, filename)
     
     doc = Document()
@@ -283,32 +337,48 @@ def generate_contributor_portfolio(
     # Get project details and sort by their contribution score
     user_projects = []
     for p_ref in projects_ref:
-        p_name = p_ref["name"]
-        if p_name in all_projects_map:
-            full_p = all_projects_map[p_name]
-            # Combine ref data with full data
-            merged = full_p.copy()
-            merged["user_pct"] = p_ref["pct"]
-            merged["user_score"] = p_ref["score"]
-            user_projects.append(merged)
+        p_name = p_ref.get("name", "Unknown Project")
+        
+        # Extract user stats directly from the profile reference
+        user_stats = {
+            "files_worked": p_ref.get("files_worked", 0),
+            "files_list": p_ref.get("files_list", []),
+            "user_code_files": p_ref.get("user_code_files", 0),
+            "user_test_files": p_ref.get("user_test_files", 0),
+            "user_doc_files": p_ref.get("user_doc_files", 0),
+            "user_design_files": p_ref.get("user_design_files", 0),
+            "pct": p_ref.get("pct", 0.0),
+            "score": p_ref.get("score", 0.0),
+            "insertions": p_ref.get("insertions", 0),
+            "deletions": p_ref.get("deletions", 0),
+            "commit_count": p_ref.get("commit_count", 0)
+        }
+
+        # Fallback: if counts are zero but list exists, update files_worked
+        if user_stats["files_worked"] == 0 and user_stats["files_list"]:
+             user_stats["files_worked"] = len(user_stats["files_list"])
+
+        # Get general project context (dates, frameworks, etc.)
+        project_context = all_projects_map.get(p_name, {})
+        
+        # Store everything needed for generation
+        user_projects.append((p_name, user_stats, project_context))
 
     # Sort by the user's specific impact (score)
-    user_projects.sort(key=lambda x: x["user_score"], reverse=True)
+    user_projects.sort(key=lambda x: x[1]["score"], reverse=True)
 
     if not user_projects:
         doc.add_paragraph("No project contributions found.")
     else:
-        for p in user_projects:
-            pct = p["user_pct"]
-            # Skip negligible contributions
-            if pct < 0.1:
+        for p_name, u_stats, p_context in user_projects:
+            pct = u_stats["pct"]
+            # Skip negligible contributions only if no actual work recorded (Fixing indentation/logic)
+            if pct < 0.1 and u_stats.get('files_worked', 0) == 0 and u_stats.get('commit_count', 0) == 0:
                 continue
 
-            p_name = p["project"]
-            
             # Format Dates
-            start_date = p.get("first_modified")
-            end_date = p.get("last_modified")
+            start_date = p_context.get("first_modified")
+            end_date = p_context.get("last_modified")
             date_str = ""
             
             def _fmt_d(d):
@@ -328,18 +398,58 @@ def generate_contributor_portfolio(
             if date_str:
                 p_head.add_run(date_str).font.size = Pt(11)
             
+            # Project Scope Stats (Total project context)
+            scope_p = doc.add_paragraph()
+            scope_p.style.font.size = Pt(9)
+            scope_p.add_run("Project Scope: ").bold = True
+            scope_p.add_run(f"{p_context.get('total_files', 0)} files, {p_context.get('duration_days', 0)} days. Languages: {p_context.get('languages', 'Unknown')}")
+
             # Stats
             stats_p = doc.add_paragraph()
-            stats_p.add_run(f"Contribution: {pct:.1f}%").bold = True
-            stats_p.add_run(f"  |  Impact Score: {p['user_score']:.1f}")
+            stats_p.add_run(f"Contribution: {pct:.1f}%").bold = True 
+            stats_p.add_run(f"  |  Impact Score: {u_stats['score']:.1f}")
+            
+            if u_stats.get("files_worked"):
+                stats_p.add_run(f"  |  Files Edited: {u_stats['files_worked']}")
+            
+            if u_stats.get("commit_count"):
+                stats_p.add_run(f"  |  Commits: {u_stats['commit_count']}")
+            
+            if u_stats.get("insertions") or u_stats.get("deletions"):
+                stats_p.add_run(f"  |  Lines: +{u_stats['insertions']} / -{u_stats['deletions']}")
+
+            # Add breakdown of file types
+            types_breakdown = []
+            if u_stats["user_code_files"] > 0:
+                types_breakdown.append(f"{u_stats['user_code_files']} Code")
+            if u_stats["user_test_files"] > 0:
+                types_breakdown.append(f"{u_stats['user_test_files']} Test")
+            if u_stats["user_doc_files"] > 0:
+                types_breakdown.append(f"{u_stats['user_doc_files']} Docs")
+            if u_stats["user_design_files"] > 0:
+                types_breakdown.append(f"{u_stats['user_design_files']} Design")
+            
+            if types_breakdown:
+                stats_p.add_run(f"  |  Work: {', '.join(types_breakdown)}")
+
+            # Files Breakdown
+            files_list = u_stats["files_list"]
+            if files_list:
+                exts = [os.path.splitext(f)[1].lower() for f in files_list]
+                cnt = Counter(exts)
+                sorted_cnt = sorted(cnt.items(), key=lambda x: x[1], reverse=True)
+                breakdown_str = ", ".join([f"{count} {ext or 'no-ext'}" for ext, count in sorted_cnt])
+                fb_p = doc.add_paragraph()
+                fb_p.add_run("File Breakdown: ").bold = True
+                fb_p.add_run(breakdown_str)
             
             # Description
-            desc = build_project_line(p)
+            desc = _build_personal_project_description(p_name, p_context, u_stats)
             doc.add_paragraph(desc)
             
             # Specific Skills Used in this project
             # The key in per_contributor_skills matches the contributor_name (normalized)
-            pcs = p.get("per_contributor_skills", {})
+            pcs = p_context.get("per_contributor_skills", {})
             my_skills = pcs.get(contributor_name, [])
             
             if my_skills:
