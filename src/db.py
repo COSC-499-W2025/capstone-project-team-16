@@ -180,20 +180,20 @@ def save_full_scan(
             )
         )
         conn.commit()
-<<<<<<< HEAD
+
 
 def get_all_full_scans(db_path=DB_NAME):
     """Return all full scans stored in the DB as a list of dicts."""
     import sqlite3, json
 
-=======
+
         
 def get_full_scan_by_id(summary_id, db_path=DB_NAME):
     """
     Return a single full scan by ID, including the parsed JSON data.
     Used when the user selects a specific scan to view or generate reports from.
     """
->>>>>>> 3988b06 (Added delete_full_scan_by_id and delted unused table and insert)
+
     with sqlite3.connect(db_path) as conn:
         conn.row_factory = sqlite3.Row
         cursor = conn.execute("SELECT * FROM full_scan_summaries ORDER BY timestamp DESC")
@@ -324,8 +324,7 @@ def delete_summary(summary_id: int, db_path: str = DB_NAME) -> bool:
         conn.commit()
         return cursor.rowcount > 0
 
-<<<<<<< HEAD
-=======
+
 
 
 #DEPRECIATED BELOW NEEDS TO BE DELETED
@@ -463,7 +462,7 @@ def delete_summary(summary_id: int, db_path: str = DB_NAME) -> bool:
         conn.commit()
         return cursor.rowcount > 0
 
->>>>>>> 3988b06 (Added delete_full_scan_by_id and delted unused table and insert)
+
 def update_summary(summary_id: int, fields: Mapping[str, Any], db_path: str = DB_NAME) -> bool:
     if not fields:
         return False
