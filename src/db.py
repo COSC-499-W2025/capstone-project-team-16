@@ -132,6 +132,7 @@ def list_full_scans(db_path=DB_NAME):
     Does NOT load the heavy JSON data, making it fast for listing.
     """
     with sqlite3.connect(db_path) as conn:
+        ensure_db_initialized(conn)
         conn.row_factory = sqlite3.Row
         rows = conn.execute("SELECT summary_id, timestamp, analysis_mode FROM full_scan_summaries ORDER BY timestamp DESC").fetchall()
         return [dict(row) for row in rows]
@@ -218,6 +219,7 @@ def get_full_scan_by_id(summary_id, db_path=DB_NAME):
 def delete_full_scan_by_id(summary_id, db_path=DB_NAME):
     """Permanently delete a scan record by its ID."""
     with sqlite3.connect(db_path) as conn:
+        ensure_db_initialized(conn)
         cursor = conn.execute("DELETE FROM full_scan_summaries WHERE summary_id = ?", (summary_id,))
         conn.commit()
     return cursor.rowcount > 0
