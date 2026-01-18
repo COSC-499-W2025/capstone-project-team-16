@@ -1,5 +1,5 @@
 import os
-from db import list_full_scans, delete_full_scan_by_id , get_full_scan_by_id
+from db import list_full_scans, delete_full_scan_by_id #DELETE , get_full_scan_by_id
 from permission_manager import get_yes_no
 from resume_generator import generate_resume, generate_contributor_portfolio
 
@@ -61,8 +61,8 @@ def view_full_scan_details():
 
     # 2. Fetch the full heavy JSON data for the selected scan
     summary_id = scans[idx]["summary_id"]
-    scan = get_full_scan_by_id(summary_id)
-    
+    #TEMP DELETE scan = get_full_scan_by_id(summary_id)
+    scan = None
     if not scan:
         print("Error: Could not retrieve scan data.")
         return
@@ -176,7 +176,8 @@ def generate_portfolio_menu():
     # Fetch full data to access contributor profiles and project details
     summary_id = scans[idx]["summary_id"]
     
-    scan = get_full_scan_by_id(summary_id)
+    #DELETE scan = get_full_scan_by_id(summary_id)
+    scan = None
     if not scan:
         print("Error: Could not retrieve scan data.")
         return
