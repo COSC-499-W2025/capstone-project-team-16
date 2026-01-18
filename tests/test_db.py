@@ -131,7 +131,7 @@ def test_get_full_scan_by_id_returns_parsed_json(db_path):
     assert full_scan["user_consent"] == "Yes"
     
     # Check that JSON was parsed back into a dict
-    json_data = full_scan["project_summaries_json"]
+    json_data = full_scan["scan_data"]
     assert isinstance(json_data, dict)
     assert json_data["project_summaries"][0]["project"] == "DeepData"
 
@@ -178,3 +178,24 @@ def test_save_full_scan_ignores_empty_results(db_path):
 
     rows = _fetch_all(db_path, "SELECT * FROM full_scan_summaries")
     assert len(rows) == 0
+
+def test_get_full_scan_by_id_returns_none_when_missing(db_path):
+    # Ensure getting a non-existent ID returns None, not an empty list or error
+    result = db.get_full_scan_by_id(99999, db_path=db_path)
+    assert result is None
+
+def test_list_full_scans_ordering(db_path):
+    # Save scans with distinct timestamps (mocking logic or relying on execution time)
+    # Since save_full_scan uses datetime.now(), we just call it sequentially.
+    db.save_full_scan({"project_summaries": [{"p": 1}]}, "basic", True, db_path=db_path)
+    # Small delay or just reliance on sequential execution usually works for sqlite timestamps
+    import time
+    time.sleep(0.1) 
+    db.save_full_scan({"project_summaries": [{"p": 2}]}, "advanced", True, db_path=db_path)
+
+    scans = db.list_full_scans(db_path=db_path)
+    assert len(scans) == 2
+    
+    # Should be ordered by timestamp DESC (newest first)
+    assert scans[0]["analysis_mode"] == "advanced"
+    assert scans[1]["analysis_mode"] == "basic"

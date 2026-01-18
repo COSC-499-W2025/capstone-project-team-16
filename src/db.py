@@ -108,6 +108,8 @@ def ensure_db_initialized(conn: sqlite3.Connection) -> None:
     Ensures the 'project_summaries' table and 'user_config' exists in the database.
     Only runs once per program execution.
     """
+
+    #DELETE 
     conn.execute(CREATE_TABLE_SQL)
     conn.execute(USER_CONFIG_TABLE_SQL)
     """Ensure the table for full scans exists."""
@@ -125,9 +127,14 @@ Temporary, generic, short term DB saving. Our returned data is changing so much 
 """
 # For displaying in selection now.
 def list_full_scans(db_path=DB_NAME):
-    """Return minimal info about each scan for selection menus."""
-    scans = get_all_full_scans(db_path)
-    return [{"summary_id": s["summary_id"], "timestamp": s["timestamp"], "analysis_mode": s["analysis_mode"]} for s in scans]
+    """
+    Return minimal info (ID, timestamp, mode) about each scan for selection menus.
+    Does NOT load the heavy JSON data, making it fast for listing.
+    """
+    with sqlite3.connect(db_path) as conn:
+        conn.row_factory = sqlite3.Row
+        rows = conn.execute("SELECT summary_id, timestamp, analysis_mode FROM full_scan_summaries ORDER BY timestamp DESC").fetchall()
+        return [dict(row) for row in rows]
 
 # Saving method for all data
 def save_full_scan(
@@ -138,12 +145,13 @@ def save_full_scan(
 ) -> None:
     """
     Save a full scan, including summaries, resume bullets, skills over time, and chronological projects.
+    The complex nested structure is serialized into a single JSON blob.
     """
     if not analysis_results or "project_summaries" not in analysis_results:
         return
 
     # Serialize datetime fields in projects
-    def _serialize_project(p):
+    def _serialize_project(p): 
         p_copy = p.copy()
         for key in ["first_modified", "last_modified"]:
             if key in p_copy and isinstance(p_copy[key], datetime):
@@ -154,6 +162,7 @@ def save_full_scan(
         _serialize_project(p) for p in analysis_results["project_summaries"]
     ]
 
+    # Construct the master dictionary to be saved as JSON
     full_scan_data = {
         "project_summaries": serialized_projects,
         "resume_summaries": analysis_results.get("resume_summaries", []),
@@ -176,10 +185,59 @@ def save_full_scan(
                 full_scan_data["timestamp"],
                 analysis_mode,
                 full_scan_data["user_consent"],
-                json.dumps(full_scan_data, ensure_ascii=False),
+                json.dumps(full_scan_data, ensure_ascii=False, default=str),
             )
         )
         conn.commit()
+
+def get_full_scan_by_id(summary_id, db_path=DB_NAME):
+    """
+    Return a single full scan by ID, including the parsed JSON data.
+    Used when the user selects a specific scan to view or generate reports from.
+    """
+    with sqlite3.connect(db_path) as conn:
+        ensure_db_initialized(conn)
+        conn.row_factory = sqlite3.Row
+        row = conn.execute("SELECT * FROM full_scan_summaries WHERE summary_id = ?", (summary_id,)).fetchone()
+        if row:
+            # Load the JSON blob which contains the FULL scan data (projects, contributors, skills, etc.)
+            scan_data = json.loads(row["project_summaries_json"]) if row["project_summaries_json"] else {}
+            
+            # Debug: Verify keys loaded
+            # print(f"DEBUG: DB Loaded keys: {list(scan_data.keys())}")
+
+            return {
+                "summary_id": row["summary_id"],
+                "timestamp": row["timestamp"],
+                "analysis_mode": row["analysis_mode"],
+                "user_consent": row["user_consent"],
+                "scan_data": scan_data
+            }
+        return None
+    
+def delete_full_scan_by_id(summary_id, db_path=DB_NAME):
+    """Permanently delete a scan record by its ID."""
+    with sqlite3.connect(db_path) as conn:
+        cursor = conn.execute("DELETE FROM full_scan_summaries WHERE summary_id = ?", (summary_id,))
+        conn.commit()
+    return cursor.rowcount > 0
+
+
+
+
+
+"""
+
+------------------------------------------
+
+DEPRECIATED BELOW NEEDS TO BE DELETED AFTER INTEGRATION
+
+-------------------------------------------
+
+
+"""
+
+
 
 
 def get_all_full_scans(db_path=DB_NAME):
@@ -188,7 +246,7 @@ def get_all_full_scans(db_path=DB_NAME):
 
 
         
-def get_full_scan_by_id(summary_id, db_path=DB_NAME):
+def deprecated_get_full_scan_by_id(summary_id, db_path=DB_NAME):
     """
     Return a single full scan by ID, including the parsed JSON data.
     Used when the user selects a specific scan to view or generate reports from.
@@ -210,7 +268,7 @@ def get_full_scan_by_id(summary_id, db_path=DB_NAME):
         return results
     
 
-def delete_full_scan_by_id(summary_id, db_path=DB_NAME):
+def deprecated_delete_full_scan_by_id(summary_id, db_path=DB_NAME):
     with sqlite3.connect(db_path) as conn:
         conn.execute("DELETE FROM full_scan_summaries WHERE summary_id = ?", (summary_id,))
         conn.commit()
@@ -348,7 +406,7 @@ def get_all_full_scans(db_path=DB_NAME):
         return results
     
 
-def delete_full_scan_by_id(summary_id, db_path=DB_NAME):
+def deprecated_delete_full_scan_by_id_v2(summary_id, db_path=DB_NAME):
     with sqlite3.connect(db_path) as conn:
         conn.execute("DELETE FROM full_scan_summaries WHERE summary_id = ?", (summary_id,))
         conn.commit()
