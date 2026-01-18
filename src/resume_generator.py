@@ -107,6 +107,14 @@ def _write_docx_resume(
 
     doc = Document()
 
+    def _fmt_date(val):
+        if isinstance(val, datetime):
+            return val.date().isoformat()
+        if isinstance(val, str):
+            # If it's already a string (from DB), try to keep just the date part
+            return val.split("T")[0]
+        return ""
+
     # --- Header / title ---
     title = doc.add_heading("Project Portfolio Resume", level=0)
     title.runs[0].font.size = Pt(20)
@@ -128,16 +136,8 @@ def _write_docx_resume(
     else:
         for p in top_projects:
             # First line: bold project name + timeframe
-            first_date = (
-                p.get("first_modified").date().isoformat()
-                if isinstance(p.get("first_modified"), datetime)
-                else ""
-            )
-            last_date = (
-                p.get("last_modified").date().isoformat()
-                if isinstance(p.get("last_modified"), datetime)
-                else ""
-            )
+            first_date = _fmt_date(p.get("first_modified"))
+            last_date = _fmt_date(p.get("last_modified"))
 
             para = doc.add_paragraph(style="List Bullet")
             run_name = para.add_run(p["project"])
