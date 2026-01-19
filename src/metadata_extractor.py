@@ -36,11 +36,11 @@ def load_filters(filename=None):
         return{"extensions":ext_to_category, "languages":ext_to_language, "frameworks":framework_files}
 
     except FileNotFoundError:
-        print(f"Filter file not found: {filename}")
+        print(f"[metadata_extractor] Filter file not found: {filename}")
     except json.JSONDecodeError as e:
-        print(f"Error decoding JSON in {filename}: {e}")
+        print(f"[metadata_extractor] JSON decode error in {filename}: {e}")
     except Exception as e:
-        print(f"Unexpected error loading filters: {e}")
+        print(f"[metadata_extractor] Unexpected error loading filters: {e}")
 
     # Provide fallback if JSON not found or failed
     return {}
@@ -109,9 +109,9 @@ def base_extraction(file_list, filters):
 
 
     else:
-    #TODO: add this to error log
-            
-        print("Unable to load filters")
+        msg = "[metadata_extractor] Unable to load filters; using empty mappings."
+        filters.setdefault("error_log", []).append(msg)
+        print(msg)
     return extracted_data
 
 
@@ -240,7 +240,7 @@ def detailed_extraction(extracted_data, advanced_options, filters=None):
                 })
 
             else:
-                print(f"Skipping invalid or failed repo: {entry['filename']}")
+                print(f"[metadata_extractor] Skipping invalid or failed repo: {entry['filename']}")
 
     #Attach files to the correct project
     for project in repositories:
