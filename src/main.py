@@ -9,7 +9,7 @@ from permission_manager import (
 from file_parser import get_input_file_path
 from metadata_extractor import base_extraction, detailed_extraction, load_filters
 from alternative_analysis import analyze_projects
-
+from scan_manager import scan_manager
 import db 
 import sqlite3
 
