@@ -1,10 +1,10 @@
 colorama==0.4.6
-iniconfig==2.3.0
+iniconfig
 packaging==25.0
 pluggy==1.6.0
 Pygments==2.19.2
 pytest==8.4.2
 GitPython==3.1.43
 python-docx==1.2.0
-toml
-pyyaml
+toml==0.10.2
+PyYAML==6.0.2

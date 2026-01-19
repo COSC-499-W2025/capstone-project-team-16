@@ -1,0 +1,10 @@
+2025-11-19 10:02:20 [INFO] __main__: Running in PROD mode. Loading real implementations.
+2025-11-19 10:02:20 [CRITICAL] root: An unexpected error occurred.
+Traceback (most recent call last):
+  File "C:\Users\ethan\Documents\COSC 499\capstone-project-team-16\src\main.py", line 66, in main
+    from components.scanner import ZipFileScanner
+  File "C:\Users\ethan\Documents\COSC 499\capstone-project-team-16\src\components\scanner.py", line 11, in <module>
+    class ZipFileScanner(FileScanner):
+  File "C:\Users\ethan\Documents\COSC 499\capstone-project-team-16\src\components\scanner.py", line 23, in ZipFileScanner
+    def get_input_file_path(self) -> list[FileInfo] | None:
+TypeError: unsupported operand type(s) for |: 'types.GenericAlias' and 'NoneType'
