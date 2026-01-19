@@ -2,6 +2,8 @@ import json
 import sqlite3
 import pytest
 import db
+from datetime import datetime
+import os
 
 
 @pytest.fixture
@@ -30,222 +32,170 @@ def _fetch_all(db_path: str, query: str, params=()):
 
 
 # ----------------------------------------------------------------------
-# Original-style tests (updated to pass user_consent + analysis_mode)
+# New tests for full_scan_summaries logic
 # ----------------------------------------------------------------------
 
-def test_save_single_record_creates_table_and_defaults(db_path):
-    data = [{"project": "TestProj", "score": 50}]
-    db.save_results(data, user_consent=True, analysis_mode="advanced", db_path=db_path)
+def test_save_full_scan_creates_tables_and_inserts_data(db_path):
+    # Prepare dummy analysis results
+    analysis_results = {
+        "project_summaries": [
+            {
+                "project": "TestProj", 
+                "score": 100, 
+                "first_modified": datetime(2023, 1, 1, 12, 0, 0),
+                "last_modified": datetime(2023, 1, 2, 12, 0, 0)
+            }
+        ],
+        "resume_summaries": ["Bullet 1"],
+        "skills_chronological": [],
+        "projects_chronological": [],
+        "contributor_profiles": {"user1": {"skills": ["Python"]}}
+    }
 
+    # Action
+    db.save_full_scan(analysis_results, "advanced", True, db_path=db_path)
+
+    # Verify tables exist
     tables = _fetch_all(
         db_path,
-        "SELECT name FROM sqlite_master WHERE type='table' AND name='project_summaries';"
+        "SELECT name FROM sqlite_master WHERE type='table';"
     )
-    assert tables == [("project_summaries",)]
+    table_names = [t[0] for t in tables]
+    assert "full_scan_summaries" in table_names
+    assert "user_config" in table_names
 
+    # Verify data insertion
     rows = _fetch_all(
-        db_path,
-        """
-        SELECT
-            project_name, score, total_files, duration_days,
-            code_files, test_files, doc_files, design_files,
-            languages, frameworks, skills, is_collaborative
-        FROM project_summaries
-        """
+        db_path, 
+        "SELECT timestamp, analysis_mode, user_consent, project_summaries_json FROM full_scan_summaries"
     )
     assert len(rows) == 1
-    (
-        project_name, score, total_files, duration_days,
-        code_files, test_files, doc_files, design_files,
-        languages, frameworks, skills, is_collaborative
-    ) = rows[0]
+    ts, mode, consent, json_str = rows[0]
 
-    assert project_name == "TestProj"
-    assert score == 50
-    assert total_files == duration_days == code_files == test_files == doc_files == design_files == 0
-    assert languages == frameworks == skills == ""
-    assert is_collaborative == "No"
-
-
-def test_missing_keys_use_defaults(db_path):
-    data = [{"project": "Incomplete", "total_files": 5}]
-    db.save_results(data, user_consent=False, analysis_mode="basic", db_path=db_path)
-
-    rows = _fetch_all(
-        db_path,
-        "SELECT project_name, total_files, duration_days, score FROM project_summaries"
-    )
-    assert len(rows) == 1
-    project_name, total_files, duration_days, score = rows[0]
-    assert project_name == "Incomplete"
-    assert total_files == 5
-    assert duration_days == 0
-    assert score == 0
-
-
-def test_multiple_records_persist_correctly(db_path):
-    data = [
-        {"project": "ProjA", "score": 10, "total_files": 1},
-        {"project": "ProjB", "score": 20, "total_files": 2},
-        {"project": "ProjC", "score": 30, "total_files": 3},
-    ]
-    db.save_results(data, user_consent=True, analysis_mode="basic", db_path=db_path)
-
-    rows = _fetch_all(
-        db_path,
-        "SELECT project_name, score, total_files FROM project_summaries ORDER BY project_name"
-    )
-    assert len(rows) == 3
-    result = {name: (score, total_files) for name, score, total_files in rows}
-    assert result["ProjA"] == (10, 1)
-    assert result["ProjB"] == (20, 2)
-    assert result["ProjC"] == (30, 3)
-
-
-def test_user_consent_and_analysis_mode_persist(db_path):
-    data = [{"project": "ConsentProj", "score": 42}]
-    db.save_results(data, user_consent=True, analysis_mode="advanced", db_path=db_path)
-
-    rows = _fetch_all(
-        db_path,
-        "SELECT project_name, user_consent, analysis_mode FROM project_summaries"
-    )
-    project_name, consent, mode = rows[0]
-    assert project_name == "ConsentProj"
-    assert consent == "Yes"
     assert mode == "advanced"
-
-
-# ----------------------------------------------------------------------
-# Generic helper tests
-# ----------------------------------------------------------------------
-
-def test_get_all_and_get_by_id_helpers(db_path):
-    data = [{"project": "ProjA", "score": 10}, {"project": "ProjB", "score": 20}]
-    db.save_results(data, user_consent=True, analysis_mode="basic", db_path=db_path)
-
-    summaries = db.get_all_summaries(db_path=db_path)
-    assert len(summaries) == 2
-
-    proj_a_id = next(s["id"] for s in summaries if s["project_name"] == "ProjA")
-    proj_a = db.get_summary_by_id(proj_a_id, db_path=db_path)
-    assert proj_a["project_name"] == "ProjA"
-    assert proj_a["score"] == 10
-    assert proj_a["user_consent"] == "Yes"
-    assert proj_a["analysis_mode"] == "basic"
-
-
-def test_update_summary_helper(db_path):
-    data = [{"project": "ToUpdate", "score": 50}]
-    db.save_results(data, user_consent=False, analysis_mode="basic", db_path=db_path)
-    summary_id = db.get_all_summaries(db_path=db_path)[0]["id"]
-
-    updated = db.update_summary(summary_id, {"score": 99, "analysis_mode": "advanced"}, db_path=db_path)
-    assert updated
-    refreshed = db.get_summary_by_id(summary_id, db_path=db_path)
-    assert refreshed["score"] == 99
-    assert refreshed["analysis_mode"] == "advanced"
-    assert refreshed["project_name"] == "ToUpdate"
-
-
-def test_delete_summary_helper(db_path):
-    data = [{"project": "ToDelete", "score": 1}]
-    db.save_results(data, user_consent=True, analysis_mode="basic", db_path=db_path)
-    summary_id = db.get_all_summaries(db_path=db_path)[0]["id"]
-
-    deleted = db.delete_summary(summary_id, db_path=db_path)
-    assert deleted
-    assert db.get_all_summaries(db_path=db_path) == []
-
-
-def test_search_by_project_name_helper(db_path):
-    data = [
-        {"project": "API Server", "score": 10},
-        {"project": "Frontend UI", "score": 20},
-        {"project": "Another API Tool", "score": 30},
-    ]
-    db.save_results(data, user_consent=True, analysis_mode="advanced", db_path=db_path)
-
-    results = db.search_by_project_name("API", db_path=db_path)
-    names = {r["project_name"] for r in results}
-    assert names == {"API Server", "Another API Tool"}
-
-
-# ----------------------------------------------------------------------
-# Requirement-specific helpers
-# ----------------------------------------------------------------------
-
-def test_store_project_insights_inserts_full_row(db_path):
-    project = {"project": "InsightsProj", "score": 88, "total_files": 12, "languages": "Python"}
-    user_id = "user-123"
-    project_id = "proj-abc"
-    file_tree = {"root": ["main.py", "README.md"]}
-    resume_bullets = ["Built analysis pipeline", "Improved performance by 20%"]
-
-    db.store_project_insights(
-        project=project,
-        user_id=user_id,
-        project_id=project_id,
-        user_consent=True,
-        analysis_mode="advanced",
-        file_tree=file_tree,
-        resume_bullets=resume_bullets,
-        db_path=db_path,
-    )
-
-    rows = _fetch_all(db_path, "SELECT project_name, user_id, project_id, analysis_data, file_tree, resume_bullets, user_consent, analysis_mode, score FROM project_summaries")
-    (
-        project_name, uid, pid, analysis_data_str,
-        file_tree_str, resume_bullets_str, consent, mode, score
-    ) = rows[0]
-
-    assert project_name == "InsightsProj"
-    assert uid == user_id
-    assert pid == project_id
     assert consent == "Yes"
-    assert mode == "advanced"
-    assert score == 88
-    assert json.loads(analysis_data_str)["project"] == "InsightsProj"
-    assert json.loads(file_tree_str) == file_tree
-    assert json.loads(resume_bullets_str) == resume_bullets
+    
+    # Verify JSON content
+    data = json.loads(json_str)
+    assert data["analysis_mode"] == "advanced"
+    assert data["user_consent"] == "Yes"
+    assert len(data["project_summaries"]) == 1
+    
+    # Verify datetime serialization
+    p_summary = data["project_summaries"][0]
+    assert p_summary["project"] == "TestProj"
+    assert p_summary["first_modified"] == "2023-01-01T12:00:00"
+    assert p_summary["last_modified"] == "2023-01-02T12:00:00"
+    
+    # Verify other fields
+    assert data["contributor_profiles"]["user1"]["skills"] == ["Python"]
 
 
-def test_list_project_summaries_filters_by_user(db_path):
-    db.save_results([{"project": "User1Proj1", "score": 10}, {"project": "User1Proj2", "score": 20}],
-                    user_consent=True, analysis_mode="basic", user_id="user1", project_id="proj-u1-1", db_path=db_path)
-    db.save_results([{"project": "User2Proj1", "score": 30}],
-                    user_consent=True, analysis_mode="advanced", user_id="user2", project_id="proj-u2-1", db_path=db_path)
+def test_list_full_scans_returns_lightweight_metadata(db_path):
+    # Save two scans
+    db.save_full_scan({"project_summaries": []}, "basic", True, db_path=db_path)
+    db.save_full_scan({"project_summaries": []}, "advanced", False, db_path=db_path)
 
-    all_summaries = db.list_project_summaries(db_path=db_path)
-    assert len(all_summaries) == 3
+    # Action
+    scans = db.list_full_scans(db_path=db_path)
 
-    user1_summaries = db.list_project_summaries(user_id="user1", db_path=db_path)
-    assert {s["project_name"] for s in user1_summaries} == {"User1Proj1", "User1Proj2"}
-
-    user2_summaries = db.list_project_summaries(user_id="user2", db_path=db_path)
-    assert user2_summaries[0]["project_name"] == "User2Proj1"
-
-
-def test_get_resume_bullets_returns_structured_items(db_path):
-    db.store_project_insights({"project": "ProjA", "score": 10}, "user1", "projA", True, "basic", {}, ["A bullet 1", "A bullet 2"], db_path=db_path)
-    db.store_project_insights({"project": "ProjB", "score": 20}, "user1", "projB", True, "advanced", {}, ["B bullet 1"], db_path=db_path)
-
-    bullets = db.get_resume_bullets(user_id="user1", db_path=db_path)
-    assert len(bullets) == 3
-    proj_ids = {b["project_id"] for b in bullets}
-    assert proj_ids == {"projA", "projB"}
+    # Assertions
+    assert len(scans) == 2
+    # Check structure (should not contain the heavy JSON)
+    first_scan = scans[0]
+    assert "summary_id" in first_scan
+    assert "timestamp" in first_scan
+    assert "analysis_mode" in first_scan
+    assert "project_summaries_json" not in first_scan
 
 
-def test_delete_project_insights_by_project_id(db_path):
-    db.store_project_insights({"project": "ProjA", "score": 10}, "user1", "projA", True, "basic", {}, ["A bullet"], db_path=db_path)
-    db.store_project_insights({"project": "ProjB", "score": 20}, "user1", "projB", True, "advanced", {}, ["B bullet"], db_path=db_path)
+def test_get_full_scan_by_id_returns_parsed_json(db_path):
+    # Save a scan
+    analysis_results = {
+        "project_summaries": [{"project": "DeepData"}],
+        "contributor_profiles": {"dev": {}}
+    }
+    db.save_full_scan(analysis_results, "advanced", True, db_path=db_path)
+    
+    # Get ID
+    scans = db.list_full_scans(db_path=db_path)
+    summary_id = scans[0]["summary_id"]
 
-    deleted = db.delete_project_insights("projA", db_path=db_path)
-    assert deleted is True
+    # Action
+    full_scan = db.get_full_scan_by_id(summary_id, db_path=db_path)
 
-    remaining = db.get_all_summaries(db_path=db_path)
-    assert len(remaining) == 1
-    assert remaining[0]["project_id"] == "projB"
+    # Assertions
+    assert full_scan is not None
+    assert full_scan["summary_id"] == summary_id
+    assert full_scan["analysis_mode"] == "advanced"
+    assert full_scan["user_consent"] == "Yes"
+    
+    # Check that JSON was parsed back into a dict
+    json_data = full_scan["scan_data"]
+    assert isinstance(json_data, dict)
+    assert json_data["project_summaries"][0]["project"] == "DeepData"
 
-    deleted_again = db.delete_project_insights("projA", db_path=db_path)
-    assert deleted_again is False
+
+def test_delete_full_scan_by_id(db_path):
+    # Save a scan
+    db.save_full_scan({"project_summaries": []}, "basic", True, db_path=db_path)
+    scans = db.list_full_scans(db_path=db_path)
+    summary_id = scans[0]["summary_id"]
+
+    # Action: Delete
+    success = db.delete_full_scan_by_id(summary_id, db_path=db_path)
+    assert success is True
+
+    # Verify it's gone
+    scans_after = db.list_full_scans(db_path=db_path)
+    assert len(scans_after) == 0
+    
+    # Verify get returns None
+    assert db.get_full_scan_by_id(summary_id, db_path=db_path) is None
+
+
+def test_delete_non_existent_scan_returns_false(db_path):
+    # Initialize DB with one record
+    db.save_full_scan({"project_summaries": []}, "basic", True, db_path=db_path)
+    
+    # Try to delete a non-existent ID
+    success = db.delete_full_scan_by_id(999, db_path=db_path)
+    assert success is False
+    
+    # Verify original is still there
+    scans = db.list_full_scans(db_path=db_path)
+    assert len(scans) == 1
+
+
+def test_save_full_scan_ignores_empty_results(db_path):
+    # If project_summaries is missing, it should return without saving
+    db.save_full_scan({}, "basic", True, db_path=db_path)
+    
+    # Check if table exists (it might not if ensure_db_initialized wasn't reached)
+    # or if it exists but is empty.
+    if not os.path.exists(db_path):
+        return
+
+    rows = _fetch_all(db_path, "SELECT * FROM full_scan_summaries")
+    assert len(rows) == 0
+
+def test_get_full_scan_by_id_returns_none_when_missing(db_path):
+    # Ensure getting a non-existent ID returns None, not an empty list or error
+    result = db.get_full_scan_by_id(99999, db_path=db_path)
+    assert result is None
+
+def test_list_full_scans_ordering(db_path):
+    # Save scans with distinct timestamps (mocking logic or relying on execution time)
+    # Since save_full_scan uses datetime.now(), we just call it sequentially.
+    db.save_full_scan({"project_summaries": [{"p": 1}]}, "basic", True, db_path=db_path)
+    # Small delay or just reliance on sequential execution usually works for sqlite timestamps
+    import time
+    time.sleep(0.1) 
+    db.save_full_scan({"project_summaries": [{"p": 2}]}, "advanced", True, db_path=db_path)
+
+    scans = db.list_full_scans(db_path=db_path)
+    assert len(scans) == 2
+    
+    # Should be ordered by timestamp DESC (newest first)
+    assert scans[0]["analysis_mode"] == "advanced"
+    assert scans[1]["analysis_mode"] == "basic"
