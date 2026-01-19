@@ -237,7 +237,7 @@ def generate_portfolio_menu():
             # Need a map of project_name -> project_data for the generator
             all_projects_map = {p["project"]: p for p in project_summaries}
             
-            out_path = generate_contributor_portfolio(target_user, profile, all_projects_map)
+            out_path = generate_contributor_portfolio(target_user, profile, all_projects_map, scan_timestamp=scan["timestamp"])
             if out_path:
                 print(f"\nSUCCESS: Portfolio saved to:\n{out_path}")
         elif idx != -1:
