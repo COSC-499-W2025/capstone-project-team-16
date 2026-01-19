@@ -118,19 +118,28 @@ def _skill_from_ext(ext: str):
     ext = ext.lower()
 
     if ext == ".py":
-        return "Python Programming"
+        return "Python Development"
 
     if ext in (".js", ".ts", ".jsx", ".tsx"):
-        return "JavaScript / Frontend"
+        return "Frontend Development (JavaScript/TypeScript)"
 
-    if ext in (".html", ".css"):
-        return "Web Dev"
+    if ext in (".html", ".css", ".scss", ".less"):
+        return "Web Design & Development"
 
     if ext in (".java",):
-        return "Java Stuff"
+        return "Java Development"
+    
+    if ext in (".c", ".cpp", ".h", ".hpp"):
+        return "C/C++ Systems Programming"
+        
+    if ext in (".cs",):
+        return "C# / .NET Development"
+        
+    if ext in (".sql",):
+        return "Database Management"
 
-    if ext in (".md", ".pdf", ".docx", ".txt"):
-        return "Docs / Writing"
+    if ext in (".md", ".pdf", ".docx", ".txt", ".rst"):
+        return "Technical Documentation"
 
     return None
 
@@ -274,6 +283,7 @@ def analyze_projects(extracted_data, filters, advanced_options, detailed_data=No
 
             # language (prefer per-file language, fall back to filters)
             lang = f.get("language") or lang_map.get(ext, "Unknown")
+
             if lang != "Unknown":
                 langs.add(lang)
 

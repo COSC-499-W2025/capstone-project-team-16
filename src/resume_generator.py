@@ -15,6 +15,7 @@ def build_project_line(p: dict) -> str:
     """
     name = p.get("project", "Unknown")
     langs = p.get("languages", "Unknown")
+    skills = p.get("skills", "NA")
     frameworks = p.get("frameworks", "None")
     duration = p.get("duration_days", 0)
     code_files = p.get("code_files", 0)
@@ -26,7 +27,9 @@ def build_project_line(p: dict) -> str:
     main = f"Contributed to project '{name}'"
     if project_type and project_type.lower() != "unknown":
         main = f"Contributed to {project_type.lower()} project '{name}'"
-    if langs and langs.lower() != "unknown":
+    if skills and skills not in ("NA", "None", ""):
+        main += f" involving {skills}"
+    elif langs and langs.lower() != "unknown":
         main += f" using {langs}"
     pieces.append(main)
 
@@ -234,6 +237,7 @@ def _build_personal_project_description(project_name, project_context, user_stat
     """
     # Context from the project as a whole
     langs = project_context.get("languages", "Unknown")
+    skills = project_context.get("skills", "NA")
     frameworks = project_context.get("frameworks", "None")
     
     # User specific stats
@@ -246,7 +250,9 @@ def _build_personal_project_description(project_name, project_context, user_stat
     parts = []
     parts.append(f"Contributed to '{project_name}'")
     
-    if langs and langs != "Unknown":
+    if skills and skills not in ("NA", "None", ""):
+        parts.append(f"involving {skills}")
+    elif langs and langs != "Unknown":
         parts.append(f"using {langs}")
         
     # Work breakdown
