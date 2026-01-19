@@ -27,9 +27,7 @@ def build_project_line(p: dict) -> str:
     main = f"Contributed to project '{name}'"
     if project_type and project_type.lower() != "unknown":
         main = f"Contributed to {project_type.lower()} project '{name}'"
-    if skills and skills not in ("NA", "None", ""):
-        main += f" involving {skills}"
-    elif langs and langs.lower() != "unknown":
+    if langs and langs.lower() != "unknown":
         main += f" using {langs}"
     pieces.append(main)
 
@@ -250,9 +248,7 @@ def _build_personal_project_description(project_name, project_context, user_stat
     parts = []
     parts.append(f"Contributed to '{project_name}'")
     
-    if skills and skills not in ("NA", "None", ""):
-        parts.append(f"involving {skills}")
-    elif langs and langs != "Unknown":
+    if langs and langs != "Unknown":
         parts.append(f"using {langs}")
         
     # Work breakdown
