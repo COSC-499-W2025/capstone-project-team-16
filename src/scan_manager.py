@@ -255,6 +255,36 @@ def is_noise(name):
     n = (name or "").lower()
     return "bot" in n or "noreply" in n or "github-classroom" in n
 
+def print_repo_summary(
+    proj_name,
+    repo_name,
+    repo_root,
+    repo_authors,
+    repo_contributors,
+    branch_count,
+    has_merges,
+    project_type,
+    repo_duration_days,
+    commit_frequency,
+):
+    """Prints metadata about a specific repository analysis."""
+    print("\n[Repository Metadata]")
+    print(f" Project:          {proj_name}")
+    print(f" Repo Name:        {repo_name}")
+    print(f" Repo Root:        {repo_root}")
+    print(
+        f" Authors:          {', '.join(sorted(repo_authors)) if repo_authors else 'None'}"
+    )
+    print(
+        f" Contributors:     {', '.join(sorted(repo_contributors)) if repo_contributors else 'None'}"
+    )
+    print(f" Branch Count:     {branch_count}")
+    print(f" Has Merges:       {has_merges}")
+    print(f" Project Type:     {project_type}")
+    print(f" Repo Duration:    {repo_duration_days} days")
+    print(f" Commit Freq:      {commit_frequency}")
+    print("-----------------------------------------------")
+
 def print_project_rankings(project_summaries, file=None):
     """
     Prints a table of projects ranked by score.

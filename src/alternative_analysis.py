@@ -7,6 +7,15 @@ from datetime import datetime
 from collections import defaultdict, Counter
 import csv
 from resume_generator import build_project_line
+from scan_manager import (
+    print_repo_summary,
+    print_project_rankings,
+    print_chronological_projects,
+    print_skills_timeline,
+    print_resume_summaries,
+    print_contributor_stats,
+    is_noise
+)
 
 
 # for contributions
@@ -24,55 +33,6 @@ def _get_contrib_pct(contrib_obj) -> float:
         return float(pct)
     except Exception:
         return 0.0
-    
-#just helpers for printing stuff out
-def _is_noise_contributor(name: str) -> bool:
-    n = (name or "").lower()
-    return (
-        "bot" in n
-        or "noreply.github.com" in n
-        or "github-classroom" in n
-    )
-
-def _display_name(person_key: str) -> str:
-    # person_key is normalized already, but keep it readable
-    return person_key
-
-def _fmt_pct(x: float) -> str:
-    return f"{x:5.1f}%"
-
-
-# --------------------------------------------------------
-# print for repo metadata
-# --------------------------------------------------------
-def print_repo_summary(
-    proj_name,
-    repo_name,
-    repo_root,
-    repo_authors,
-    repo_contributors,
-    branch_count,
-    has_merges,
-    project_type,
-    repo_duration_days,
-    commit_frequency,
-):
-    print("\n[Repository Metadata]")
-    print(f" Project:          {proj_name}")
-    print(f" Repo Name:        {repo_name}")
-    print(f" Repo Root:        {repo_root}")
-    print(
-        f" Authors:          {', '.join(sorted(repo_authors)) if repo_authors else 'None'}"
-    )
-    print(
-        f" Contributors:     {', '.join(sorted(repo_contributors)) if repo_contributors else 'None'}"
-    )
-    print(f" Branch Count:     {branch_count}")
-    print(f" Has Merges:       {has_merges}")
-    print(f" Project Type:     {project_type}")
-    print(f" Repo Duration:    {repo_duration_days} days")
-    print(f" Commit Freq:      {commit_frequency}")
-    print("-----------------------------------------------")
 
 
 # --------------------------------------------------------
@@ -499,10 +459,37 @@ def analyze_projects(extracted_data, filters, advanced_options, detailed_data=No
                         contributor_profiles[key]["skills"].add(skill)
                         per_contributor_skills[key].add(skill)
                 
+                # Calculate detailed file stats for resume generator
+                files_edited = c.get("files_edited", [])
+                user_code = 0
+                user_test = 0
+                user_doc = 0
+                user_design = 0
+                
+                ext_map = filters.get("extensions", {})
+                for fpath in files_edited:
+                    _, ext = os.path.splitext(fpath)
+                    ext = ext.lower()
+                    cat = ext_map.get(ext, "uncategorized")
+                    act = _detect_activity(cat, fpath)
+                    if act == "code": user_code += 1
+                    elif act == "test": user_test += 1
+                    elif act == "documentation": user_doc += 1
+                    elif act == "design": user_design += 1
+
                 contributor_profiles[key]["projects"].append({
                     "name": proj_name,
                     "pct": pct,
-                    "score": score * (pct / 100.0)
+                    "score": score * (pct / 100.0),
+                    "files_worked": len(files_edited),
+                    "files_list": files_edited,
+                    "user_code_files": user_code,
+                    "user_test_files": user_test,
+                    "user_doc_files": user_doc,
+                    "user_design_files": user_design,
+                    "insertions": c.get("insertions", 0),
+                    "deletions": c.get("deletions", 0),
+                    "commit_count": c.get("commit_count", 0)
                 })
 
             elif c:
@@ -565,102 +552,20 @@ def analyze_projects(extracted_data, filters, advanced_options, detailed_data=No
             }
         )
 
-    # -----------------------------------------
-    # rankings per contributor (after collecting all projects)
-    # -----------------------------------------
-    contributor_rankings = {}
-    all_people = set()
-
-    for p in project_summaries:
-        all_people.update((p.get("per_contributor_scores") or {}).keys())
-
-    for person in sorted(all_people):
-        contributor_rankings[person] = sorted(
-            project_summaries,
-            key=lambda x: (x.get("per_contributor_scores") or {}).get(person, 0.0),
-            reverse=True
-        )
-
-    # -----------------------------------------
-            # -----------------------------------------
-    # NEW: rank contributors by total adjusted score
-    # -----------------------------------------
-    contributor_totals = []  # (person, total_adj, total_pct, projects_count)
-
-    for person in sorted(all_people):
-        if _is_noise_contributor(person):
-            continue
-
-        total_adj = 0.0
-        total_pct = 0.0
-        projects_count = 0
-
-        for p in project_summaries:
-            pct = (p.get("per_contributor_pct") or {}).get(person, 0.0)
-            adj = (p.get("per_contributor_scores") or {}).get(person, 0.0)
-
-            if pct > 0:
-                projects_count += 1
-                total_pct += pct
-                total_adj += adj
-
-        contributor_totals.append((person, total_adj, total_pct, projects_count))
-
-    contributor_totals.sort(key=lambda x: x[1], reverse=True)
-
-    print("\n=== Contributor Leaderboard (by total adjusted score) ===")
-    print(f"{'Rank':>4}  {'Contributor':<28} {'Projects':>8} {'TotalAdj':>10} {'TotalPct':>9}")
-    print("-" * 70)
-
-    for i, (person, total_adj, total_pct, projects_count) in enumerate(contributor_totals, start=1):
-        print(f"{i:4}  {person[:28]:<28} {projects_count:8} {total_adj:10.1f} {total_pct:8.1f}%")
-
-
     # --------------------------------------------------------
     # OUTPUT PART 1: ranked project table
     # --------------------------------------------------------
     # sort projects so biggest score first
     project_summaries.sort(key=lambda x: x["score"], reverse=True)
-
-    print(
-        f"\n{'Project':<30} "
-        f"{'Files':>6} {'Days':>6} {'Code':>6} {'Test':>6} "
-        f"{'Doc':>6} {'Des':>6} "
-        f"{'Languages':<25} {'Frameworks':<40} "
-        f"{'Collab':>7} {'Score':>7}"
-    )
-    print("-" * 155)
-
-    for p in project_summaries:
-        # Truncate long language/framework lists for display
-        langs_str = p["languages"]
-        if len(langs_str) > 25:
-            langs_str = langs_str[:22] + "..."
-
-        fw_str = p["frameworks"]
-        if len(fw_str) > 40:
-            fw_str = fw_str[:37] + "..."
-
-        print(
-            f"{p['project'][:30]:<30} "
-            f"{p['total_files']:6} {p['duration_days']:6} {p['code_files']:6} "
-            f"{p['test_files']:6} {p['doc_files']:6} {p['design_files']:6} "
-            f"{langs_str:<25} {fw_str:<40} "
-            f"{p['is_collaborative']:>7} {p['score']:7.1f}"
-        )
-
+    print_project_rankings(project_summaries)
 
     # --------------------------------------------------------
     # OUTPUT PART 2: chronological list of projects
     # --------------------------------------------------------
-    print("\nProjects in chronological order (by first activity)")
-    print("-" * 80)
-
     projects_chrono = sorted(
         project_summaries,
         key=lambda x: x["first_modified"],
     )
-
     chronological_projects = []
     for p in projects_chrono:
         first_date = p["first_modified"].date().isoformat()
@@ -672,10 +577,7 @@ def analyze_projects(extracted_data, filters, advanced_options, detailed_data=No
                 "last_used": last_date,
             }
         )
-        print(
-            f"- {p['project']}: {first_date} → {last_date} "
-            f"({p['duration_days']} days, score {p['score']:.1f})"
-        )
+    print_chronological_projects(chronological_projects)
 
     # --------------------------------------------------------
     # OUTPUT PART 3: chronological list of skills exercised
@@ -683,9 +585,6 @@ def analyze_projects(extracted_data, filters, advanced_options, detailed_data=No
     
     skills_output = []
     if advanced_options.get("skills_gen", True):
-        print("\nSkills exercised over time")
-        print("-" * 80)
-
         skills_chrono = sorted(
             (
                 {
@@ -699,7 +598,6 @@ def analyze_projects(extracted_data, filters, advanced_options, detailed_data=No
             key=lambda x: x["first_used"],
         )
 
-        
         for row in skills_chrono:
             first_date = row["first_used"].date().isoformat()
             last_date = row["last_used"].date().isoformat()
@@ -710,59 +608,23 @@ def analyze_projects(extracted_data, filters, advanced_options, detailed_data=No
                     "last_used": last_date,
                 }
             )
-            print(
-                f"- {first_date} → {last_date}: {row['skill']} "
-                f"(used in {row['count']} files)"
-            )
+        print_skills_timeline(skills_output)
 
-        # --------------------------------------------------------
+    # --------------------------------------------------------
     # OUTPUT PART 4: resume style summaries of top projects
     # --------------------------------------------------------
     TOP_N = 3
     top_projects = project_summaries[:TOP_N]
-
-    print(f"\nTop {TOP_N} projects (Summaries)")
-    print("-" * 80)
     resume_summaries = []
-
     for p in top_projects:
         line = build_project_line(p)
         resume_summaries.append(line)
-        print(f"- {line}")
+    print_resume_summaries(resume_summaries)
 
     # --------------------------------------------------------
     # OUTPUT PART 5: Per-Contributor Rankings (per person)
     # --------------------------------------------------------
-    print("\n=== Contributor Contribution Breakdown ===")
-
-    TOP_N_PER_PERSON = 3
-    MIN_PCT_TO_SHOW = 0.1  # hide tiny noise like 0.0%
-
-    for person, ranked in contributor_rankings.items():
-        if _is_noise_contributor(person):
-            continue
-
-        rows = []
-        for p in ranked:
-            pct = (p.get("per_contributor_pct") or {}).get(person, 0.0)
-            if pct >= MIN_PCT_TO_SHOW:
-                adj = (p.get("per_contributor_scores") or {}).get(person, 0.0)
-                rows.append((p["project"], pct, adj, p["score"]))
-
-        if not rows:
-            continue
-
-        print(f"\n-- {_display_name(person)} --")
-        print(f"{'Project':<32} {'Pct':>7} {'AdjScore':>10} {'Base':>10}")
-        print("-" * 65)
-
-        for project, pct, adj, base in rows[:TOP_N_PER_PERSON]:
-            print(
-                f"{project[:32]:<32} "
-                f"{_fmt_pct(pct):>7} "
-                f"{adj:10.1f} "
-                f"{base:10.1f}"
-            )
+    print_contributor_stats(project_summaries)
 
 
 
@@ -843,6 +705,5 @@ def analyze_projects(extracted_data, filters, advanced_options, detailed_data=No
     "resume_summaries": resume_summaries,        # résumé-style top projects
     "skills_chronological": skills_output,      # skills exercised over time
     "projects_chronological": chronological_projects,  # projects in chronological order
-    "contributor_rankings": contributor_rankings,
     "contributor_profiles": final_contributor_profiles,
 }
