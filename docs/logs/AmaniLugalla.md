@@ -1,4 +1,34 @@
 # Personal Log - Amani Lugalla
+## 2026-JAN-11 to 2026-JAN-18
+
+### Type of Tasks Worked On
+![Screenshot](<screenshots/Amani/Week16.png>)
+
+### Recap of Week's Goals
+- Improve CLI readability and consistency in the main interface.
+- Standardize prompts and section formatting for scan outputs.
+- Add a quick summary view before detailed scan results.
+
+
+### Features Assigned (Project Plan)
+- CLI readability improvements for scan workflows.
+  
+### Tasks from Project Board
+| Feature | Task | Status (Completed/In Progress) | Notes |
+|------|------|-------------------------------|-------|
+| CLI readability improvements | Standardize menu/section output | Completed | Added helper functions for menu and section formatting |
+| CLI readability improvements | Improve scan detail presentation | Completed | Added summary block and clearer headers for scan output |
+| CLI readability improvements | Consistent prompt wording | Completed | Unified "return" phrasing for numeric prompts |
+
+### Completed Tasks (Last 2 Weeks)
+- Refactored main CLI output to use shared menu/section helpers.
+- Added a scan summary section for quick context before detailed tables.
+- Standardized numeric prompt language across scan views.
+
+
+### In-Progress Tasks 
+- FastAPI backend setup for frontend communication (API endpoints)
+
 ## [Date Range]  
 2025-11-23 to 2025-11-30
 
