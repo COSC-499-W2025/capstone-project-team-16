@@ -1,22 +1,74 @@
 import os
-from db import list_full_scans, delete_full_scan_by_id , get_full_scan_by_id
+import shutil
+from datetime import datetime
+from db import delete_full_scan_by_id, get_full_scan_by_id, list_full_scans
 from permission_manager import get_yes_no
 from resume_generator import generate_resume, generate_contributor_portfolio
+
+
+def _center_text(text):
+    width = shutil.get_terminal_size(fallback=(80, 20)).columns
+    if len(text) >= width:
+        return text
+    padding = (width - len(text)) // 2
+    return " " * padding + text
+
+
+def _print_banner(title, line_char="~", min_width=23):
+    line_width = max(len(title), min_width)
+    line = line_char * line_width
+    print()
+    print(_center_text(line))
+    print(_center_text(title))
+    print(_center_text(line))
+
+
+def _print_header(title, width=28, sep="="):
+    line = sep * width
+    print()
+    print(_center_text(line))
+    print(_center_text(title))
+    print(_center_text(line))
+
+
+def _print_menu(title, options, prompt="Choose an option: "):
+    _print_banner(title)
+    for key, label in options:
+        print(_center_text(f"{key}) {label}"))
+    return input(_center_text(prompt)).strip()
+
+
+def _print_scan_list(scans):
+    for i, s in enumerate(scans, start=1):
+        print(_center_text(f"{i}. [ID: {s['summary_id']}] {s['timestamp']} ({s['analysis_mode']})"))
+
+
+def _format_timestamp(value):
+    if not value:
+        return value
+    try:
+        ts = value.replace("Z", "+00:00")
+        return datetime.fromisoformat(ts).strftime("%b %d, %Y %I:%M %p")
+    except (TypeError, ValueError):
+        return value
+
 
 def scan_manager():
     """
     Main entry point for the Scan Manager UI.
     Provides a loop for viewing, generating portfolios, and deleting past scans.
     """
-    # Continuous loop until the user chooses to return to the home screen
     while True:
-        print("\n===== SCAN MANAGER =====")
-        print("1. View stored project analyses")
-        print("2. Generate Resume/Portfolio")
-        print("3. Delete stored scans")
-        print("4. Return to home screen")
-
-        choice = input("Choose an option: ").strip()
+        choice = _print_menu(
+            "SCAN MANAGER",
+            [
+                ("1", "View stored project analyses"),
+                ("2", "Generate Resume/Portfolio"),
+                ("3", "Delete stored scans"),
+                ("4", "Return to home screen"),
+            ],
+            prompt="Choose an option (1-4): ",
+        )
 
         if choice == "1":
             view_full_scan_details()
@@ -44,13 +96,13 @@ def view_full_scan_details():
         print("No scans found.")
         return
 
-    # Display list of scans with index for selection
     # 1. List available scans (lightweight metadata only)
-    print("Select a scan to view:")
-    for i, s in enumerate(scans, start=1):
-        print(f"{i}. [ID: {s['summary_id']}] {s['timestamp']} ({s['analysis_mode']})")
+    print()
+    print(_center_text("Select a scan to view:"))
+    print("/n")
+    _print_scan_list(scans)
 
-    choice = input("Enter number (0 to cancel): ").strip()
+    choice = input(_center_text("Enter number (0 to cancel): ")).strip()
     if not choice.isdigit() or int(choice) == 0:
         print("Canceled.")
         return
@@ -76,12 +128,10 @@ def view_full_scan_details():
     contributor_profiles = data.get("contributor_profiles", {})
 
     # 3. Display the report sections using helper functions
-    print("\n============================")
-    print(" FULL SCAN DETAILS")
-    print("============================")
-    print(f"Timestamp: {scan['timestamp']}")
+    _print_header("FULL SCAN DETAILS")
+    print(f"Timestamp: {_format_timestamp(scan['timestamp'])}")
     print(f"Mode: {scan['analysis_mode']}")
-    print("============================\n")
+    print("=" * 28)
 
     # Print various sections of the report
     print_project_rankings(project_summaries)
@@ -101,7 +151,7 @@ def view_full_scan_details():
         
         try:
             with open(txt_path, "w", encoding="utf-8") as f:
-                print(f"Scan Report - {scan['timestamp']}", file=f)
+                print(f"Scan Report - {_format_timestamp(scan['timestamp'])}", file=f)
                 print("=" * 60, file=f)
                 print_project_rankings(project_summaries, file=f)
                 print_chronological_projects(projects_chronological, file=f)
@@ -123,11 +173,12 @@ def delete_full_scan():
         return
 
     # Display list for deletion
-    print("\nSelect a scan to delete:")
-    for i, s in enumerate(scans, start=1):
-        print(f"{i}. [ID: {s['summary_id']}] {s['timestamp']} ({s['analysis_mode']})")
+    print()
+    print(_center_text("Select a scan to delete:"))
+    print("/n")
+    _print_scan_list(scans)
 
-    choice = input("Enter number (or 0 to cancel): ").strip()
+    choice = input(_center_text("Enter number (or 0 to cancel): ")).strip()
     if not choice.isdigit() or int(choice) == 0:
         print("Deletion canceled.")
         return
@@ -151,8 +202,8 @@ def generate_portfolio_menu():
     """
     Menu for generating Word documents from a saved scan.
     Options:
-    1. Full Project Resume (summary of all projects in the scan).
-    2. Individual Contributor Portfolio (specific to one person).
+    1) Full Project Resume (summary of all projects in the scan).
+    2) Individual Contributor Portfolio (specific to one person).
     """
     scans = list_full_scans()
     if not scans:
@@ -160,11 +211,12 @@ def generate_portfolio_menu():
         return
 
     # Select scan first
-    print("\nSelect a scan to generate portfolio from:")
-    for i, s in enumerate(scans, start=1):
-        print(f"{i}. [ID: {s['summary_id']}] {s['timestamp']} ({s['analysis_mode']})")
+    print()
+    print(_center_text("Select a scan to generate portfolio from:"))
+    print("/n")
+    _print_scan_list(scans)
 
-    choice = input("Enter number (0 to cancel): ").strip()
+    choice = input(_center_text("Enter number (0 to cancel): ")).strip()
     if not choice.isdigit() or int(choice) == 0:
         print("Canceled.")
         return
@@ -183,13 +235,11 @@ def generate_portfolio_menu():
     data = scan["scan_data"]
     
     # Choose generation type
-    print("\n------------------------------------------------")
-    print(" GENERATION OPTIONS")
-    print("------------------------------------------------")
-    print("1. Full Project Resume (Summary of all projects)")
-    print("2. Individual Contributor Portfolio")
+    _print_header("GENERATION OPTIONS", width=48, sep="-")
+    print(_center_text("1) Full Project Resume (Summary of all projects)"))
+    print(_center_text("2) Individual Contributor Portfolio"))
     
-    gen_choice = input("Enter number (0 to cancel): ").strip()
+    gen_choice = input(_center_text("Enter number (0 to cancel): ")).strip()
     
     if gen_choice == "1":
         # Generate full resume (all projects summary)
@@ -223,11 +273,13 @@ def generate_portfolio_menu():
         print("No valid contributors found.")
         return
 
-    print("\nSelect a contributor:")
+    print()
+    print(_center_text("Select a contributor:"))
+    print("/n")
     for i, c in enumerate(contributors, 1):
-        print(f"{i}. {c}")
+        print(_center_text(f"{i}. {c}"))
     
-    sel = input("\nEnter number (0 to cancel): ").strip()
+    sel = input(_center_text("Enter number (0 to cancel): ")).strip()
     if sel.isdigit():
         idx = int(sel) - 1
         if 0 <= idx < len(contributors):

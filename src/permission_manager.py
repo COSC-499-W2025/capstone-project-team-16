@@ -1,6 +1,23 @@
 import sys
+import shutil
 
 ### Permission Manager for enforcing privacy rules
+
+def _center_text(text):
+    width = shutil.get_terminal_size(fallback=(80, 20)).columns
+    if len(text) >= width:
+        return text
+    padding = (width - len(text)) // 2
+    return " " * padding + text
+
+
+def _print_banner(title, line_char="~", min_width=23):
+    line_width = max(len(title), min_width)
+    line = line_char * line_width
+    print()
+    print(_center_text(line))
+    print(_center_text(title))
+    print(_center_text(line))
 
 def get_yes_no(prompt: str) -> bool:
     """
@@ -8,7 +25,7 @@ def get_yes_no(prompt: str) -> bool:
     Returns True for 'Y', False for 'N'.
     """
     while True:
-        choice = input(f"{prompt} (Y/N): ").strip().upper()
+        choice = input(_center_text(f"{prompt} (Y/N): ")).strip().upper()
         if choice == "Y":
             return True
         elif choice == "N":
@@ -40,14 +57,14 @@ def get_analysis_mode() -> str:
     Returns "basic" or "advanced".
     """
     while True:
-        print("\nSelect analysis mode:")
-        print("1) Basic (Does not open file content)")
-        print("2) Advanced (Opens file content)")
-        choice = input("Enter 1 or 2: ").strip()
+        _print_banner("ANALYSIS MODE")
+        print(_center_text("1. Basic (Does not open file content)"))
+        print(_center_text("2. Advanced (Opens file content)"))
+        choice = input(_center_text("Choose an option (1-2): ")).strip()
         if choice == "1":
-            return "basic"
+            return "Basic"
         elif choice == "2":
-            return "advanced"
+            return "Advanced"
         else:
             print("Invalid choice. Please enter 1 or 2.")
 
@@ -57,7 +74,7 @@ def get_advanced_options() -> dict:
     Prompts the user for advanced analysis options.
     Returns a dictionary of boolean flags for each option.
     """
-    print("\nAdvanced Analysis Options:")
+    _print_banner("ADVANCED OPTIONS")
     options = {}
     options["programming_scan"] = get_yes_no("Include programming analysis?")
     options["framework_scan"] = get_yes_no("Include framework detection?")
