@@ -1,5 +1,47 @@
 # Personal Log - Ethan Sturek
-## 2025-DEC-07 to 2026-JAN-11
+## 2026-JAN-11 to 2026-JAN-18
+
+
+### Type of Tasks Worked On
+![Screenshot](<screenshots/Ethan/Week 16.png>)
+
+### Recap of Week's Goals
+- Resume generation based on a per contributor basis
+- Refactoring unused methods and cleaning up code
+
+
+### Features Assigned (Project Plan)
+- Portfolio on a per contributor basis
+- Save and retrieve contributor data
+- DB cleanup
+- Strengthen Resume Generation
+- Scan Manager
+  
+### Project Board 
+| Feature | Item Number | Status (Completed/In Progress) | Task Type (Code, Test, Team Work) | Notes |
+|------|------|-----|-------------------------------|-------|
+| Portfolio on a per contributor basis | [#180](https://github.com/COSC-499-W2025/capstone-project-team-16/issues/180)| Completed | Code | Text portfolio and resumes can be made for each contributor now and also on a per scan basis |
+| Save and retrieve contributor data | [#182](https://github.com/COSC-499-W2025/capstone-project-team-16/issues/182)| Completed | Code | DB has been refactored to capture updated contributor info and have faster retrieval  |
+| DB cleanup | [#205](https://github.com/COSC-499-W2025/capstone-project-team-16/issues/205)| Completed | Code | Removed unused methods, imports |
+| Strengthen Resume Generation | [#206](https://github.com/COSC-499-W2025/capstone-project-team-16/issues/206)| Completed | Code | Resume now correctly shows dynamic content based on contributor data |
+
+
+
+
+### Completed Tasks (Last 2 Weeks)
+- Portfolio on a per contributor basis
+- Save and retrieve contributor data
+- DB cleanup
+- Strengthen Resume Generation
+- Scan Manager
+
+
+### This Week's Goals
+- Create Polished Demo for peer testing
+- Identify bugs
+- Start Milestone 2 improvements
+
+## 2026-JAN-05 to 2026-JAN-11
 
 
 ### Type of Tasks Worked On
@@ -355,7 +397,6 @@
 ### Additional Context (Optional)
 - NA
 
-# Personal Log - Ethan Sturek
 ## 2025-SEP-8 to 2025-OCT-5
 
 
