@@ -1,5 +1,50 @@
 # Team Log - Team 16
-## Milestone: 2025-DEC-07 to 2026-JAN-11
+## Milestone: 2026-JAN-11 to 2026-JAN-18
+
+
+### Milestone Goals Recap
+- Resume generation based on a per contributor basis
+- Refactoring unused methods and cleaning up code
+
+### Features in Project Plan
+- Portfolio on a per contributor basis
+- Save and retrieve contributor data
+- DB cleanup
+- Strengthen Resume Generation
+- Scan Manager
+
+
+### Burnup Chart
+| Name | Username |
+|----------------|----------------|
+| Ethan Sturek | ethansturek |
+| La Wunn| LaWunn|
+| Amani |lugger33 |
+
+![Screenshot](<screenshots/Team16/BurnupW16.png>)
+
+### Completed Tasks Table
+![Screenshot](<screenshots/Team16/DoneTasksW16.png>)
+
+### In Progress Tasks Table
+![Screenshot](<screenshots/Team16/TasksW16.png>)
+
+### Test Report
+![Screenshot](<screenshots/Team16/Test1W15.png>)
+
+### Tests
+- Unit tests all run without issues
+Added addtional tests to db.py to reflect refactoring. Full details can be found [here](https://github.com/COSC-499-W2025/capstone-project-team-16/pull/199)
+- Extensive manual testing
+### Running Tests
+
+1.  Run `python -m venv venv` to create a virtual environment.
+2. On Windows run `venv/Scripts/activate`.
+3. On Mac run `venv/bin/activate`.
+4. Run `pip install -r requirements.txt`.
+5. In the root of the repositiory, enter `pytest` to run all tests.
+
+## Milestone: 2026-JAN-05 to 2026-JAN-11
 
 
 ### Milestone Goals Recap
@@ -31,7 +76,7 @@
 ### Tests
 - Unit tests all run without issues
 - Extensive manual testing
-## Running Tests
+### Running Tests
 
 1.  Run `python -m venv venv` to create a virtual environment.
 2. On Windows run `venv/Scripts/activate`.
