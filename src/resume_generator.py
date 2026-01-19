@@ -15,6 +15,7 @@ def build_project_line(p: dict) -> str:
     """
     name = p.get("project", "Unknown")
     langs = p.get("languages", "Unknown")
+    skills = p.get("skills", "NA")
     frameworks = p.get("frameworks", "None")
     duration = p.get("duration_days", 0)
     code_files = p.get("code_files", 0)
@@ -89,8 +90,17 @@ def _write_txt_summary(
     lines.append("")
 
     os.makedirs(os.path.dirname(txt_path), exist_ok=True)
-    with open(txt_path, "w", encoding="utf-8") as f:
-        f.write("\n".join(lines))
+
+    while True:
+        try:
+            with open(txt_path, "w", encoding="utf-8") as f:
+                f.write("\n".join(lines))
+            break
+        except PermissionError:
+            print(f"\n[!] Could not save to '{txt_path}' because it is open.")
+            print("Please close the file and press Enter to retry, or type 'cancel' to stop.")
+            if input("> ").strip().lower() == "cancel":
+                return
 
 
 def _write_docx_resume(
@@ -234,6 +244,7 @@ def _build_personal_project_description(project_name, project_context, user_stat
     """
     # Context from the project as a whole
     langs = project_context.get("languages", "Unknown")
+    skills = project_context.get("skills", "NA")
     frameworks = project_context.get("frameworks", "None")
     
     # User specific stats
