@@ -22,7 +22,7 @@ def _center_text(text):
     width = shutil.get_terminal_size(fallback=(80, 20)).columns
     if len(text) >= width:
         return text
-    padding = (width - len(text)) // 2
+    padding = (width - len(text) + 1) // 2
     return " " * padding + text
 
 
@@ -133,10 +133,13 @@ def orchestrator(config):
 
     # Step 1: Ask for analysis mode EACH TIME
     analysis_mode = get_analysis_mode()
+    if analysis_mode is None:
+        return
+    analysis_mode_key = analysis_mode.lower()
 
     # Step 2: Advanced mode logic
     advanced_options = {}
-    if analysis_mode == "advanced":
+    if analysis_mode_key == "advanced":
         advanced_options = get_advanced_options()
 
     # Step 3: Select project files
@@ -150,7 +153,7 @@ def orchestrator(config):
     scraped_data = base_extraction(file_list, filters)
 
     detailed_data = None
-    if analysis_mode == "advanced":
+    if analysis_mode_key == "advanced":
         detailed_data = detailed_extraction(scraped_data, advanced_options, filters)
 
     # Step 5: Run analysis on the extracted metadata and save data to DB
@@ -160,9 +163,9 @@ def orchestrator(config):
 
     try:
         save_full_scan(analysis_results, analysis_mode, config.consent)
-        print("Scan successfully saved.")
+        print(_center_text("Scan successfully saved."))
     except Exception as e:
-        print(f"[WARN] Could not store project analysis: {e}")
+        print(_center_text(f"[WARN] Could not store project analysis: {e}"))
 
    
 

@@ -7,7 +7,7 @@ def _center_text(text):
     width = shutil.get_terminal_size(fallback=(80, 20)).columns
     if len(text) >= width:
         return text
-    padding = (width - len(text)) // 2
+    padding = (width - len(text) + 1) // 2
     return " " * padding + text
 
 
@@ -31,7 +31,7 @@ def get_yes_no(prompt: str) -> bool:
         elif choice == "N":
             return False
         else:
-            print("Invalid input. Please enter Y or N.")
+            print(_center_text("Invalid input. Please enter Y or N."))
 
 
 def get_user_consent() -> bool:
@@ -44,9 +44,9 @@ def get_user_consent() -> bool:
     )
     
     if consent_granted:
-        print("Consent granted.")
+        print(_center_text("Consent granted."))
     else:
-        print("Consent denied. Exiting now.")
+        print(_center_text("Consent denied. Exiting now."))
     
     return consent_granted
 
@@ -54,19 +54,22 @@ def get_user_consent() -> bool:
 def get_analysis_mode() -> str:
     """
     Prompts the user to choose an analysis mode.
-    Returns "basic" or "advanced".
+    Returns "Basic", "Advanced", or None if the user goes back.
     """
     while True:
         _print_banner("ANALYSIS MODE")
+        print(_center_text("0. Back"))
         print(_center_text("1. Basic (Does not open file content)"))
         print(_center_text("2. Advanced (Opens file content)"))
-        choice = input(_center_text("Choose an option (1-2): ")).strip()
+        choice = input(_center_text("Choose an option (0-2): ")).strip()
+        if choice == "0":
+            return None
         if choice == "1":
             return "Basic"
         elif choice == "2":
             return "Advanced"
         else:
-            print("Invalid choice. Please enter 1 or 2.")
+            print(_center_text("Invalid choice. Please enter 0, 1, or 2."))
 
 
 def get_advanced_options() -> dict:

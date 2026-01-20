@@ -20,7 +20,7 @@ def _center_text(text):
     width = shutil.get_terminal_size(fallback=(80, 20)).columns
     if len(text) >= width:
         return text
-    padding = (width - len(text)) // 2
+    padding = (width - len(text) + 1) // 2
     return " " * padding + text
 
 

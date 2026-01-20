@@ -10,7 +10,7 @@ def _center_text(text):
     width = shutil.get_terminal_size(fallback=(80, 20)).columns
     if len(text) >= width:
         return text
-    padding = (width - len(text)) // 2
+    padding = (width - len(text) + 1) // 2
     return " " * padding + text
 
 
@@ -38,6 +38,13 @@ def _print_menu(title, options, prompt="Choose an option: "):
     return input(_center_text(prompt)).strip()
 
 
+def _print_line(text, file=None):
+    if file:
+        print(text, file=file)
+    else:
+        print(_center_text(text))
+
+
 def _print_scan_list(scans):
     for i, s in enumerate(scans, start=1):
         print(_center_text(f"{i}. [ID: {s['summary_id']}] {s['timestamp']} ({s['analysis_mode']})"))
@@ -62,12 +69,12 @@ def scan_manager():
         choice = _print_menu(
             "SCAN MANAGER",
             [
+                ("0", "Return to home screen"),
                 ("1", "View stored project analyses"),
                 ("2", "Generate Resume/Portfolio"),
                 ("3", "Delete stored scans"),
-                ("4", "Return to home screen"),
             ],
-            prompt="Choose an option (1-4): ",
+            prompt="Choose an option (0-3): ",
         )
 
         if choice == "1":
@@ -79,7 +86,7 @@ def scan_manager():
         elif choice == "3":
             delete_full_scan()
 
-        elif choice == "4":
+        elif choice == "0":
             break
 
         else:
@@ -99,12 +106,11 @@ def view_full_scan_details():
     # 1. List available scans (lightweight metadata only)
     print()
     print(_center_text("Select a scan to view:"))
-    print("/n")
     _print_scan_list(scans)
 
     choice = input(_center_text("Enter number (0 to cancel): ")).strip()
     if not choice.isdigit() or int(choice) == 0:
-        print("Canceled.")
+        print(_center_text("Canceled."))
         return
     idx = int(choice) - 1
     if idx < 0 or idx >= len(scans):
@@ -175,7 +181,6 @@ def delete_full_scan():
     # Display list for deletion
     print()
     print(_center_text("Select a scan to delete:"))
-    print("/n")
     _print_scan_list(scans)
 
     choice = input(_center_text("Enter number (or 0 to cancel): ")).strip()
@@ -193,7 +198,7 @@ def delete_full_scan():
     # Confirm before deletion
     if get_yes_no(f"Are you sure you want to delete the scan from {scan['timestamp']}?"):
         success = delete_full_scan_by_id(scan["summary_id"])
-        print("Scan deleted." if success else "Failed to delete scan.")
+        print(_center_text("Scan deleted.") if success else "Failed to delete scan.")
     else:
         print("Deletion canceled.")
 
@@ -213,12 +218,11 @@ def generate_portfolio_menu():
     # Select scan first
     print()
     print(_center_text("Select a scan to generate portfolio from:"))
-    print("/n")
     _print_scan_list(scans)
 
     choice = input(_center_text("Enter number (0 to cancel): ")).strip()
     if not choice.isdigit() or int(choice) == 0:
-        print("Canceled.")
+        print(_center_text("Canceled."))
         return
     idx = int(choice) - 1
     if idx < 0 or idx >= len(scans):
@@ -253,7 +257,7 @@ def generate_portfolio_menu():
         return
 
     elif gen_choice != "2":
-        print("Canceled.")
+        print(_center_text("Canceled."))
         return
 
     # --- Contributor Portfolio Logic ---
@@ -261,7 +265,7 @@ def generate_portfolio_menu():
     project_summaries = data.get("project_summaries", [])
 
     if not contributor_profiles:
-        print("No contributor data found in this scan.")
+        print(_center_text("No contributor data found in this scan."))
         return
 
     # List contributors
@@ -275,7 +279,6 @@ def generate_portfolio_menu():
 
     print()
     print(_center_text("Select a contributor:"))
-    print("/n")
     for i, c in enumerate(contributors, 1):
         print(_center_text(f"{i}. {c}"))
     
@@ -295,7 +298,7 @@ def generate_portfolio_menu():
         elif idx != -1:
             print("Invalid selection.")
     else:
-        print("Canceled.")
+        print(_center_text("Canceled."))
 
 
 # --------------------------------------------------------
@@ -320,22 +323,22 @@ def print_repo_summary(
     commit_frequency,
 ):
     """Prints metadata about a specific repository analysis."""
-    print("\n[Repository Metadata]")
-    print(f" Project:          {proj_name}")
-    print(f" Repo Name:        {repo_name}")
-    print(f" Repo Root:        {repo_root}")
-    print(
-        f" Authors:          {', '.join(sorted(repo_authors)) if repo_authors else 'None'}"
-    )
-    print(
-        f" Contributors:     {', '.join(sorted(repo_contributors)) if repo_contributors else 'None'}"
-    )
-    print(f" Branch Count:     {branch_count}")
-    print(f" Has Merges:       {has_merges}")
-    print(f" Project Type:     {project_type}")
-    print(f" Repo Duration:    {repo_duration_days} days")
-    print(f" Commit Freq:      {commit_frequency}")
-    print("-----------------------------------------------")
+    _print_banner("REPOSITORY METADATA")
+
+    def _kv(label, value):
+        _print_line(f"{label:<14}: {value}")
+
+    _kv("Project", proj_name)
+    _kv("Repo Name", repo_name)
+    _kv("Repo Root", repo_root)
+    _kv("Authors", ", ".join(sorted(repo_authors)) if repo_authors else "None")
+    _kv("Contributors", ", ".join(sorted(repo_contributors)) if repo_contributors else "None")
+    _kv("Branch Count", branch_count)
+    _kv("Has Merges", has_merges)
+    _kv("Project Type", project_type)
+    _kv("Repo Duration", f"{repo_duration_days} days")
+    _kv("Commit Freq", commit_frequency)
+    print()
 
 def print_project_rankings(project_summaries, file=None):
     """
@@ -344,15 +347,23 @@ def print_project_rankings(project_summaries, file=None):
     """
     if not project_summaries:
         return
-    print("\nRanked Projects", file=file)
-    print(
-        f"\n{'Project':<30} "
+    if file:
+        print("\nRanked Projects", file=file)
+    else:
+        _print_banner("RANKED PROJECTS")
+
+    header = (
+        f"{'Project':<30} "
         f"{'Files':>6} {'Days':>6} {'Code':>6} {'Test':>6} "
         f"{'Doc':>6} {'Assets':>6} "
         f"{'Languages':<25} {'Frameworks':<40} "
-        f"{'Collab':>7} {'Score':>7}", file=file
+        f"{'Collab':>7} {'Score':>7}"
     )
-    print("-" * 155, file=file)
+    if file:
+        print(f"\n{header}", file=file)
+    else:
+        _print_line(header)
+    _print_line("-" * 155, file=file)
 
     for p in project_summaries:
         # Truncate long language/framework lists for display
@@ -364,13 +375,14 @@ def print_project_rankings(project_summaries, file=None):
         if len(fw_str) > 40:
             fw_str = fw_str[:37] + "..."
 
-        print(
+        line = (
             f"{p.get('project', 'Unknown')[:30]:<30} "
             f"{p.get('total_files', 0):6} {p.get('duration_days', 0):6} {p.get('code_files', 0):6} "
             f"{p.get('test_files', 0):6} {p.get('doc_files', 0):6} {p.get('design_files', 0):6} "
             f"{langs_str:<25} {fw_str:<40} "
-            f"{p.get('is_collaborative', 'No'):>7} {p.get('score', 0):7.1f}", file=file
+            f"{p.get('is_collaborative', 'No'):>7} {p.get('score', 0):7.1f}"
         )
+        _print_line(line, file=file)
 
 def print_chronological_projects(projects_chronological, file=None):
     """
@@ -378,10 +390,13 @@ def print_chronological_projects(projects_chronological, file=None):
     """
     if not projects_chronological:
         return
-    print("\nProjects in Chronological Order", file=file)
-    print("-" * 80, file=file)
+    if file:
+        print("\nProjects in Chronological Order", file=file)
+    else:
+        _print_banner("PROJECTS IN CHRONOLOGICAL ORDER")
+    _print_line("-" * 80, file=file)
     for p in projects_chronological:
-        print(f"- {p['name']}: {p['first_used']} → {p['last_used']}", file=file)
+        _print_line(f"- {p['name']}: {p['first_used']} → {p['last_used']}", file=file)
 
 def print_skills_timeline(skills_chronological, file=None):
     """
@@ -389,10 +404,13 @@ def print_skills_timeline(skills_chronological, file=None):
     """
     if not skills_chronological:
         return
-    print("\nSkills Exercised Over Time", file=file)
-    print("-" * 80, file=file)
+    if file:
+        print("\nSkills Exercised Over Time", file=file)
+    else:
+        _print_banner("SKILLS EXERCISED OVER TIME")
+    _print_line("-" * 80, file=file)
     for s in skills_chronological:
-        print(f"- {s['first_used']} → {s['last_used']}: {s['skill']}", file=file)
+        _print_line(f"- {s['first_used']} → {s['last_used']}: {s['skill']}", file=file)
 
 def print_resume_summaries(resume_summaries, file=None):
     """
@@ -400,10 +418,13 @@ def print_resume_summaries(resume_summaries, file=None):
     """
     if not resume_summaries:
         return
-    print("\nTop Project Résumé Summaries", file=file)
-    print("-" * 80, file=file)
+    if file:
+        print("\nTop Project Résumé Summaries", file=file)
+    else:
+        _print_banner("TOP PROJECT RESUME SUMMARIES")
+    _print_line("-" * 80, file=file)
     for bullet in resume_summaries:
-        print(f"- {bullet}", file=file)
+        _print_line(f"- {bullet}", file=file)
 
 def print_contributor_stats(project_summaries, file=None):
     """
@@ -444,14 +465,26 @@ def print_contributor_stats(project_summaries, file=None):
 
     # Print Leaderboard Table
     if leaderboard:
-        print("\n=== Contributor Leaderboard (by total adjusted score) ===", file=file)
-        print(f"{'Rank':>4}  {'Contributor':<28} {'Projects':>8} {'TotalAdj':>10} {'TotalPct':>9}", file=file)
-        print("-" * 70, file=file)
+        if file:
+            print("\n=== Contributor Leaderboard (by total adjusted score) ===", file=file)
+        else:
+            _print_banner("CONTRIBUTOR LEADERBOARD")
+        _print_line(
+            f"{'Rank':>4}  {'Contributor':<28} {'Projects':>8} {'TotalAdj':>10} {'TotalPct':>9}",
+            file=file,
+        )
+        _print_line("-" * 70, file=file)
         for i, (person, total_adj, total_pct, projects_count) in enumerate(leaderboard, start=1):
-            print(f"{i:4}  {person[:28]:<28} {projects_count:8} {total_adj:10.1f} {total_pct:8.1f}%", file=file)
+            _print_line(
+                f"{i:4}  {person[:28]:<28} {projects_count:8} {total_adj:10.1f} {total_pct:8.1f}%",
+                file=file,
+            )
 
         # Print Detailed Breakdown per Person
-        print("\n=== Contributor Contribution Breakdown ===", file=file)
+        if file:
+            print("\n=== Contributor Contribution Breakdown ===", file=file)
+        else:
+            _print_banner("CONTRIBUTOR CONTRIBUTION BREAKDOWN")
         for person, _, _, _ in leaderboard:
             person_projects = []
             for p in project_summaries:
@@ -463,8 +496,15 @@ def print_contributor_stats(project_summaries, file=None):
             
             person_projects.sort(key=lambda x: x[2], reverse=True)
             if person_projects:
-                print(f"\n-- {person} --", file=file)
-                print(f"{'Project':<32} {'Pct':>7} {'AdjScore':>10} {'Base':>10}", file=file)
-                print("-" * 65, file=file)
+                if file:
+                    print(f"\n-- {person} --", file=file)
+                else:
+                    print()
+                    _print_line(f"-- {person} --", file=file)
+                _print_line(f"{'Project':<32} {'Pct':>7} {'AdjScore':>10} {'Base':>10}", file=file)
+                _print_line("-" * 65, file=file)
                 for proj, pct, adj, base in person_projects[:3]:
-                    print(f"{proj[:32]:<32} {pct:5.1f}% {adj:10.1f} {base:10.1f}", file=file)
+                    _print_line(
+                        f"{proj[:32]:<32} {pct:5.1f}% {adj:10.1f} {base:10.1f}",
+                        file=file,
+                    )
