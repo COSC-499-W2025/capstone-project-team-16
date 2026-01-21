@@ -62,7 +62,7 @@ def load_filters(filename=None):
     except FileNotFoundError:
         print(f"[metadata_extractor] Filter file not found: {filename}")
     except json.JSONDecodeError as e:
-        print(f"[metadata_extractor] JSON decode error in {filename}: {e}")
+        print(f"Error decoding JSON in {filename}: {e}")
     except Exception as e:
         print(f"[metadata_extractor] Unexpected error loading filters: {e}")
 

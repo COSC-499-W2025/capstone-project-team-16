@@ -50,7 +50,7 @@ def get_input_file_path(input_dir=INPUT_DIR):
                 print(_center_text("Still no zip files found. Returning to home."))
                 return None
 
-        _print_banner("SELECT A ZIP FILE")
+        _print_banner("Select a zip file")
         for i, f in enumerate(zip_files, start=1):
             print(_center_text(f"{i}. {f}"))
 
