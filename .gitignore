@@ -17,5 +17,5 @@ __pycache__/
 
 
 #Scan results
-src/out/
+output
 skillscope.db
