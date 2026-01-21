@@ -84,15 +84,15 @@ def check_file_validity(zip_path):
     """
     # Fast path checks before doing any I/O-heavy work
     if not os.path.exists(zip_path):
-        print("Path does not exist.")
+        print(_center_text("Path does not exist."))
         return None
 
     if not os.path.isfile(zip_path):
-        print("File does not exist.")
+        print(_center_text("File does not exist."))
         return None
 
     if not zip_path.lower().endswith(".zip"):
-        print("The requested file is not a zip file.")
+        print(_center_text("The requested file is not a zip file."))
         return None
 
     try:
@@ -110,7 +110,7 @@ def check_file_validity(zip_path):
 
             infos = zip_ref.infolist()
             if not infos:
-                print("Zip file is valid, but empty.")
+                print(_center_text("Zip file is valid, but empty."))
                 return None
 
             # Extract once, using the already-open zip_ref
@@ -130,10 +130,10 @@ def check_file_validity(zip_path):
         return file_tree
 
     except zipfile.BadZipFile:
-        print("Not a zip file or corrupted at central directory.")
+        print(_center_text("Not a zip file or corrupted at central directory."))
         return None
     except zipfile.LargeZipFile:
-        print("File uses ZIP64. Too large cannot handle.")
+        print(_center_text("File uses ZIP64. Too large cannot handle."))
         return None
     except Exception as e:
         print("Error:", e)

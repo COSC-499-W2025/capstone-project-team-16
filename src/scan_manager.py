@@ -90,7 +90,7 @@ def scan_manager():
             break
 
         else:
-            print("Invalid input. Try again.")
+            print(_center_text("Invalid input. Try again."))
 
 
 def view_full_scan_details():
@@ -100,7 +100,7 @@ def view_full_scan_details():
     """
     scans = list_full_scans()
     if not scans:
-        print("No scans found.")
+        print(_center_text("No scans found."))
         return
 
     # 1. List available scans (lightweight metadata only)
@@ -114,7 +114,7 @@ def view_full_scan_details():
         return
     idx = int(choice) - 1
     if idx < 0 or idx >= len(scans):
-        print("Invalid selection.")
+        print(_center_text("Invalid selection."))
         return
 
     # 2. Fetch the full heavy JSON data for the selected scan
@@ -122,7 +122,7 @@ def view_full_scan_details():
     scan = get_full_scan_by_id(summary_id)
     
     if not scan:
-        print("Error: Could not retrieve scan data.")
+        print(_center_text("Error: Could not retrieve scan data."))
         return
     data = scan["scan_data"]
 
@@ -146,7 +146,7 @@ def view_full_scan_details():
     print_resume_summaries(resume_summaries)
     print_contributor_stats(project_summaries)
 
-    print("\nEnd of scan view.\n")
+    print(_center_text("\nEnd of scan view.\n"))
 
     # Option to export the displayed report to a text file
     if get_yes_no("Do you want to export this report to a text file?"):
@@ -175,7 +175,7 @@ def delete_full_scan():
     """
     scans = list_full_scans()
     if not scans:
-        print("No saved scans found to delete.")
+        print(_center_text("No saved scans found to delete."))
         return
 
     # Display list for deletion
@@ -185,12 +185,12 @@ def delete_full_scan():
 
     choice = input(_center_text("Enter number (or 0 to cancel): ")).strip()
     if not choice.isdigit() or int(choice) == 0:
-        print("Deletion canceled.")
+        print(_center_text("Deletion canceled."))
         return
 
     idx = int(choice) - 1
     if idx < 0 or idx >= len(scans):
-        print("Invalid selection.")
+        print(_center_text("Invalid selection."))
         return
 
     scan = scans[idx]
@@ -200,7 +200,7 @@ def delete_full_scan():
         success = delete_full_scan_by_id(scan["summary_id"])
         print(_center_text("Scan deleted.") if success else "Failed to delete scan.")
     else:
-        print("Deletion canceled.")
+        print(_center_text("Deletion canceled."))
 
 
 def generate_portfolio_menu():
@@ -212,7 +212,7 @@ def generate_portfolio_menu():
     """
     scans = list_full_scans()
     if not scans:
-        print("No scans found.")
+        print(_center_text("No scans found."))
         return
 
     # Select scan first
@@ -226,7 +226,7 @@ def generate_portfolio_menu():
         return
     idx = int(choice) - 1
     if idx < 0 or idx >= len(scans):
-        print("Invalid selection.")
+        print(_center_text("Invalid selection."))
         return
 
     # Fetch full data to access contributor profiles and project details
@@ -234,7 +234,7 @@ def generate_portfolio_menu():
     
     scan = get_full_scan_by_id(summary_id)
     if not scan:
-        print("Error: Could not retrieve scan data.")
+        print(_center_text("Error: Could not retrieve scan data."))
         return
     data = scan["scan_data"]
     
@@ -253,7 +253,7 @@ def generate_portfolio_menu():
             data.get("skills_chronological", []),
             scan_timestamp=scan["timestamp"]
         )
-        print(f"\nSUCCESS: Resume saved to:\n{txt_path}\n{docx_path}")
+        print(_center_text(f"\nSUCCESS: Resume saved to:\n{txt_path}\n{docx_path}"))
         return
 
     elif gen_choice != "2":
@@ -274,7 +274,7 @@ def generate_portfolio_menu():
     contributors = [c for c in contributors if not is_noise(c)]
     
     if not contributors:
-        print("No valid contributors found.")
+        print(_center_text("No valid contributors found."))
         return
 
     print()
@@ -294,9 +294,9 @@ def generate_portfolio_menu():
             
             out_path = generate_contributor_portfolio(target_user, profile, all_projects_map, scan_timestamp=scan["timestamp"])
             if out_path:
-                print(f"\nSUCCESS: Portfolio saved to:\n{out_path}")
+                print(_center_text(f"\nSUCCESS: Portfolio saved to:\n{out_path}"))
         elif idx != -1:
-            print("Invalid selection.")
+            print(_center_text("Invalid selection."))
     else:
         print(_center_text("Canceled."))
 

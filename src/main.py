@@ -108,7 +108,6 @@ def home_screen(config, initial_choice=None):
                 prompt="Choose an option (1-3): ",
             )
         else:
-            _print_banner("SKILL SCOPE HOME")
             choice = pending_choice
             pending_choice = None
 
@@ -123,7 +122,7 @@ def home_screen(config, initial_choice=None):
             exit()
 
         else:
-            print("Invalid input. Try again.")
+            print(_center_text("Invalid input. Try again."))
 
 # --------------------------------------------------------
 # ORCHESTRATOR (handles running a scan)
@@ -145,7 +144,7 @@ def orchestrator(config):
     # Step 3: Select project files
     file_list = get_input_file_path()
     if not file_list:
-        print("No files selected. Returning to home.")
+        print(_center_text("No files selected. Returning to home."))
         return
 
     # Step 4: Load filters and extract metadata
