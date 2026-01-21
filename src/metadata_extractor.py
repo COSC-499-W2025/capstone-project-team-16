@@ -2,7 +2,31 @@ import os
 import json
 import toml  
 import yaml  
+import shutil
 from repository_extractor import analyze_repo_type
+
+
+def _center_text(text):
+    width = shutil.get_terminal_size(fallback=(80, 20)).columns
+    if len(text) >= width:
+        return text
+    padding = (width - len(text) + 1) // 2
+    return " " * padding + text
+
+
+def _print_banner(title, line_char="~", min_width=23):
+    line_width = max(len(title), min_width)
+    line = line_char * line_width
+    print()
+    print(_center_text(line))
+    print(_center_text(title))
+    print(_center_text(line))
+
+
+def _print_repo_skip(path):
+    _print_banner("REPO SKIPPED")
+    print(_center_text("Invalid or failed repo:"))
+    print(_center_text(path))
 
 # We should do a shallow extraction regardless of the file type, and selectively deal with larger categorical extractions later
 
@@ -36,11 +60,11 @@ def load_filters(filename=None):
         return{"extensions":ext_to_category, "languages":ext_to_language, "frameworks":framework_files}
 
     except FileNotFoundError:
-        print(f"Filter file not found: {filename}")
+        print(f"[metadata_extractor] Filter file not found: {filename}")
     except json.JSONDecodeError as e:
         print(f"Error decoding JSON in {filename}: {e}")
     except Exception as e:
-        print(f"Unexpected error loading filters: {e}")
+        print(f"[metadata_extractor] Unexpected error loading filters: {e}")
 
     # Provide fallback if JSON not found or failed
     return {}
@@ -109,9 +133,9 @@ def base_extraction(file_list, filters):
 
 
     else:
-    #TODO: add this to error log
-            
-        print("Unable to load filters")
+        msg = "[metadata_extractor] Unable to load filters; using empty mappings."
+        filters.setdefault("error_log", []).append(msg)
+        print(msg)
     return extracted_data
 
 
@@ -240,7 +264,7 @@ def detailed_extraction(extracted_data, advanced_options, filters=None):
                 })
 
             else:
-                print(f"Skipping invalid or failed repo: {entry['filename']}")
+                _print_repo_skip(entry["filename"])
 
     #Attach files to the correct project
     for project in repositories:

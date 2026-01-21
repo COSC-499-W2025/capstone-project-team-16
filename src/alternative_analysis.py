@@ -3,6 +3,7 @@
 
 import json
 import os
+import shutil
 from datetime import datetime
 from collections import defaultdict, Counter
 import csv
@@ -16,6 +17,14 @@ from scan_manager import (
     print_contributor_stats,
     is_noise
 )
+
+
+def _center_text(text):
+    width = shutil.get_terminal_size(fallback=(80, 20)).columns
+    if len(text) >= width:
+        return text
+    padding = (width - len(text) + 1) // 2
+    return " " * padding + text
 
 
 # for contributions
@@ -686,15 +695,17 @@ def analyze_projects(extracted_data, filters, advanced_options, detailed_data=No
                             for p in project_summaries]
                     )
 
-                print(f"saved file to {out_path}")
+                print(_center_text(f"saved file to {out_path}"))
                 break
             except PermissionError:
-                print(f"\n[!] Could not save CSV to '{out_path}' because it is open.")
-                print("Please close the file and press Enter to retry, or type 'cancel' to skip.")
+                print()
+                print(_center_text(f"[!] Could not save CSV to '{out_path}' because it is open."))
+                print(_center_text("Please close the file and press Enter to retry, or type 'cancel' to skip."))
                 if input("> ").strip().lower() == "cancel":
                     break
             except Exception as e:
-                print(f"\n[WARN] Could not save CSV: {e}")
+                print()
+                print(_center_text(f"[WARN] Could not save CSV: {e}"))
                 break
 
 
