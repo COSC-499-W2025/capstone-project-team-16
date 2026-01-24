@@ -4,6 +4,7 @@ import toml
 import yaml  
 import shutil
 from repository_extractor import analyze_repo_type
+from language_detector import detect_language_from_snippet
 
 
 def _center_text(text):
@@ -27,6 +28,24 @@ def _print_repo_skip(path):
     _print_banner("REPO SKIPPED")
     print(_center_text("Invalid or failed repo:"))
     print(_center_text(path))
+
+
+def detect_language_by_content(file_path):
+    """
+    Attempts to detect language by reading the first 4KB and matching regex patterns.
+    Useful for files with missing or non-standard extensions.
+    """
+    try:
+        # Read first 4KB to catch headers/imports that might be further down
+        with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+            content = f.read(4096)
+            
+        _, ext = os.path.splitext(file_path)
+        return detect_language_from_snippet(content, ext)
+
+    except Exception:
+        pass
+    return None
 
 # We should do a shallow extraction regardless of the file type, and selectively deal with larger categorical extractions later
 
@@ -116,8 +135,7 @@ def base_extraction(file_list, filters):
                     # Assign programming language if detected as source_code or web_code
                     if category in( "source_code", "web_code"):
                         language = languages.get(ext, "undefined")
-
-            
+                    
 
             extracted_data.append(
                 {
@@ -228,6 +246,22 @@ def detailed_extraction(extracted_data, advanced_options, filters=None):
             "skills_gen": True,
             "resume_gen": True
         }
+
+    # -------------------------------------------------------------------------
+    # PHASE 1: Content-Based Language Correction (The "Deep Scan")
+    # -------------------------------------------------------------------------
+    if advanced_options.get("programming_scan", True):
+        for entry in extracted_data:
+            # Only check files that are potential code or completely unknown
+            if entry["category"] in ("source_code", "web_code", "uncategorized", "documentation"):
+                # Run content detection on ALL source files to verify extension accuracy
+                # (e.g. catching a .py file that actually contains C code)
+                detected = detect_language_by_content(entry["filename"])
+                
+                if detected:
+                    entry["language"] = detected
+                    if entry["category"] in ("uncategorized", "documentation"):
+                        entry["category"] = "source_code"
 
       # Identify repo roots and gather repo metadata
     for entry in extracted_data:
