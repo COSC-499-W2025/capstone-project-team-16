@@ -706,3 +706,62 @@ Unit tests for two functions in file_parser have been added using Pytest.
 ### Additional Context (Optional)
 - Notes or blockers
 
+## Milestone: 2026-JAN-04 to 2026-JAN-11
+
+
+### Milestone Goals Recap
+- Stuff we need to fix from Milestone 1
+  - Upload test zip
+  - Rank projects with each person contribution
+  - Specific skill contribution based of contributor (who had which skill, ex java, python)
+  - Portfolio for each user/contributor -> make it individual
+  - Formet top 3 projects part better (hard to see, looks like an error message)
+  - Different users, retrieve users from repo(ex- gmail and name) and make them into different profiles
+
+### Features in Project Plan
+- Rank projects with each person contributions
+- Upload test zip
+- Specific skill contribution based on contributor
+
+### Tasks from Project Board
+| Feature | Task | Assigned To (Username) | Notes |
+| --------- | ------ | ---------------------- | ------ |
+| Rank projects with each person contributions | Rank projects with each person contributions | LaWunn | … |
+|  Upload test zip | Upload test zip | LaWunn | … |
+|  Specific skill contribution based on contributor | Specific skill contribution based on contributor | ethansturek | … |
+
+
+### Burnup Chart
+| Name | Username |
+|----------------|----------------|
+| Ethan Sturek | ethansturek |
+|  La Wunn| LaWunn|
+| Amani |lugger33 |
+
+<img width="716" height="535" alt="Screenshot 2026-01-11 at 10 35 05 PM" src="https://github.com/user-attachments/assets/9a8b465e-35c6-4fc0-8c57-de0775560ed0" />
+
+
+### Completed Tasks Table
+| Task | Assigned To (Username) | 
+|------|----------------------|
+| Rank projects with each person contributions | LaWunn |
+|  Upload test zip | LaWunn | 
+| Specific skill contribution based on contributor | ethansturek |
+
+
+### In Progress Tasks Table
+| Task | Assigned To (Username) |
+|------|----------------------|
+
+<img width="236" height="227" alt="Screenshot 2026-01-11 at 10 38 41 PM" src="https://github.com/user-attachments/assets/e460d00b-9bbb-4214-8740-24edde6f28b4" />
+
+
+### Test Report
+- Summary of tests run this milestone
+
+<img width="1255" height="767" alt="Screenshot 2026-01-11 at 9 35 43 PM" src="https://github.com/user-attachments/assets/6d12d270-a509-4cd7-8734-82ef006eaee7" />
+
+
+### Additional Context (Optional)
+- Notes or blockers
+
