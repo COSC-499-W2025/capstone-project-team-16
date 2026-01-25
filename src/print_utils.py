@@ -1,4 +1,4 @@
-# to print stuff - similar to whats happening in scan manager but i didn't want a circular import to analysis file so this exisit
+# to print stuff -moved from scan manager
 import shutil
 
 def _center_text(text: str) -> str:
