@@ -53,6 +53,24 @@ Then, run the application from the project root:
 python src/main.py
 ```
 
+## Test File
+
+Due to GitHub file size limits, the full stress-test ZIP archive is not committed
+to the repository.
+
+This dataset was used for manual and performance testing of:
+- ZIP validation
+- File parsing
+- Repository analysis
+- Contributor scoring
+
+# Download link
+ https://drive.google.com/file/d/1-9tQJhX9-cK3kk-2KdwOifr74SMqY5RG/view?usp=sharing
+
+# Notes
+- This file is **not required** to run tests.
+
+
 ## System Functionality — Milestone 1
 
 The system must be able to:
