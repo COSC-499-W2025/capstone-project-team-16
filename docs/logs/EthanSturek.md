@@ -1,4 +1,40 @@
 # Personal Log - Ethan Sturek
+## 2026-JAN-18 to 2026-JAN-25
+
+
+### Type of Tasks Worked On
+![Screenshot](<screenshots/Ethan/Week 17.png>)
+
+### Recap of Week's Goals
+- Improve language detection 
+
+
+### Features Assigned (Project Plan)
+- Improve language detection by opening files
+- Test different file scenerios
+- Peer Testing #1 Task List
+  
+### Project Board 
+| Feature | Item Number | Status (Completed/In Progress) | Task Type (Code, Test, Team Work) | Notes |
+|------|------|-----|-------------------------------|-------|
+| Improve language detection by opening files | [#212](https://github.com/COSC-499-W2025/capstone-project-team-16/issues/212)| Completed | Code | Language detection now looks at certain regex in combination with file exentsions. This greatly increases the accuracy of language detection. |
+| Test different file scenerios | [#213](https://github.com/COSC-499-W2025/capstone-project-team-16/issues/213)| Completed | Test | Created 5 new tests to test the new language detection, covering spoofing, polyglot, false positives, new languages, import order |
+| Test different file scenerios | [#214](https://github.com/COSC-499-W2025/capstone-project-team-16/issues/214)| Completed | Test | Created 5 new tests to test the new language detection, covering spoofing, polyglot, false positives, new languages, import order |
+  
+
+
+
+
+
+### Completed Tasks (Last 2 Weeks)
+- Improve language detection by opening files
+- Test different file scenerios
+- Peer Testing #1 Task List
+
+### Next Week's Goals
+- Create Polished Demo for peer testing
+- Start on Milestone 2 improvements
+
 ## 2026-JAN-11 to 2026-JAN-18
 
 
