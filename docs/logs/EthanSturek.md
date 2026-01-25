@@ -6,7 +6,8 @@
 ![Screenshot](<screenshots/Ethan/Week 17.png>)
 
 ### Recap of Week's Goals
-- Improve language detection 
+- Improve language detection
+- Make peer testing activity list
 
 
 ### Features Assigned (Project Plan)
@@ -19,7 +20,7 @@
 |------|------|-----|-------------------------------|-------|
 | Improve language detection by opening files | [#212](https://github.com/COSC-499-W2025/capstone-project-team-16/issues/212)| Completed | Code | Language detection now looks at certain regex in combination with file exentsions. This greatly increases the accuracy of language detection. |
 | Test different file scenerios | [#213](https://github.com/COSC-499-W2025/capstone-project-team-16/issues/213)| Completed | Test | Created 5 new tests to test the new language detection, covering spoofing, polyglot, false positives, new languages, import order |
-| Test different file scenerios | [#214](https://github.com/COSC-499-W2025/capstone-project-team-16/issues/214)| Completed | Test | Created 5 new tests to test the new language detection, covering spoofing, polyglot, false positives, new languages, import order |
+| Peer Testing #1 Task List| [#214](https://github.com/COSC-499-W2025/capstone-project-team-16/issues/214)| Completed | Team Work | Task list for peer testing session has been created. |
   
 
 
