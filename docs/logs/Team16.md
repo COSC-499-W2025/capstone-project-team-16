@@ -1,4 +1,61 @@
 # Team Log - Team 16
+## Milestone: 2026-JAN-18 to 2026-JAN-25
+
+
+### Milestone Goals Recap
+- Improve language detection
+- Make peer testing activity list
+
+### Features in Project Plan
+- Improve language detection by opening files
+- Test different file scenerios
+- Peer Testing #1 Task List
+
+
+### Burnup Chart
+| Name | Username |
+|----------------|----------------|
+| Ethan Sturek | ethansturek |
+| La Wunn| LaWunn|
+| Amani |lugger33 |
+
+![Screenshot](<screenshots/Team16/BurnupW17.png>)
+
+### Completed Tasks Table
+![Screenshot](<screenshots/Team16/DoneTasksW17.png>)
+
+| User | Feature | Item Number  | Task Type (Code, Test, Team Work) | Notes |
+|------|------|-----|-------------------------------|-------|
+| Ethan Sturek | Improve language detection by opening files | [#212](https://github.com/COSC-499-W2025/capstone-project-team-16/issues/212) | Code | Language detection now looks at certain regex in combination with file exentsions. This greatly increases the accuracy of language detection. |
+| Ethan Sturek | Test different file scenerios | [#213](https://github.com/COSC-499-W2025/capstone-project-team-16/issues/213)| Test | Created 5 new tests to test the new language detection, covering spoofing, polyglot, false positives, new languages, import order |
+| Ethan Sturek | Peer Testing #1 Task List| [#214](https://github.com/COSC-499-W2025/capstone-project-team-16/issues/214)| Completed | Task list for peer testing session has been created. |
+
+### In Progress Tasks Table
+![Screenshot](<screenshots/Team16/TasksW17.png>)
+| User | Feature | Item Number  | Task Type (Code, Test, Team Work) | Notes |
+|------|------|-----|-------------------------------|-------|
+| Ethan Sturek | Add Milestone 2 tasks to board | [#215](https://github.com/COSC-499-W2025/capstone-project-team-16/issues/215) | Team Work | Language detection now looks at certain regex in combination with file exentsions. This greatly increases the accuracy of language detection. |
+
+
+### Test Report
+![Screenshot](<screenshots/Team16/Test1W17.png>)
+
+### Tests
+- Unit tests added for language detection covering,
+    - Spoofing Test: Verified that a .py file containing C code is correctly identified as C.
+    - Polyglot Test: Verified that a Python file with C comments is correctly identified as Python.
+    - False Positive Test: Verified that a text file with "class Summary" is NOT identified as code.
+    - New Languages: Verified detection for Go, Ruby, PHP, and TypeScript.
+    - Import Order: Verified that JavaScript imports are not misidentified as Python
+- Extensive manual testing
+### Running Tests
+
+1.  Run `python -m venv venv` to create a virtual environment.
+2. On Windows run `venv/Scripts/activate`.
+3. On Mac run `venv/bin/activate`.
+4. Run `pip install -r requirements.txt`.
+5. In the root of the repositiory, enter `pytest` to run all tests.
+   
 ## Milestone: 2026-JAN-11 to 2026-JAN-18
 
 
