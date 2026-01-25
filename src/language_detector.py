@@ -85,7 +85,7 @@ def detect_language_from_snippet(content, ext):
     # Ruby
     if ext.lower() == ".rb":
         # Matches def, class, module keywords or require statements
-        if re.search(r'^\s*def\s+\w+|^\s*class\s+\w+|^\s*module\s+\w+|^\s*require\s+[\'"]', content, re.MULTILINE):
+        if re.search(r'^\s*(?:class|module)\s+[A-Z]\w*(?:\s*<|\s*$)|^\s*def\s+\w+|^\s*require\s+[\'"]', content, re.MULTILINE):
             return "Ruby"
 
     # Go
@@ -118,6 +118,11 @@ def detect_language_from_snippet(content, ext):
         return "C"
     if re.search(r'^\s*using\s+System;', content, re.MULTILINE): return "C#"
     
+    # JS / TS (Moved up to prevent Python import confusion)
+    if re.search(r'^\s*(import\s+.*\s+from\s+[\'"]|const\s+\w+\s*=|let\s+\w+\s*=|var\s+\w+\s*=|function\s+\w+\s*\(|console\.log\()', content, re.MULTILINE):
+        if re.search(r':\s*(string|number|boolean|any|void)\b|interface\s+\w+', content): return "TypeScript"
+        return "JavaScript"
+
     # Python
     if re.search(r'^\s*(def|class)\s+\w+\s*[:\(]|^\s*import\s+\w+|^\s*from\s+\w+\s+import', content, re.MULTILINE): return "Python"
     
@@ -128,18 +133,13 @@ def detect_language_from_snippet(content, ext):
     if re.search(r'^\s*package\s+main|^\s*func\s+\w+', content, re.MULTILINE): return "Go"
     
     # Ruby
-    if re.search(r'^\s*def\s+\w+|^\s*class\s+\w+|^\s*module\s+\w+|^\s*require\s+[\'"]', content, re.MULTILINE): return "Ruby"
+    if re.search(r'^\s*(?:class|module)\s+[A-Z]\w*(?:\s*<|\s*$)|^\s*def\s+\w+|^\s*require\s+[\'"]', content, re.MULTILINE): return "Ruby"
     
     # PHP
     if re.search(r'<\?php', content): return "PHP"
     
     # HTML
     if re.search(r'^\s*<!DOCTYPE\s+html>|^\s*<html', content, re.IGNORECASE | re.MULTILINE): return "HTML"
-    
-    # JS / TS
-    if re.search(r'^\s*(import\s+.*\s+from\s+[\'"]|const\s+\w+\s*=|let\s+\w+\s*=|var\s+\w+\s*=|function\s+\w+\s*\(|console\.log\()', content, re.MULTILINE):
-        if re.search(r':\s*(string|number|boolean|any|void)\b|interface\s+\w+', content): return "TypeScript"
-        return "JavaScript"
     
     # CSS
     if re.search(r'^\s*[.#a-zA-Z0-9_-]+\s*\{\s*[\w-]+\s*:', content, re.MULTILINE): return "CSS"
