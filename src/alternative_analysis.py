@@ -3,36 +3,28 @@
 
 import json
 import os
+import shutil
 from datetime import datetime
+from analysis_utils import center_text, to_datetime
+from classification import detect_activity, detect_framework, skill_from_ext
+from contributor_utils import apply_contributor_breakdown
+from scoring_utils import compute_project_score
+
 from collections import defaultdict, Counter
 import csv
 from resume_generator import build_project_line
-from scan_manager import (
+from print_utils import (
     print_repo_summary,
     print_project_rankings,
     print_chronological_projects,
     print_skills_timeline,
     print_resume_summaries,
     print_contributor_stats,
-    is_noise
 )
 
 
-# for contributions
 
 
-def _normalize_name(name: str) -> str:
-    return (name or "").strip().lower()
-
-def _get_contrib_pct(contrib_obj) -> float:
-    
-    if not isinstance(contrib_obj, dict):
-        return 0.0
-    pct = contrib_obj.get("contribution_percentage")
-    try:
-        return float(pct)
-    except Exception:
-        return 0.0
 
 
 # --------------------------------------------------------
@@ -49,99 +41,7 @@ def _project_name(filename: str) -> str:
     return parts[0]
 
 
-def _to_datetime(dt_value):
-    """
-    zipfile gives time as tuple (Y, M, D, H, M, S).
-    also supports ISO strings. if it dies, use 'now'.
-    """
-    # data from zipfile
-    if isinstance(dt_value, (list, tuple)) and len(dt_value) >= 6:
-        try:
-            y, mo, d, h, mi, s = dt_value[:6]
-            return datetime(y, mo, d, h, mi, s)
-        except Exception:
-            pass
 
-    # ISO string like "2025-11-19T01:23:45"
-    if isinstance(dt_value, str):
-        try:
-            return datetime.fromisoformat(dt_value.replace("Z", ""))
-        except Exception:
-            pass
-
-    # if everything fails, just return now so code doesn’t crash
-    return datetime.now()
-
-
-# figure out if this file is code / test / docs / design
-def _detect_activity(category: str, filename: str) -> str:
-    low = filename.lower()
-
-    # anything with 'test' in name or common test patterns
-    if "test" in low or low.endswith((".spec.js", ".test.js", ".test.py", ".spec.ts")):
-        return "test"
-
-    if category == "documentation":
-        return "documentation"
-
-    if category == "assets":
-        return "design"
-
-    # default to code if we are not sure
-    return "code"
-
-
-# guessing for frameworks based on file names
-def _detect_framework(filename: str) -> str:
-    fn = filename.lower()
-
-    if "package.json" in fn:
-        return "Node / React"
-
-    if "requirements.txt" in fn or "pyproject.toml" in fn:
-        return "Python (requirements)"
-
-    if "pom.xml" in fn:
-        return "Java (Maven)"
-
-    if "build.gradle" in fn:
-        return "Java/Kotlin (Gradle)"
-
-    if "cargo.toml" in fn:
-        return "Rust (Cargo)"
-
-    return "None"
-
-
-# just matches file extensions with skills, like .py -> python skill
-def _skill_from_ext(ext: str):
-    ext = ext.lower()
-
-    if ext == ".py":
-        return "Python Development"
-
-    if ext in (".js", ".ts", ".jsx", ".tsx"):
-        return "Frontend Development (JavaScript/TypeScript)"
-
-    if ext in (".html", ".css", ".scss", ".less"):
-        return "Web Design & Development"
-
-    if ext in (".java",):
-        return "Java Development"
-    
-    if ext in (".c", ".cpp", ".h", ".hpp"):
-        return "C/C++ Systems Programming"
-        
-    if ext in (".cs",):
-        return "C# / .NET Development"
-        
-    if ext in (".sql",):
-        return "Database Management"
-
-    if ext in (".md", ".pdf", ".docx", ".txt", ".rst"):
-        return "Technical Documentation"
-
-    return None
 
 
 # --------------------------------------------------------
@@ -230,7 +130,7 @@ def analyze_projects(extracted_data, filters, advanced_options, detailed_data=No
         
 
         # duration: based on first + last modified timestamps
-        mod_times = [_to_datetime(f["last_modified"]) for f in clean_files]
+        mod_times = [to_datetime(f["last_modified"]) for f in clean_files]
         first_mod = min(mod_times)
         last_mod = max(mod_times)
         duration_days = (last_mod - first_mod).days + 1
@@ -278,7 +178,7 @@ def analyze_projects(extracted_data, filters, advanced_options, detailed_data=No
             category = f.get("category", "uncategorized")
 
             # activity type
-            act = _detect_activity(category, filename)
+            act = detect_activity(category, filename)
             activity_counts[act] += 1
 
             # language (prefer per-file language, fall back to filters)
@@ -292,12 +192,12 @@ def analyze_projects(extracted_data, filters, advanced_options, detailed_data=No
 
             if advanced_options.get("skills_gen", True):
                 # skills
-                s = _skill_from_ext(ext)
+                s = skill_from_ext(ext)
                 if s:
                     skills.add(s)
 
                     # track global usage for chronological skill list
-                    file_time = _to_datetime(f["last_modified"])
+                    file_time = to_datetime(f["last_modified"])
                     info = skill_usage.get(s)
                     if info is None:
                         skill_usage[s] = {
@@ -423,90 +323,37 @@ def analyze_projects(extracted_data, filters, advanced_options, detailed_data=No
         except Exception:
             pass
 
-        score = (
-            volume_score
-            + activity_score
-            + variety_score
-            + duration_score
-            + collab_bonus
-            + branch_bonus
-            + merge_bonus
-            + commit_bonus
-        )
-
-        # -----------------------------------------
-        # per-contributor adjusted project score
-        # -----------------------------------------
-        per_contributor_scores = {}
-        per_contributor_pct = {}
-        per_contributor_skills = defaultdict(set)
+        score = compute_project_score(
+             volume_score=volume_score,
+             activity_score=activity_score,
+            variety_score=variety_score,
+             duration_score=duration_score,
+            collab_bonus=collab_bonus,
+            branch_bonus=branch_bonus,
+            merge_bonus=merge_bonus,
+            commit_bonus=commit_bonus,
+)
 
         project_meta = None
         if detailed_data:
             project_meta = next(
-                (p for p in detailed_data.get("projects", []) if p.get("repo_name") == proj_name),
-                None,
-            )
+            (p for p in detailed_data.get("projects", [])
+            if p.get("repo_name") == proj_name),
+            None,
+    )
 
-        contributors_raw = project_meta.get("contributors", []) if project_meta else []
-
-        for c in contributors_raw:
-            if isinstance(c, dict):
-                name = c.get("name") or c.get("email") or ""
-                key = _normalize_name(name)
-                if not key:
-                    continue
-
-                pct = _get_contrib_pct(c)
-                per_contributor_pct[key] = pct
-                per_contributor_scores[key] = score * (pct / 100.0)
-
-                # Capture skills from repo data (loc_by_type)
-                loc_map = c.get("loc_by_type", {})
-                for ext in loc_map:
-                    skill = _skill_from_ext(ext)
-                    if skill:
-                        contributor_profiles[key]["skills"].add(skill)
-                        per_contributor_skills[key].add(skill)
-                
-                # Calculate detailed file stats for resume generator
-                files_edited = c.get("files_edited", [])
-                user_code = 0
-                user_test = 0
-                user_doc = 0
-                user_design = 0
-                
-                ext_map = filters.get("extensions", {})
-                for fpath in files_edited:
-                    _, ext = os.path.splitext(fpath)
-                    ext = ext.lower()
-                    cat = ext_map.get(ext, "uncategorized")
-                    act = _detect_activity(cat, fpath)
-                    if act == "code": user_code += 1
-                    elif act == "test": user_test += 1
-                    elif act == "documentation": user_doc += 1
-                    elif act == "design": user_design += 1
-
-                contributor_profiles[key]["projects"].append({
-                    "name": proj_name,
-                    "pct": pct,
-                    "score": score * (pct / 100.0),
-                    "files_worked": len(files_edited),
-                    "files_list": files_edited,
-                    "user_code_files": user_code,
-                    "user_test_files": user_test,
-                    "user_doc_files": user_doc,
-                    "user_design_files": user_design,
-                    "insertions": c.get("insertions", 0),
-                    "deletions": c.get("deletions", 0),
-                    "commit_count": c.get("commit_count", 0)
-                })
-
-            elif c:
-                key = _normalize_name(str(c))
-                if key:
-                    per_contributor_pct[key] = 0.0
-                    per_contributor_scores[key] = 0.0
+    # ----------------------------------------------------
+# Per-contributor breakdown
+# ----------------------------------------------------
+        per_contributor_scores, per_contributor_pct, per_contributor_skills = apply_contributor_breakdown(
+            proj_name=proj_name,
+            score=score,
+            filters=filters,
+            project_meta=project_meta,
+            contributor_profiles=contributor_profiles,
+            detect_activity=detect_activity,
+            skill_from_ext=skill_from_ext,
+)
 
 
 
@@ -524,7 +371,9 @@ def analyze_projects(extracted_data, filters, advanced_options, detailed_data=No
                 repo_duration_days,
                 commit_frequency,
             )
+        
 
+        
         project_summaries.append(
             {
                 "project": proj_name,
@@ -561,6 +410,9 @@ def analyze_projects(extracted_data, filters, advanced_options, detailed_data=No
 
             }
         )
+
+    
+
 
     # --------------------------------------------------------
     # OUTPUT PART 1: ranked project table
@@ -630,11 +482,13 @@ def analyze_projects(extracted_data, filters, advanced_options, detailed_data=No
         line = build_project_line(p)
         resume_summaries.append(line)
     print_resume_summaries(resume_summaries)
+    
 
     # --------------------------------------------------------
     # OUTPUT PART 5: Per-Contributor Rankings (per person)
     # --------------------------------------------------------
     print_contributor_stats(project_summaries)
+    
 
 
 
@@ -686,16 +540,19 @@ def analyze_projects(extracted_data, filters, advanced_options, detailed_data=No
                             for p in project_summaries]
                     )
 
-                print(f"saved file to {out_path}")
+                print(center_text(f"saved file to {out_path}"))
                 break
             except PermissionError:
-                print(f"\n[!] Could not save CSV to '{out_path}' because it is open.")
-                print("Please close the file and press Enter to retry, or type 'cancel' to skip.")
+                print()
+                print(center_text(f"[!] Could not save CSV to '{out_path}' because it is open."))
+                print(center_text("Please close the file and press Enter to retry, or type 'cancel' to skip."))
                 if input("> ").strip().lower() == "cancel":
                     break
             except Exception as e:
-                print(f"\n[WARN] Could not save CSV: {e}")
+                print()
+                print(center_text(f"[WARN] Could not save CSV: {e}"))
                 break
+
 
 
     # Serialize contributor profiles (sets to lists)

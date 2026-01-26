@@ -14,8 +14,9 @@ __pycache__/
 
 # pytest cache
 .pytest_cache/
+.pytest-tmp/
 
 
 #Scan results
-src/out/
+output
 skillscope.db

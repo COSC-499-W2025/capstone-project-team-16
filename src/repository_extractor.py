@@ -5,10 +5,28 @@ from git import Repo
 from collections import Counter, defaultdict
 from datetime import datetime
 import os
+import shutil
+
+
+def _center_text(text):
+    width = shutil.get_terminal_size(fallback=(80, 20)).columns
+    if len(text) >= width:
+        return text
+    padding = (width - len(text) + 1) // 2
+    return " " * padding + text
+
+
+def _print_banner(title, line_char="~", min_width=23):
+    line_width = max(len(title), min_width)
+    line = line_char * line_width
+    print()
+    print(_center_text(line))
+    print(_center_text(title))
+    print(_center_text(line))
 
 
 def analyze_repo_type(repo_path):
-    print("repo analyzing")
+    _print_banner("REPO ANALYZING")
 
     # Only proceed if it is a .git folder indicating .git is likely a legitimate repository directory.
     # Return project dictionary containing all repo-level metadata.
@@ -108,5 +126,6 @@ def analyze_repo_type(repo_path):
             }
         except Exception as e:
             # TODO: add error to logs
-            print("Repo analysis failed:", e)
+            _print_banner("REPO ANALYSIS FAILED")
+            print(_center_text(str(e)))
             return None
