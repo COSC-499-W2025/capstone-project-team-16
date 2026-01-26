@@ -11,8 +11,7 @@ from permission_manager import (
     get_advanced_options
 )
 from file_parser import get_input_file_path
-from metadata_extractor import base_extraction, detailed_extraction, load_filters
-from alternative_analysis import analyze_projects
+from services.scan_service import analyze_scan, save_scan
 from scan_manager import scan_manager
 
 # --------------------------------------------------------
@@ -147,21 +146,11 @@ def orchestrator(config):
         print(_center_text("No files selected. Returning to home."))
         return
 
-    # Step 4: Load filters and extract metadata
-    filters = load_filters()
-    scraped_data = base_extraction(file_list, filters)
-
-    detailed_data = None
-    if analysis_mode_key == "advanced":
-        detailed_data = detailed_extraction(scraped_data, advanced_options, filters)
-
-    # Step 5: Run analysis on the extracted metadata and save data to DB
-    from db import save_full_scan  
-
-    analysis_results = analyze_projects(scraped_data, filters, advanced_options, detailed_data)
+    # Step 4: Run analysis on the extracted metadata and save data to DB
+    analysis_results = analyze_scan(file_list, analysis_mode, advanced_options)
 
     try:
-        save_full_scan(analysis_results, analysis_mode, config.consent)
+        save_scan(analysis_results, analysis_mode, config.consent)
         print(_center_text("Scan successfully saved."))
     except Exception as e:
         print(_center_text(f"[WARN] Could not store project analysis: {e}"))
