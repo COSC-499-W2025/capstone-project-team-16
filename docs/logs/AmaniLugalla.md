@@ -1,4 +1,37 @@
 # Personal Log - Amani Lugalla
+## 2026-JAN-19 to 2026-JAN-25
+
+### Type of Tasks Worked On
+![Screenshot](<screenshots/Amani/Week17.png>)
+
+### Recap of Week's Goals
+- Polish CLI output formatting and readability.
+- Refactor scan workflow for clearer structure and easier maintenance.
+- Stand up Flask backend pieces to support scan actions and data flow.
+
+
+### Features Assigned (Project Plan)
+- CLI polish and consistency pass.
+- Scan workflow refactor.
+- Flask backend setup and routing.
+  
+### Tasks from Project Board
+| Feature | Task | Status (Completed/In Progress) | Notes |
+|------|------|-------------------------------|-------|
+| CLI polish | Improve menu/section formatting | Completed | Cleaned up spacing, headers, and prompt consistency |
+| Scan refactor | Restructure scan flow and helpers | Completed | Simplified flow and centralized formatting logic |
+| Flask backend | Create app setup and base routes | In Progress | Initial app/config wiring and route scaffolding |
+| Flask backend | Hook scan endpoints to CLI flow | In Progress | Pending final API contracts |
+
+### Completed Tasks (Last 2 Weeks)
+- Polished CLI menus, prompts, and section output for readability.
+- Refactored scan workflow for clearer structure and reuse of helpers.
+- Added early Flask app setup and initial route scaffolding.
+
+
+### In-Progress Tasks 
+- Finalize Flask API endpoints for scan operations and data exchange.
+
 ## 2026-JAN-11 to 2026-JAN-18
 
 ### Type of Tasks Worked On
