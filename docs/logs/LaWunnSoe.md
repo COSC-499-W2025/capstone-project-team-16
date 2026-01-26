@@ -544,3 +544,38 @@
 
 ### Additional Context (Optional)
 - N/A
+
+
+## 2026-Jan-19 to 2026-Jan-25
+
+### Type of Tasks Worked On
+
+
+<img width="965" height="573" alt="Screenshot 2026-01-25 at 9 42 45 PM" src="https://github.com/user-attachments/assets/2d85c476-27d8-4483-beec-d8934b95a820" />
+
+
+
+
+### Recap of Week's Goals
+
+- Stuff we need to fix from Milestone 1
+
+
+### Features Assigned (Project Plan)
+- Refactoring our analysis code file -> It has been getting really big so if we refactor it into many different files, we can resue the codes and logics in there too for other parts of the project
+- Refactoring Scan Manager
+
+
+### Tasks from Project Board
+| Feature | Task | Status (Completed/In Progress) | Notes |
+|------|------|-------------------------------|-------|
+| Refactor Analysis Engine | Refactor Analysis Engine | Completed | … |
+
+
+### Completed/In-Progress Tasks (Last 2 Weeks)
+- Rank projects with each person contributions
+- Uploaded testing zip file
+- Refactor Analysis Engine
+
+### Additional Context (Optional)
+- N/A
