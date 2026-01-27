@@ -203,6 +203,15 @@ def _build_personal_project_description(project_name, project_context, user_stat
     parts = []
     parts.append(f"{verb} project development")
     
+    # Quantifiable Metrics (Suggestion 5)
+    pct = user_stats.get("pct", 0.0)
+    if pct > 10.0:
+        parts.append(f", contributing {pct:.1f}% of the codebase")
+        
+    duration = project_context.get("duration_days", 0)
+    if duration > 14:
+        parts.append(f"over a {duration}-day period")
+    
     if langs and langs != "Unknown":
         parts.append(f"using {langs}")
     if frameworks and frameworks not in ("None", "NA"):
@@ -215,7 +224,8 @@ def generate_contributor_portfolio(
     contributor_name: str,
     profile_data: dict,
     all_projects_map: dict,
-    scan_timestamp: str = None
+    scan_timestamp: str = None,
+    sort_mode: str = "impact"
 ) -> str:
     """
     Generates a specific resume Word doc for a single contributor.
@@ -306,6 +316,16 @@ def generate_contributor_portfolio(
 
     # Sort by impact
     user_projects.sort(key=lambda x: x[1]["score"], reverse=True)
+    # Sort Projects (Suggestion 6)
+    if sort_mode == "date":
+        # Chronological (Newest First)
+        # Ensure we handle both datetime objects and ISO strings safely
+        user_projects.sort(
+            key=lambda x: str(x[2].get("last_modified", "")), reverse=True
+        )
+    else:
+        # Functional (Impact Score - Best First)
+        user_projects.sort(key=lambda x: x[1]["score"], reverse=True)
 
     if not user_projects:
         doc.add_paragraph("No project contributions found.")
