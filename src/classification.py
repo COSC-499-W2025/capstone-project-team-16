@@ -27,7 +27,7 @@ def detect_framework(filename: str) -> str:
     fn = filename.lower()
 
     if "package.json" in fn:
-        return "Node / React"
+        return "Node.js / React"
 
     if "requirements.txt" in fn or "pyproject.toml" in fn:
         return "Python (requirements)"
@@ -47,19 +47,62 @@ def detect_framework(filename: str) -> str:
 def skill_from_ext(ext: str):
     ext = ext.lower()
 
+    # Python & Data
     if ext == ".py":
-        return "Python Programming"
+        return "Python Development"
+    if ext == ".ipynb":
+        return "Data Science (Jupyter)"
 
-    if ext in (".js", ".ts", ".jsx", ".tsx"):
-        return "JavaScript / Frontend"
+    # Web & JavaScript
+    if ext in (".js", ".jsx", ".mjs", ".cjs"):
+        return "JavaScript Development"
+    if ext in (".ts", ".tsx"):
+        return "TypeScript Development"
+    if ext in (".html", ".htm"):
+        return "HTML / Web Markup"
+    if ext in (".css", ".scss", ".sass", ".less"):
+        return "CSS / Web Styling"
+    if ext == ".vue":
+        return "Vue.js Development"
 
-    if ext in (".html", ".css"):
-        return "Web Dev"
-
+    # Java / JVM
     if ext == ".java":
-        return "Java Stuff"
+        return "Java Development"
+    if ext in (".kt", ".kts"):
+        return "Kotlin Development"
+    if ext == ".scala":
+        return "Scala Development"
 
-    if ext in (".md", ".pdf", ".docx", ".txt"):
-        return "Docs / Writing"
+    # C-Family
+    if ext in (".c", ".h"):
+        return "C Programming"
+    if ext in (".cpp", ".hpp", ".cc", ".cxx", ".c++"):
+        return "C++ Programming"
+    if ext == ".cs":
+        return "C# / .NET Development"
+
+    # Systems / Backend
+    if ext == ".go":
+        return "Go Programming"
+    if ext == ".rs":
+        return "Rust Systems Programming"
+    if ext == ".php":
+        return "PHP Development"
+    if ext == ".rb":
+        return "Ruby Development"
+    if ext == ".lua":
+        return "Lua Scripting"
+
+    # Database & DevOps
+    if ext == ".sql":
+        return "SQL / Database Management"
+    if ext in (".sh", ".bash", ".zsh"):
+        return "Shell Scripting & Automation"
+    if ext == ".tf":
+        return "Terraform / IaC"
+
+    # Documentation
+    if ext in (".md", ".markdown", ".rst", ".txt", ".pdf", ".docx"):
+        return "Technical Documentation"
 
     return None
