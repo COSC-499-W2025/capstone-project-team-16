@@ -61,7 +61,15 @@
   ".sass": "Cass",
   ".less": "Less",
   ".vue": "Vue",
-  ".php": "Php"
+  ".php": "Php",
+  ".ipynb": "Jupyter Notebook",
+  ".tf": "Terraform",
+  ".md": "Markdown",
+  ".markdown": "Markdown",
+  ".rst": "ReStructuredText",
+  ".txt": "Plain Text",
+  ".pdf": "PDF",
+  ".docx": "Word Document"
 },
 
 "frameworks": [
@@ -106,6 +114,13 @@
     "lua": "Lua Scripting",
     "sql": "SQL / Database Management",
     "shell": "Shell Scripting & Automation",
-    "perl": "Perl Scripting"
+    "perl": "Perl Scripting",
+    "jupyter notebook": "Data Science (Jupyter)",
+    "terraform": "Terraform / IaC",
+    "markdown": "Technical Documentation",
+    "restructuredtext": "Technical Documentation",
+    "plain text": "Technical Documentation",
+    "pdf": "Technical Documentation",
+    "word document": "Technical Documentation"
   }
 }

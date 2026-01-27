@@ -44,81 +44,25 @@ def detect_framework(filename: str) -> str:
     return "None"
 
 
-def skill_from_ext(ext: str):
+def get_skill(ext: str, lang: str = None, skill_map: dict = None, ext_map: dict = None) -> str | None:
+    """
+    Determines the professional skill based on language (priority) or extension.
+    Uses the provided maps to look up skills dynamically.
+    """
     ext = ext.lower()
 
-    # Python & Data
-    if ext == ".py":
-        return "Python Development"
-    if ext == ".ipynb":
-        return "Data Science (Jupyter)"
+    # 1. Priority: Verified Language
+    if lang and lang != "Unknown" and skill_map:
+        l = lang.lower()
+        if l in skill_map:
+            return skill_map[l]
 
-    # Web & JavaScript
-    if ext in (".js", ".jsx", ".mjs", ".cjs"):
-        return "JavaScript Development"
-    if ext in (".ts", ".tsx"):
-        return "TypeScript Development"
-    if ext in (".html", ".htm"):
-        return "HTML / Web Markup"
-    if ext in (".css", ".scss", ".sass", ".less"):
-        return "CSS / Web Styling"
-    if ext == ".vue":
-        return "Vue.js Development"
-
-    # Java / JVM
-    if ext == ".java":
-        return "Java Development"
-    if ext in (".kt", ".kts"):
-        return "Kotlin Development"
-    if ext == ".scala":
-        return "Scala Development"
-
-    # C-Family
-    if ext in (".c", ".h"):
-        return "C Programming"
-    if ext in (".cpp", ".hpp", ".cc", ".cxx", ".c++"):
-        return "C++ Programming"
-    if ext == ".cs":
-        return "C# / .NET Development"
-
-    # Systems / Backend
-    if ext == ".go":
-        return "Go Programming"
-    if ext == ".rs":
-        return "Rust Systems Programming"
-    if ext == ".php":
-        return "PHP Development"
-    if ext == ".rb":
-        return "Ruby Development"
-    if ext == ".lua":
-        return "Lua Scripting"
-
-    # Database & DevOps
-    if ext == ".sql":
-        return "SQL / Database Management"
-    if ext in (".sh", ".bash", ".zsh"):
-        return "Shell Scripting & Automation"
-    if ext == ".tf":
-        return "Terraform / IaC"
-
-    # Documentation
-    if ext in (".md", ".markdown", ".rst", ".txt", ".pdf", ".docx"):
-        return "Technical Documentation"
-
-    return None
-
-
-def skill_from_lang(lang: str, skill_map: dict = None) -> str | None:
-    """
-    Maps a detected language name (from language_detector) to a professional skill name.
-    """
-    if not lang or lang == "Unknown":
-        return None
-    
-    l = lang.lower()
-    
-    # 1. Check dynamic mapping from JSON filters if provided
-    if skill_map and l in skill_map:
-        return skill_map[l]
+    # 2. Fallback: Derive language from extension (if maps provided)
+    if ext and ext_map and skill_map:
+        derived_lang = ext_map.get(ext)
+        if derived_lang:
+            l = derived_lang.lower()
+            if l in skill_map:
+                return skill_map[l]
 
     return None

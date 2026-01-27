@@ -82,6 +82,16 @@ def detect_language_from_snippet(content, ext):
         if re.search(r'\bSELECT\b[\s\S]+?\bFROM\b|\bINSERT\s+INTO\b|\bCREATE\s+TABLE\b|\bUPDATE\b[\s\S]+?\bSET\b', content, re.IGNORECASE):
             return "SQL"
 
+    # Jupyter Notebook
+    if ext.lower() == ".ipynb":
+        if re.search(r'"cells"\s*:\s*\[', content) and re.search(r'"metadata"\s*:\s*\{', content):
+            return "Jupyter Notebook"
+
+    # Terraform
+    if ext.lower() == ".tf":
+        if re.search(r'^\s*(resource|provider|variable|output|module|terraform)\s+', content, re.MULTILINE):
+            return "Terraform"
+
     # Ruby
     if ext.lower() == ".rb":
         # Matches def, class, module keywords or require statements
@@ -146,5 +156,11 @@ def detect_language_from_snippet(content, ext):
     
     # SQL
     if re.search(r'\bSELECT\b[\s\S]+?\bFROM\b|\bINSERT\s+INTO\b|\bCREATE\s+TABLE\b|\bUPDATE\b[\s\S]+?\bSET\b', content, re.IGNORECASE): return "SQL"
+
+    # Jupyter Notebook
+    if re.search(r'"cells"\s*:\s*\[', content) and re.search(r'"metadata"\s*:\s*\{', content): return "Jupyter Notebook"
+
+    # Terraform
+    if re.search(r'^\s*(resource|provider|variable|output|module|terraform)\s+', content, re.MULTILINE): return "Terraform"
 
     return None

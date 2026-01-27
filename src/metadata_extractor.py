@@ -253,7 +253,7 @@ def detailed_extraction(extracted_data, advanced_options, filters=None):
     if advanced_options.get("programming_scan", True):
         for entry in extracted_data:
             # Only check files that are potential code or completely unknown
-            if entry["category"] in ("source_code", "web_code", "uncategorized", "documentation"):
+            if entry["category"] in ("source_code", "web_code", "uncategorized", "documentation", "notebooks"):
                 # Run content detection on ALL source files to verify extension accuracy
                 # (e.g. catching a .py file that actually contains C code)
                 detected = detect_language_by_content(entry["filename"])
