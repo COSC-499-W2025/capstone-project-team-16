@@ -6,7 +6,7 @@ import os
 import shutil
 from datetime import datetime
 from analysis_utils import center_text, to_datetime
-from classification import detect_activity, detect_framework, skill_from_ext
+from classification import detect_activity, detect_framework, skill_from_ext, skill_from_lang
 from contributor_utils import apply_contributor_breakdown
 from scoring_utils import compute_project_score
 
@@ -192,7 +192,13 @@ def analyze_projects(extracted_data, filters, advanced_options, detailed_data=No
 
             if advanced_options.get("skills_gen", True):
                 # skills
-                s = skill_from_ext(ext)
+                s = None
+                if lang and lang != "Unknown":
+                    s = skill_from_lang(lang, filters.get("skills"))
+                
+                if not s:
+                    s = skill_from_ext(ext)
+
                 if s:
                     skills.add(s)
 

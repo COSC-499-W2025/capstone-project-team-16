@@ -86,6 +86,26 @@
     "docker-compose.yml",
     "composer.json",
     "composer.lock"
-]
-
+] ,
+"skills": {
+    "python": "Python Development",
+    "javascript": "JavaScript Development",
+    "typescript": "TypeScript Development",
+    "html": "HTML / Web Markup",
+    "css": "CSS / Web Styling",
+    "java": "Java Development",
+    "kotlin": "Kotlin Development",
+    "scala": "Scala Development",
+    "c": "C Programming",
+    "c++": "C++ Programming",
+    "c#": "C# / .NET Development",
+    "go": "Go Programming",
+    "rust": "Rust Systems Programming",
+    "php": "PHP Development",
+    "ruby": "Ruby Development",
+    "lua": "Lua Scripting",
+    "sql": "SQL / Database Management",
+    "shell": "Shell Scripting & Automation",
+    "perl": "Perl Scripting"
+  }
 }

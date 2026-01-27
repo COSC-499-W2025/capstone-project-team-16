@@ -74,9 +74,9 @@ def load_filters(filename=None):
 
         framework_files = set(name.lower() for name in data.get("frameworks", []))
 
+        skills_map = data.get("skills", {})
 
-
-        return{"extensions":ext_to_category, "languages":ext_to_language, "frameworks":framework_files}
+        return{"extensions":ext_to_category, "languages":ext_to_language, "frameworks":framework_files, "skills": skills_map}
 
     except FileNotFoundError:
         print(f"[metadata_extractor] Filter file not found: {filename}")

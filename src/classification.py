@@ -106,3 +106,19 @@ def skill_from_ext(ext: str):
         return "Technical Documentation"
 
     return None
+
+
+def skill_from_lang(lang: str, skill_map: dict = None) -> str | None:
+    """
+    Maps a detected language name (from language_detector) to a professional skill name.
+    """
+    if not lang or lang == "Unknown":
+        return None
+    
+    l = lang.lower()
+    
+    # 1. Check dynamic mapping from JSON filters if provided
+    if skill_map and l in skill_map:
+        return skill_map[l]
+
+    return None
