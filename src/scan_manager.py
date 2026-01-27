@@ -5,6 +5,7 @@ from datetime import datetime
 from db import delete_full_scan_by_id, get_full_scan_by_id, list_full_scans
 from permission_manager import get_yes_no
 from resume_generator import generate_resume, generate_contributor_portfolio
+from portfolio_generator import create_portfolios
 
 from print_utils import (
     print_repo_summary,
@@ -190,6 +191,27 @@ def delete_full_scan():
         print(_center_text("Deletion canceled."))
 
 
+def generate_markdown_portfolio(data, user, timestamp):
+    """Generates a Markdown portfolio for a specific user."""
+    portfolios = create_portfolios(data)
+    target_portfolio = next((p for p in portfolios if p.user_name == user), None)
+
+    if target_portfolio:
+        from file_parser import OUTPUT_DIR
+        os.makedirs(OUTPUT_DIR, exist_ok=True)
+        
+        safe_name = "".join(c for c in user if c.isalnum() or c in (' ', '_', '-')).strip().replace(' ', '_')
+        filename = f"Portfolio_{safe_name}_{timestamp.replace(':', '-')}.md"
+        out_path = os.path.join(OUTPUT_DIR, filename)
+        
+        with open(out_path, "w", encoding="utf-8") as f:
+            f.write(target_portfolio.to_markdown())
+            
+        print(_center_text(f"Saved portfolio to:\n{out_path}"))
+    else:
+        print(_center_text("Error: Could not generate portfolio for selected user."))
+
+
 # --------------------------------------------------------
 # PORTFOLIO GENERATION
 # --------------------------------------------------------
@@ -200,7 +222,8 @@ def generate_portfolio_menu():
     Menu for generating Word documents from a saved scan.
     Options:
     1) Full Project Resume (summary of all projects in the scan).
-    2) Individual Contributor Portfolio (specific to one person).
+    2) Individual Contributor Resume (Word)
+    3) Individual Contributor Portfolio (Markdown)specific to one person).
     """
     scans = list_full_scans()
     if not scans:
@@ -229,7 +252,8 @@ def generate_portfolio_menu():
 
     _print_header("GENERATION OPTIONS", width=48, sep="-")
     print(_center_text("1) Full Project Resume (Summary of all projects)"))
-    print(_center_text("2) Individual Contributor Portfolio"))
+    print(_center_text("2) Individual Contributor Resume (Word)"))
+    print(_center_text("3) Individual Contributor Portfolio (Markdown)"))
 
     choice = input(_center_text("Enter number (0 to cancel): ")).strip()
 
@@ -243,7 +267,7 @@ def generate_portfolio_menu():
         print(_center_text(f"Saved:\n{txt}\n{docx}"))
         return
 
-    if choice != "2":
+    if choice not in ("2", "3"):
         return
 
     # --- Contributor Portfolio Logic ---
@@ -272,18 +296,20 @@ def generate_portfolio_menu():
 
     user = contributors[idx]
     profile = data["contributor_profiles"][user]
+    
+    if choice == "3":
+        generate_markdown_portfolio(data, user, scan["timestamp"])
+    elif choice == "2":
+        project_map = {p["project"]: p for p in data.get("project_summaries", [])}
+        out = generate_contributor_portfolio(
+            user,
+            profile,
+            project_map,
+            scan_timestamp=scan["timestamp"],
+        )
 
-    project_map = {p["project"]: p for p in data.get("project_summaries", [])}
-
-    out = generate_contributor_portfolio(
-        user,
-        profile,
-        project_map,
-        scan_timestamp=scan["timestamp"],
-    )
-
-    if out:
-        print(_center_text(f"Saved portfolio to:\n{out}"))
+        if out:
+            print(_center_text(f"Saved portfolio to:\n{out}"))
 
 
 # --------------------------------------------------------

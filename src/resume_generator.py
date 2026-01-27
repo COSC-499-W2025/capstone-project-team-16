@@ -420,40 +420,6 @@ def generate_contributor_portfolio(
             stats_p.add_run(f"Contribution: {pct:.1f}%").bold = True 
             stats_p.add_run(f"  |  Impact Score: {u_stats['score']:.1f}")
             
-            if u_stats.get("files_worked"):
-                stats_p.add_run(f"  |  Files Edited: {u_stats['files_worked']}")
-            
-            if u_stats.get("commit_count"):
-                stats_p.add_run(f"  |  Commits: {u_stats['commit_count']}")
-            
-            if u_stats.get("insertions") or u_stats.get("deletions"):
-                stats_p.add_run(f"  |  Lines: +{u_stats['insertions']} / -{u_stats['deletions']}")
-
-            # Add breakdown of file types
-            types_breakdown = []
-            if u_stats["user_code_files"] > 0:
-                types_breakdown.append(f"{u_stats['user_code_files']} Code")
-            if u_stats["user_test_files"] > 0:
-                types_breakdown.append(f"{u_stats['user_test_files']} Test")
-            if u_stats["user_doc_files"] > 0:
-                types_breakdown.append(f"{u_stats['user_doc_files']} Docs")
-            if u_stats["user_design_files"] > 0:
-                types_breakdown.append(f"{u_stats['user_design_files']} Design")
-            
-            if types_breakdown:
-                stats_p.add_run(f"  |  Work: {', '.join(types_breakdown)}")
-
-            # Files Breakdown
-            files_list = u_stats["files_list"]
-            if files_list:
-                exts = [os.path.splitext(f)[1].lower() for f in files_list]
-                cnt = Counter(exts)
-                sorted_cnt = sorted(cnt.items(), key=lambda x: x[1], reverse=True)
-                breakdown_str = ", ".join([f"{count} {ext or 'no-ext'}" for ext, count in sorted_cnt])
-                fb_p = doc.add_paragraph()
-                fb_p.add_run("File Breakdown: ").bold = True
-                fb_p.add_run(breakdown_str)
-            
             # Description
             desc = _build_personal_project_description(p_name, p_context, u_stats)
             doc.add_paragraph(desc)
