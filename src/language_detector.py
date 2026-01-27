@@ -98,6 +98,11 @@ def detect_language_from_snippet(content, ext):
         if re.search(r'^\s*(?:class|module)\s+[A-Z]\w*(?:\s*<|\s*$)|^\s*def\s+\w+|^\s*require\s+[\'"]', content, re.MULTILINE):
             return "Ruby"
 
+    # Perl
+    if ext.lower() == ".pl":
+        if re.search(r'^\s*(use\s+|sub\s+|my\s+\$|package\s+)', content, re.MULTILINE):
+            return "Perl"
+
     # Go
     if ext.lower() == ".go":
         # Matches 'package main' or function definitions
@@ -145,6 +150,9 @@ def detect_language_from_snippet(content, ext):
     # Ruby
     if re.search(r'^\s*(?:class|module)\s+[A-Z]\w*(?:\s*<|\s*$)|^\s*def\s+\w+|^\s*require\s+[\'"]', content, re.MULTILINE): return "Ruby"
     
+    # Perl
+    if re.search(r'^\s*use\s+(strict|warnings)|^\s*my\s+\$|^\s*sub\s+\w+', content, re.MULTILINE): return "Perl"
+
     # PHP
     if re.search(r'<\?php', content): return "PHP"
     

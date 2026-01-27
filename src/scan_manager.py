@@ -258,13 +258,14 @@ def generate_portfolio_menu():
     choice = input(_center_text("Enter number (0 to cancel): ")).strip()
 
     if choice == "1":
-        txt, docx = generate_resume(
+        docx = generate_resume(
             data.get("project_summaries", []),
             data.get("projects_chronological", []),
             data.get("skills_chronological", []),
             scan_timestamp=scan["timestamp"],
         )
-        print(_center_text(f"Saved:\n{txt}\n{docx}"))
+        if docx:
+            print(_center_text(f"Saved:\n{docx}"))
         return
 
     if choice not in ("2", "3"):

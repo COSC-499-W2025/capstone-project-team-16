@@ -492,7 +492,7 @@ def analyze_projects(extracted_data, filters, advanced_options, detailed_data=No
     # --------------------------------------------------------
     # OUTPUT PART 5: Per-Contributor Rankings (per person)
     # --------------------------------------------------------
-    print_contributor_stats(project_summaries)
+    # print_contributor_stats(project_summaries)
     
 
 

@@ -1,11 +1,45 @@
-# Builds both a plain text summary and a Word resume
+# Builds Word resumes for projects and contributors
 
 import os
 from datetime import datetime
-from collections import Counter
 
 from docx import Document
 from docx.shared import Pt
+from file_parser import OUTPUT_DIR
+
+
+# -------------------------------------------------------------------------
+# SHARED HELPERS
+# -------------------------------------------------------------------------
+
+def _fmt_date(val):
+    """Formats a datetime or ISO string into YYYY-MM-DD."""
+    if isinstance(val, datetime):
+        return val.date().isoformat()
+    if isinstance(val, str):
+        return val.split("T")[0]
+    return ""
+
+
+def _save_doc(doc, path):
+    """Helper to save a docx with retry logic."""
+    while True:
+        try:
+            doc.save(path)
+            return path
+        except PermissionError:
+            print(f"\n[!] Could not save to '{path}' because it is open.")
+            print("Please close the file and press Enter to retry, or type 'cancel' to stop.")
+            if input("> ").strip().lower() == "cancel":
+                return None
+        except Exception as e:
+            print(f"Error saving document: {e}")
+            return None
+
+
+# -------------------------------------------------------------------------
+# 1. GENERAL PROJECT RESUME (Summary of all projects)
+# -------------------------------------------------------------------------
 
 
 def build_project_line(p: dict) -> str:
@@ -22,15 +56,14 @@ def build_project_line(p: dict) -> str:
     test_files = p.get("test_files", 0)
     project_type = p.get("project_type", "software")
 
-    pieces = []
-
+    # Main clause
     main = f"Contributed to project '{name}'"
     if project_type and project_type.lower() != "unknown":
         main = f"Contributed to {project_type.lower()} project '{name}'"
     if langs and langs.lower() != "unknown":
         main += f" using {langs}"
-    pieces.append(main)
 
+    # Details clause
     details = []
     if code_files:
         details.append(f"{code_files} code files")
@@ -39,7 +72,8 @@ def build_project_line(p: dict) -> str:
 
     if duration:
         details.append(f"over {duration} days")
-
+    
+    pieces = [main]
     if details:
         pieces.append("comprising " + ", ".join(details))
 
@@ -49,193 +83,91 @@ def build_project_line(p: dict) -> str:
     return "; ".join(pieces) + "."
 
 
-def _write_txt_summary(
-    txt_path: str,
-    top_projects: list[dict],
-    chronological_projects: list[dict],
-    skills_output: list[dict],
-) -> None:
-    """
-    plain-text summary for debugging / quick copy paste. we can remove this if we don't need a text file.
-    """
-    lines: list[str] = []
-    lines.append("PROJECT PORTFOLIO SUMMARY")
-    lines.append("=" * 60)
-    lines.append("")
-
-    # Top projects
-    lines.append("Top Projects")
-    lines.append("Projects")
-    lines.append("-" * 40)
-    for p in top_projects:
-        lines.append(f"- {build_project_line(p)}")
-    lines.append("")
-
-    # Project timeline
-    lines.append("Chronological Project Timeline")
-    lines.append("-" * 40)
-    for p in chronological_projects:
-        lines.append(
-            f"- {p['name']} – {p['first_used']} → {p['last_used']}"
-        )
-    lines.append("")
-
-    # Skills over time
-    lines.append("Skills Used Over Time")
-    lines.append("-" * 40)
-    for row in skills_output:
-        lines.append(
-            f"- {row['skill']} – {row['first_used']} → {row['last_used']}"
-        )
-    lines.append("")
-
-    os.makedirs(os.path.dirname(txt_path), exist_ok=True)
-
-    while True:
-        try:
-            with open(txt_path, "w", encoding="utf-8") as f:
-                f.write("\n".join(lines))
-            break
-        except PermissionError:
-            print(f"\n[!] Could not save to '{txt_path}' because it is open.")
-            print("Please close the file and press Enter to retry, or type 'cancel' to stop.")
-            if input("> ").strip().lower() == "cancel":
-                return
-
-
-def _write_docx_resume(
-    docx_path: str,
-    top_projects: list[dict],
-    chronological_projects: list[dict],
-    skills_output: list[dict],
-) -> str:
-
-    """
-    Word document
-    """
-    os.makedirs(os.path.dirname(docx_path), exist_ok=True)
-
-    doc = Document()
-
-    def _fmt_date(val):
-        if isinstance(val, datetime):
-            return val.date().isoformat()
-        if isinstance(val, str):
-            # If it's already a string (from DB), try to keep just the date part
-            return val.split("T")[0]
-        return ""
-
-    # --- Header / title ---
-    title = doc.add_heading("Project Portfolio Resume", level=0)
-    title.runs[0].font.size = Pt(20)
-
-    # Placeholder for user info (later on, when we store user infos this need to be updated)
-    info_p = doc.add_paragraph()
-    info_p.add_run("Name: ").bold = True
-    info_p.add_run("  |  Email: .gmail.com  |  GitHub: github.com/")
-    info_p.style.font.size = Pt(10)
-
-    doc.add_paragraph()  # blank line
-
-    # --- Top Projects section ---
-    doc.add_heading("Top Projects", level=1)
-    doc.add_heading("Projects", level=1)
-
-    if not top_projects:
-        doc.add_paragraph("No projects detected.", style="List Bullet")
-    else:
-        for p in top_projects:
-            # First line: bold project name + timeframe
-            first_date = _fmt_date(p.get("first_modified"))
-            last_date = _fmt_date(p.get("last_modified"))
-
-            para = doc.add_paragraph(style="List Bullet")
-            run_name = para.add_run(p["project"])
-            run_name.bold = True
-
-            if first_date and last_date:
-                para.add_run(f"  ({first_date} – {last_date})")
-
-            # Second line (same bullet) – description
-            para.add_run("\n" + build_project_line(p))
-
-    doc.add_paragraph()  # spacing
-
-    # --- Chronological Project Timeline ---
-    doc.add_heading("Project Timeline", level=1)
-    for p in chronological_projects:
-        para = doc.add_paragraph(style="List Bullet")
-        para.add_run(p["name"]).bold = True
-        para.add_run(f" – {p['first_used']} → {p['last_used']}")
-
-    doc.add_paragraph()
-
-    # --- Skills Used Over Time ---
-    doc.add_heading("Skills Used Over Time", level=1)
-
-    if skills_output:
-        table = doc.add_table(rows=1, cols=3)
-        hdr_cells = table.rows[0].cells
-        hdr_cells[0].text = "Skill"
-        hdr_cells[1].text = "First Used"
-        hdr_cells[2].text = "Last Used"
-
-        for row in skills_output:
-            row_cells = table.add_row().cells
-            row_cells[0].text = row["skill"]
-            row_cells[1].text = row["first_used"]
-            row_cells[2].text = row["last_used"]
-    else:
-        doc.add_paragraph("No skills detected.", style="List Bullet")
-
-    # footer note
-    doc.add_paragraph()
-    foot = doc.add_paragraph()
-    foot_run = foot.add_run(
-        "Generated automatically from code repositories using Skill Scope."
-    )
-    foot_run.italic = True
-    foot_run.font.size = Pt(8)
-
-    while True:
-        try:
-            doc.save(docx_path)
-            return docx_path
-        except PermissionError:
-            print(f"\n[!] Could not save to '{docx_path}' because it is open.")
-            print("Please close the file and press Enter to retry, or type 'cancel' to stop.")
-            if input("> ").strip().lower() == "cancel":
-                return None
-
-
 def generate_resume(
     project_summaries: list[dict],
     chronological_projects: list[dict],
     skills_output: list[dict],
     scan_timestamp: str = None
-) -> tuple[str, str]:
+) -> str:
     """
-    Main entry point called from alternative_analysis.analyze_projects.
+    Generates the 'Full Project Resume' Word document.
+    Returns the path to the generated file.
     """
-    # Sort projects by score again just in case
+    # Sort projects by score
     sorted_projects = sorted(
         project_summaries, key=lambda p: p.get("score", 0), reverse=True
     )
 
-    from file_parser import OUTPUT_DIR
-
     suffix = ""
     if scan_timestamp:
-        # Clean timestamp for filename
         suffix = "_" + scan_timestamp.replace(":", "-").replace(" ", "_")
 
-    txt_path = os.path.join(OUTPUT_DIR, f"resume_output{suffix}.txt")
     docx_path = os.path.join(OUTPUT_DIR, f"portfolio_resume{suffix}.docx")
 
-    _write_txt_summary(txt_path, sorted_projects, chronological_projects, skills_output)
-    final_docx_path = _write_docx_resume(docx_path, sorted_projects, chronological_projects, skills_output)
+    doc = Document()
 
-    return txt_path, final_docx_path
+    # Title
+    title = doc.add_heading("Project Portfolio Resume", level=0)
+    title.runs[0].font.size = Pt(20)
+
+    # Placeholder Info
+    info_p = doc.add_paragraph()
+    info_p.add_run("Generated by Skill Scope").italic = True
+    doc.add_paragraph()
+
+    # Top Projects
+    doc.add_heading("Top Projects", level=1)
+    if not sorted_projects:
+        doc.add_paragraph("No projects detected.", style="List Bullet")
+    else:
+        for p in sorted_projects:
+            first = _fmt_date(p.get("first_modified"))
+            last = _fmt_date(p.get("last_modified"))
+
+            para = doc.add_paragraph(style="List Bullet")
+            para.add_run(p["project"]).bold = True
+            if first and last:
+                para.add_run(f"  ({first} – {last})")
+            para.add_run("\n" + build_project_line(p))
+
+    doc.add_paragraph()
+
+    # Timeline
+    doc.add_heading("Project Timeline", level=1)
+    for p in chronological_projects:
+        para = doc.add_paragraph(style="List Bullet")
+        para.add_run(p["name"]).bold = True
+        para.add_run(f" – {p['first_used']} → {p['last_used']}")
+    doc.add_paragraph()
+
+    # Skills
+    doc.add_heading("Skills Used Over Time", level=1)
+    if skills_output:
+        table = doc.add_table(rows=1, cols=3)
+        hdr = table.rows[0].cells
+        hdr[0].text = "Skill"
+        hdr[1].text = "First Used"
+        hdr[2].text = "Last Used"
+        for row in skills_output:
+            cells = table.add_row().cells
+            cells[0].text = row["skill"]
+            cells[1].text = row["first_used"]
+            cells[2].text = row["last_used"]
+    else:
+        doc.add_paragraph("No skills detected.", style="List Bullet")
+
+    # Footer
+    doc.add_paragraph()
+    foot = doc.add_paragraph("Generated automatically from code repositories using Skill Scope.")
+    foot.runs[0].italic = True
+    foot.runs[0].font.size = Pt(8)
+
+    return _save_doc(doc, docx_path)
+
+
+# -------------------------------------------------------------------------
+# 2. INDIVIDUAL CONTRIBUTOR RESUME (Specific Person)
+# -------------------------------------------------------------------------
 
 
 def _build_personal_project_description(project_name, project_context, user_stats):
@@ -254,28 +186,30 @@ def _build_personal_project_description(project_name, project_context, user_stat
     u_doc = user_stats.get("user_doc_files", 0)
     u_design = user_stats.get("user_design_files", 0)
     
+    # Determine the most appropriate action verb based on work distribution
+    verb = "Contributed to"
+    total_work = u_code + u_test + u_doc + u_design
+    
+    if total_work > 0:
+        if u_code >= u_test and u_code >= u_doc and u_code >= u_design:
+            verb = "Developed key components for"
+        elif u_test > u_code and u_test > u_doc:
+            verb = "Implemented testing suites for"
+        elif u_doc > u_code and u_doc > u_test:
+            verb = "Authored technical documentation for"
+        elif u_design > u_code:
+            verb = "Designed assets and UI elements for"
+
     parts = []
-    parts.append(f"Contributed to '{project_name}'")
+    parts.append(f"{verb} project development")
     
     if langs and langs != "Unknown":
         parts.append(f"using {langs}")
-        
-    # Work breakdown
-    work_details = []
-    if u_code: work_details.append(f"{u_code} code files")
-    if u_test: work_details.append(f"{u_test} test files")
-    if u_doc: work_details.append(f"{u_doc} documents")
-    if u_design: work_details.append(f"{u_design} design assets")
-    
-    if work_details:
-        parts.append("working on " + ", ".join(work_details))
-    elif u_files:
-        parts.append(f"working on {u_files} files")
-        
     if frameworks and frameworks not in ("None", "NA"):
         parts.append(f"utilizing frameworks such as {frameworks}")
         
     return " ".join(parts) + "."
+
 
 def generate_contributor_portfolio(
     contributor_name: str,
@@ -284,167 +218,128 @@ def generate_contributor_portfolio(
     scan_timestamp: str = None
 ) -> str:
     """
-    Generates a specific portfolio Word doc for a single contributor.
+    Generates a specific resume Word doc for a single contributor.
     """
     if not profile_data:
-        print(f"Error: No profile data found for {contributor_name}")
         return None
 
-    from file_parser import OUTPUT_DIR
-    
     safe_name = "".join(c for c in contributor_name if c.isalnum() or c in (' ', '_', '-')).strip()
-    
     suffix = ""
     if scan_timestamp:
         suffix = "_" + scan_timestamp.replace(":", "-").replace(" ", "_")
         
-    filename = f"Portfolio_{safe_name}{suffix}.docx"
-    docx_path = os.path.join(OUTPUT_DIR, filename)
+    docx_path = os.path.join(OUTPUT_DIR, f"Resume_{safe_name}{suffix}.docx")
     
     doc = Document()
     
-    # --- Header ---
-    # Try to make the name look a bit better (e.g. capitalize words)
+    # Header
+    display_name = contributor_name
     if "@" in contributor_name:
-        # If email, use local part as name
-        display_name = contributor_name.split("@")[0].replace(".", " ").replace("_", " ").title()
-    else:
-        display_name = contributor_name.replace(".", " ").replace("_", " ").title()
+        display_name = contributor_name.split("@")[0]
+    display_name = display_name.replace(".", " ").replace("_", " ").title()
     
-    title = doc.add_heading(f"Portfolio: {display_name}", level=0)
+    title = doc.add_heading(display_name, level=0)
     title.runs[0].font.size = Pt(24)
     doc.add_paragraph(f"Generated on {datetime.now().strftime('%B %d, %Y')}")
     
-    # --- Professional Summary ---
+    # Summary
     doc.add_heading("Professional Summary", level=1)
     
     skills = profile_data.get("skills", [])
     projects_ref = profile_data.get("projects", [])
     
-    if "@" in contributor_name:
-        summary_text = f"Contributor ({contributor_name}) with active contributions across {len(projects_ref)} project(s)."
-    else:
-        summary_text = f"Contributor with active contributions across {len(projects_ref)} project(s)."
+    # Determine a professional title based on skills
+    role = "Software Contributor"
+    dev_keywords = {"Development", "Programming", "Engineering"}
+    if any(any(k in s for k in dev_keywords) for s in skills):
+        role = "Software Developer"
+
+    summary_text = f"{role} with a track record of contributions across {len(projects_ref)} project(s)."
 
     if skills:
-        top_skills = ", ".join(skills[:5])
-        summary_text += f" Demonstrated technical proficiency in: {top_skills}."
+        # List top 3 skills naturally
+        top_skills = skills[:3]
+        summary_text += f" Proficient in {', '.join(top_skills)}"
+        if len(skills) > 3:
+            summary_text += f", along with expertise in {len(skills)-3} other technologies"
+        summary_text += "."
+        
     doc.add_paragraph(summary_text)
     doc.add_paragraph()
 
-    # --- Technical Skills ---
+    # Skills
     doc.add_heading("Technical Skills", level=1)
     if skills:
         p = doc.add_paragraph()
         p.add_run("Languages & Technologies: ").bold = True
         p.add_run(", ".join(skills))
     else:
-        doc.add_paragraph("No specific skills detected from file extensions.")
+        doc.add_paragraph("No specific skills detected.")
     doc.add_paragraph()
 
-    # --- Project Contributions ---
-    doc.add_heading("Project Contributions", level=1)
+    # Experience
+    doc.add_heading("Project Experience", level=1)
     
-    # Get project details and sort by their contribution score
+    # Prepare projects
     user_projects = []
     for p_ref in projects_ref:
         p_name = p_ref.get("name", "Unknown Project")
         
-        # Extract user stats directly from the profile reference
+        # Reconstruct stats
         user_stats = {
-            "files_worked": p_ref.get("files_worked", 0),
-            "files_list": p_ref.get("files_list", []),
             "user_code_files": p_ref.get("user_code_files", 0),
             "user_test_files": p_ref.get("user_test_files", 0),
             "user_doc_files": p_ref.get("user_doc_files", 0),
             "user_design_files": p_ref.get("user_design_files", 0),
             "pct": p_ref.get("pct", 0.0),
             "score": p_ref.get("score", 0.0),
-            "insertions": p_ref.get("insertions", 0),
-            "deletions": p_ref.get("deletions", 0),
+            "files_worked": p_ref.get("files_worked", 0),
             "commit_count": p_ref.get("commit_count", 0)
         }
 
-        # Fallback: if counts are zero but list exists, update files_worked
-        if user_stats["files_worked"] == 0 and user_stats["files_list"]:
-             user_stats["files_worked"] = len(user_stats["files_list"])
+        # Fallback for files_worked
+        if user_stats["files_worked"] == 0 and p_ref.get("files_list"):
+             user_stats["files_worked"] = len(p_ref.get("files_list"))
 
-        # Get general project context (dates, frameworks, etc.)
         project_context = all_projects_map.get(p_name, {})
-        
-        # Store everything needed for generation
         user_projects.append((p_name, user_stats, project_context))
 
-    # Sort by the user's specific impact (score)
+    # Sort by impact
     user_projects.sort(key=lambda x: x[1]["score"], reverse=True)
 
     if not user_projects:
         doc.add_paragraph("No project contributions found.")
     else:
         for p_name, u_stats, p_context in user_projects:
-            pct = u_stats["pct"]
-            # Skip negligible contributions only if no actual work recorded (Fixing indentation/logic)
-            if pct < 0.1 and u_stats.get('files_worked', 0) == 0 and u_stats.get('commit_count', 0) == 0:
+            # Filter negligible
+            if u_stats["pct"] < 0.1 and u_stats["files_worked"] == 0 and u_stats["commit_count"] == 0:
                 continue
 
-            # Format Dates
-            start_date = p_context.get("first_modified")
-            end_date = p_context.get("last_modified")
+            # Date
+            start = p_context.get("first_modified")
+            end = p_context.get("last_modified")
             date_str = ""
-            
-            def _fmt_d(d):
-                if isinstance(d, str):
-                    try: return datetime.fromisoformat(d).strftime('%Y-%m-%d')
-                    except: return d
-                if isinstance(d, datetime):
-                    return d.strftime('%Y-%m-%d')
-                return str(d)
+            if start and end:
+                date_str = f" ({_fmt_date(start)} – {_fmt_date(end)})"
 
-            if start_date and end_date:
-                date_str = f" ({_fmt_d(start_date)} – {_fmt_d(end_date)})"
-
-            # Project Header
+            # Heading
             p_head = doc.add_heading(level=2)
             p_head.add_run(p_name).bold = True
             if date_str:
                 p_head.add_run(date_str).font.size = Pt(11)
             
-            # Project Scope Stats (Total project context)
-            scope_p = doc.add_paragraph()
-            scope_p.style.font.size = Pt(9)
-            scope_p.add_run("Project Scope: ").bold = True
-            scope_p.add_run(f"{p_context.get('total_files', 0)} files, {p_context.get('duration_days', 0)} days. Languages: {p_context.get('languages', 'Unknown')}")
-
-            # Stats
-            stats_p = doc.add_paragraph()
-            stats_p.add_run(f"Contribution: {pct:.1f}%").bold = True 
-            stats_p.add_run(f"  |  Impact Score: {u_stats['score']:.1f}")
-            
             # Description
             desc = _build_personal_project_description(p_name, p_context, u_stats)
-            doc.add_paragraph(desc)
+            doc.add_paragraph(desc, style="List Bullet")
             
-            # Specific Skills Used in this project
-            # The key in per_contributor_skills matches the contributor_name (normalized)
+            # Skills for this project
             pcs = p_context.get("per_contributor_skills", {})
             my_skills = pcs.get(contributor_name, [])
-            
             if my_skills:
-                s_p = doc.add_paragraph()
-                s_p.add_run("Skills Applied: ").italic = True
+                s_p = doc.add_paragraph(style="List Bullet")
+                s_p.add_run("Skills: ").bold = True
                 s_p.add_run(", ".join(my_skills))
             
-            doc.add_paragraph() # spacing
-            
-    while True:
-        try:
-            doc.save(docx_path)
-            return docx_path
-        except PermissionError:
-            print(f"\n[!] Could not save to '{docx_path}' because it is open.")
-            print("Please close the file and press Enter to retry, or type 'cancel' to stop.")
-            if input("> ").strip().lower() == "cancel":
-                return None
-        except Exception as e:
-            print(f"Error saving portfolio: {e}")
-            return None
+            doc.add_paragraph()
+
+    return _save_doc(doc, docx_path)

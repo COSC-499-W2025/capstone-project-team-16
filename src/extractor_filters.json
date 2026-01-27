@@ -1,7 +1,7 @@
 {
   "categories": {
     "source_code": [
-      ".py", ".js", ".ts", ".java", ".cpp", ".c", ".cs", ".rb", ".go", ".rs", ".swift", ".kt"
+      ".py", ".js", ".ts", ".java", ".cpp", ".c", ".cs", ".rb", ".go", ".rs", ".swift", ".kt", ".pl"
     ],
     "web_code": [
       ".html", ".htm", ".css", ".scss", ".sass", ".less", ".jsx", ".tsx", ".vue", ".php"
@@ -62,6 +62,7 @@
   ".less": "Less",
   ".vue": "Vue",
   ".php": "Php",
+  ".pl": "Perl",
   ".ipynb": "Jupyter Notebook",
   ".tf": "Terraform",
   ".md": "Markdown",
