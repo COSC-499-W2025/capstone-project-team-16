@@ -208,6 +208,9 @@ def _build_personal_project_description(project_name, project_context, user_stat
     if pct > 10.0:
         parts.append(f", contributing {pct:.1f}% of the codebase")
         
+    if u_files > 0:
+        parts.append(f"impacting {u_files} files")
+
     duration = project_context.get("duration_days", 0)
     if duration > 14:
         parts.append(f"over a {duration}-day period")

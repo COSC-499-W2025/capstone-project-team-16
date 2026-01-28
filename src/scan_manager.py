@@ -301,12 +301,16 @@ def generate_portfolio_menu():
     if choice == "3":
         generate_markdown_portfolio(data, user, scan["timestamp"])
     elif choice == "2":
+        # Default to chronological sorting
+        sort_mode = "date"
+
         project_map = {p["project"]: p for p in data.get("project_summaries", [])}
         out = generate_contributor_portfolio(
             user,
             profile,
             project_map,
             scan_timestamp=scan["timestamp"],
+            sort_mode=sort_mode,
         )
 
         if out:
