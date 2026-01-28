@@ -80,6 +80,9 @@ def initialize_app():
     if config is None:
         config = UserConfig()
 
+    if initial_choice == "3":
+        return config, initial_choice
+
     # Ensure consent exists
     if not config.consent:
         consent = get_user_consent()
