@@ -27,7 +27,7 @@ def detect_framework(filename: str) -> str:
     fn = filename.lower()
 
     if "package.json" in fn:
-        return "Node / React"
+        return "Node.js / React"
 
     if "requirements.txt" in fn or "pyproject.toml" in fn:
         return "Python (requirements)"
@@ -44,22 +44,25 @@ def detect_framework(filename: str) -> str:
     return "None"
 
 
-def skill_from_ext(ext: str):
+def get_skill(ext: str, lang: str = None, skill_map: dict = None, ext_map: dict = None) -> str | None:
+    """
+    Determines the professional skill based on language (priority) or extension.
+    Uses the provided maps to look up skills dynamically.
+    """
     ext = ext.lower()
 
-    if ext == ".py":
-        return "Python Programming"
+    # 1. Priority: Verified Language
+    if lang and lang != "Unknown" and skill_map:
+        l = lang.lower()
+        if l in skill_map:
+            return skill_map[l]
 
-    if ext in (".js", ".ts", ".jsx", ".tsx"):
-        return "JavaScript / Frontend"
-
-    if ext in (".html", ".css"):
-        return "Web Dev"
-
-    if ext == ".java":
-        return "Java Stuff"
-
-    if ext in (".md", ".pdf", ".docx", ".txt"):
-        return "Docs / Writing"
+    # 2. Fallback: Derive language from extension (if maps provided)
+    if ext and ext_map and skill_map:
+        derived_lang = ext_map.get(ext)
+        if derived_lang:
+            l = derived_lang.lower()
+            if l in skill_map:
+                return skill_map[l]
 
     return None

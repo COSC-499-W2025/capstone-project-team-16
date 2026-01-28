@@ -35,7 +35,7 @@ def apply_contributor_breakdown(
     project_meta: Dict[str, Any] | None,
     contributor_profiles: MutableMapping[str, Dict[str, Any]],
     detect_activity: Callable[[str, str], str],
-    skill_from_ext: Callable[[str], str | None],
+    get_skill: Callable[..., str | None],
 ) -> Tuple[Dict[str, float], Dict[str, float], Dict[str, Set[str]]]:
     """
     Builds:
@@ -54,6 +54,8 @@ def apply_contributor_breakdown(
     contributors_raw = project_meta.get("contributors", []) if project_meta else []
 
     ext_map = filters.get("extensions", {})
+    lang_map = filters.get("languages", {})
+    skill_map = filters.get("skills", {})
 
     for c in contributors_raw:
         # contributor objects are usually dicts
@@ -70,7 +72,7 @@ def apply_contributor_breakdown(
             # skills from loc_by_type
             loc_map = c.get("loc_by_type", {}) or {}
             for ext in loc_map:
-                s = skill_from_ext(ext)
+                s = get_skill(ext=ext, skill_map=skill_map, ext_map=lang_map)
                 if s:
                     contributor_profiles[key]["skills"].add(s)
                     per_contributor_skills[key].add(s)

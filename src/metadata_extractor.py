@@ -74,9 +74,9 @@ def load_filters(filename=None):
 
         framework_files = set(name.lower() for name in data.get("frameworks", []))
 
+        skills_map = data.get("skills", {})
 
-
-        return{"extensions":ext_to_category, "languages":ext_to_language, "frameworks":framework_files}
+        return{"extensions":ext_to_category, "languages":ext_to_language, "frameworks":framework_files, "skills": skills_map}
 
     except FileNotFoundError:
         print(f"[metadata_extractor] Filter file not found: {filename}")
@@ -252,8 +252,13 @@ def detailed_extraction(extracted_data, advanced_options, filters=None):
     # -------------------------------------------------------------------------
     if advanced_options.get("programming_scan", True):
         for entry in extracted_data:
+            # Skip content scan for VCS internal files (git hooks, etc) which often cause false positives (e.g. Perl)
+            fname_normalized = entry["filename"].replace("\\", "/")
+            if any(part in fname_normalized.split("/") for part in (".git", ".hg", ".svn")):
+                continue
+
             # Only check files that are potential code or completely unknown
-            if entry["category"] in ("source_code", "web_code", "uncategorized", "documentation"):
+            if entry["category"] in ("source_code", "web_code", "uncategorized", "documentation", "notebooks"):
                 # Run content detection on ALL source files to verify extension accuracy
                 # (e.g. catching a .py file that actually contains C code)
                 detected = detect_language_by_content(entry["filename"])
