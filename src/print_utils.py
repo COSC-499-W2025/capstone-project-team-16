@@ -48,10 +48,8 @@ def print_repo_summary(
     def _kv(label, value):
         _print_line(f"{label:<14}: {value}")
 
-    _kv("Project", proj_name)
     _kv("Repo Name", repo_name)
     _kv("Repo Root", repo_root)
-    _kv("Authors", ", ".join(sorted(repo_authors)) if repo_authors else "None")
     _kv("Contributors", ", ".join(sorted(repo_contributors)) if repo_contributors else "None")
     _kv("Branch Count", branch_count)
     _kv("Has Merges", has_merges)
@@ -166,19 +164,19 @@ def print_contributor_stats(project_summaries, file=None):
         return
 
     if file:
-        print("\n=== Contributor Leaderboard (by total adjusted score) ===", file=file)
+        print("\n=== Contributor Leaderboard (by total Impact Score) ===", file=file)
     else:
         _print_banner("CONTRIBUTOR LEADERBOARD")
 
     _print_line(
-        f"{'Rank':>4}  {'Contributor':<28} {'Projects':>8} {'TotalAdj':>10} {'TotalPct':>9}",
+        f"{'Rank':>4}  {'Contributor':<28} {'Projects':>8} {'Impact Score':>14} {'TotalPct':>9}",
         file=file,
     )
-    _print_line("-" * 70, file=file)
+    _print_line("-" * 74, file=file)
 
     for i, (person, total_adj, total_pct, projects_count) in enumerate(leaderboard, start=1):
         _print_line(
-            f"{i:4}  {person[:28]:<28} {projects_count:8} {total_adj:10.1f} {total_pct:8.1f}%",
+            f"{i:4}  {person[:28]:<28} {projects_count:8} {total_adj:14.1f} {total_pct:8.1f}%",
             file=file,
         )
 
@@ -206,8 +204,8 @@ def print_contributor_stats(project_summaries, file=None):
             print()
             _print_line(f"-- {person} --", file=file)
 
-        _print_line(f"{'Project':<32} {'Pct':>7} {'AdjScore':>10} {'Base':>10}", file=file)
-        _print_line("-" * 65, file=file)
+        _print_line(f"{'Project':<32} {'Pct':>7} {'Impact Score':>14} {'Base':>10}", file=file)
+        _print_line("-" * 69, file=file)
 
         for proj, pct, adj, base in person_projects[:3]:
-            _print_line(f"{proj[:32]:<32} {pct:5.1f}% {adj:10.1f} {base:10.1f}", file=file)
+            _print_line(f"{proj[:32]:<32} {pct:5.1f}% {adj:14.1f} {base:10.1f}", file=file)

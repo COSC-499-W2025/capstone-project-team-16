@@ -492,6 +492,7 @@ def analyze_projects(extracted_data, filters, advanced_options, detailed_data=No
     # --------------------------------------------------------
     # OUTPUT PART 5: Per-Contributor Rankings (per person)
     # --------------------------------------------------------
+    print_contributor_stats(project_summaries)
     # print_contributor_stats(project_summaries)
     
 
@@ -545,7 +546,9 @@ def analyze_projects(extracted_data, filters, advanced_options, detailed_data=No
                             for p in project_summaries]
                     )
 
-                print(center_text(f"saved file to {out_path}"))
+                print()
+                print(center_text("Project contribution summary CSV saved to:"))
+                print(center_text(out_path))
                 break
             except PermissionError:
                 print()

@@ -310,11 +310,11 @@ def generate_portfolio_menu():
             profile,
             project_map,
             scan_timestamp=scan["timestamp"],
-            sort_mode=sort_mode,
+            sort_mode=sort_mode
         )
 
         if out:
-            print(_center_text(f"Saved portfolio to:\n{out}"))
+            print(_center_text(f"Saved resume to:\n{out}"))
 
 
 # --------------------------------------------------------
@@ -347,8 +347,9 @@ def _print_menu(title, options, prompt="Choose an option: "):
 
 def _print_scan_list(scans):
     for i, s in enumerate(scans, start=1):
+        ts = _format_timestamp(s['timestamp'])
         print(
             _center_text(
-                f"{i}. [ID: {s['summary_id']}] {s['timestamp']} ({s['analysis_mode']})"
+                f"{i}. Scan {s['summary_id']} - {ts} ({s['analysis_mode']})"
             )
         )
