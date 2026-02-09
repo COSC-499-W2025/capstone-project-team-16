@@ -579,3 +579,45 @@
 
 ### Additional Context (Optional)
 - N/A
+
+
+## 2026-Feb-01 to 2026-Feb-08
+
+### Type of Tasks Worked On
+
+
+<img width="975" height="568" alt="Screenshot 2026-02-08 at 9 40 44 PM" src="https://github.com/user-attachments/assets/91cf0357-a3c0-4bce-9765-4b78552736aa" />
+
+
+
+
+### Recap of Week's Goals
+
+- Milestone 2 stuff
+
+
+### Features Assigned (Project Plan)
+- Allow users to choose which information is represented (e.g., re-ranking of projects, corrections to chronology, attributes for project comparison, skills to highlight, projects selected for showcase)
+- Incorporate a key role of the user in a given project
+
+
+### Tasks from Project Board
+| Feature | Task | Status (Completed/In Progress) | Notes |
+|------|------|-------------------------------|-------|
+| Allow users to choose which information is represented | In Progress | … |
+| Incorporate a key role of the user in a given project | In Progress | … |
+
+
+### Completed/In-Progress Tasks (Last 2 Weeks)
+- Rank projects with each person contributions
+- Uploaded testing zip file
+- Refactor Analysis Engine
+
+### Additional Context (Optional)
+
+- This week I decided to focus mainly on Milestone requirements 23 and 24. For requirement 23, I am working on letting users have more control over how their information is shown in the system instead of relying only on automated outputs. This involve creating some kind of “overrides” logic where users can reorder projects, pick which ones to showcase, or highlight certain skills.So basically I’ll just be handling the internal logic that applies these user choices to the system’s generated results.
+
+For requirement 24, I am looking at how to better represent the user’s individual role in each project, rather than treating all contributors the same. The idea is to make sure the portfolio or resume clearly reflects what the user actually did in each project.
+
+Overall, this week I mostly worked on those two requirements. It is currently in progress and will be finished soon. Just a bunch of stuff I need to fix which will take a bit more time.
+
