@@ -1,4 +1,59 @@
 # Team Log - Team 16
+## Milestone: 2026-JAN-25 to 2026-FEB-08
+
+
+### Milestone Goals Recap
+- Get system ready for peer testing
+- Add a portfolio item for user generation
+
+### Features in Project Plan
+- Peer testing ready
+- Protfolio per user
+- Add Milestone 2 tasks to board
+
+
+### Burnup Chart
+| Name | Username |
+|----------------|----------------|
+| Ethan Sturek | ethansturek |
+| La Wunn| LaWunn|
+| Amani |lugger33 |
+
+![Screenshot](<screenshots/Team16/BurnupW18.png>)
+
+### Completed Tasks Table
+![Screenshot](<screenshots/Team16/DoneTasksW18.png>)
+
+| User | Feature | Item Number  | Task Type (Code, Test, Team Work) | Notes |
+|------|------|-----|-------------------------------|-------|
+| Ethan Sturek | Portfolio per user | [#238](https://github.com/COSC-499-W2025/capstone-project-team-16/issues/238) | Code | Users can now generate a separate artifact called a portfolio. This has a more detailed breakdown of their contributions for projects they're apart of |
+| Ethan Sturek | Peer testing ready | [#239](https://github.com/COSC-499-W2025/capstone-project-team-16/issues/239)| Test | Various outputs cleaned up including scan IDs, proper success feedback for resume and portfolio generation, removed redundant information in project summary, Adjscore changed to impact score, summary readability|
+| Ethan Sturek | Add Milestone 2 tasks to board | [#215](https://github.com/COSC-499-W2025/capstone-project-team-16/issues/215)| Team Work | Added and grouped Milestone 2 work items onto the project board for easier tracking on project timeline.|
+
+### In Progress Tasks Table
+![Screenshot](<screenshots/Team16/TasksW18.png>)
+| User | Feature | Item Number  | Task Type (Code, Test, Team Work) | Notes |
+|------|------|-----|-------------------------------|-------|
+| Ethan Sturek | Allow incremental information by adding another zipped folder of files for the same portfolio or résumé that incorporates additional information at a later point in time | [#223](https://github.com/COSC-499-W2025/capstone-project-team-16/issues/223) | Team Work |  |
+| Ethan Sturek | Recognize duplicate files and maintains only one in the system | [#224](https://github.com/COSC-499-W2025/capstone-project-team-16/issues/224) | Team Work |  |
+| Ethan Sturek | Customize and save the wording of a project used for a résumé item | [#230](https://github.com/COSC-499-W2025/capstone-project-team-16/issues/230) | Team Work |  |
+| Ethan Sturek | Customize and save information about a portfolio showcase project | [#229](https://github.com/COSC-499-W2025/capstone-project-team-16/issues/229) | Team Work |  |
+
+
+### Test Report
+![Screenshot](<screenshots/Team16/Test1W17.png>)
+
+### Tests
+- Unit tests all passing
+- Manual testing for Peer testing ready as well as portfolio generation.
+### Running Tests
+
+1.  Run `python -m venv venv` to create a virtual environment.
+2. On Windows run `venv/Scripts/activate`.
+3. On Mac run `venv/bin/activate`.
+4. Run `pip install -r requirements.txt`.
+5. In the root of the repositiory, enter `pytest` to run all tests.
+   
 ## Milestone: 2026-JAN-18 to 2026-JAN-25
 
 

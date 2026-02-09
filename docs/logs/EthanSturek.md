@@ -1,4 +1,43 @@
 # Personal Log - Ethan Sturek
+## 2026-JAN-25 to 2026-FEB-08
+
+
+### Type of Tasks Worked On
+![Screenshot](<screenshots/Ethan/Week 18.png>)
+
+### Recap of Week's Goals
+- Improve language detection
+- Make peer testing activity list
+
+
+### Features Assigned (Project Plan)
+- Peer testing ready
+- Protfolio per user
+- Add Milestone 2 tasks to board
+  
+### Project Board 
+| Feature | Item Number | Status (Completed/In Progress) | Task Type (Code, Test, Team Work) | Notes |
+|------|------|-----|-------------------------------|-------|
+| Portfolio per user | [#238](https://github.com/COSC-499-W2025/capstone-project-team-16/issues/238)| Completed | Code | Users can now generate a separate artifact called a portfolio. This has a more detailed breakdown of their contributions for projects they're apart of |
+| Peer testing ready | [#239](https://github.com/COSC-499-W2025/capstone-project-team-16/issues/239)| Completed | Test | Various outputs cleaned up including scan IDs, proper success feedback for resume and portfolio generation, removed redundant information in project summary, Adjscore changed to impact score, summary readability|
+| Add Milestone 2 tasks to board | [#215](https://github.com/COSC-499-W2025/capstone-project-team-16/issues/215)| Completed | Team Work | Added and grouped Milestone 2 work items onto the project board for easier tracking on project timeline.|
+  
+
+
+
+
+
+### Completed Tasks (Last 2 Weeks)
+- Peer testing ready
+- Protfolio per user
+- Add Milestone 2 tasks to board
+
+### Next Week's Goals
+- Incremental info by adding another zip
+- Recognize duplicate files and maintain only 1
+- Edit wording and information of Portfolios and resumes
+
+
 ## 2026-JAN-18 to 2026-JAN-25
 
 
