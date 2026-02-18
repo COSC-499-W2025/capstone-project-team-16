@@ -1,4 +1,37 @@
 # Personal Log - Amani Lugalla
+## 2026-FEB-02 to 2026-FEB-08
+
+### Type of Tasks Worked On
+![Screenshot](<screenshots/Amani/Week19.png>)
+
+### Recap of Week's Goals
+- Finalize Flask API endpoints for scan operations.
+- Connect backend scan routes to the shared scan workflow.
+- Improve API response structure and request validation for reliable CLI/frontend use.
+
+
+### Features Assigned (Project Plan)
+- Flask backend endpoint completion.
+- Scan workflow integration through API routes.
+- API validation and response consistency updates.
+  
+### Tasks from Project Board
+| Feature | Task | Status (Completed/In Progress) | Notes |
+|------|------|-------------------------------|-------|
+| Flask backend | Finalize app setup and scan routes | Completed | Completed endpoint wiring for scan-related actions |
+| Scan integration | Hook scan endpoints to scan workflow/service layer | Completed | Routes now trigger shared scan logic and return structured output |
+| API quality | Add request validation and standardized responses | Completed | Improved handling of invalid input and consistent response payload shape |
+| Integration | Validate backend flow with CLI/consumer expectations | In Progress | Final integration checks and edge-case validation ongoing |
+
+### Completed Tasks (Last 2 Weeks)
+- Finalized Flask scan endpoints and route wiring.
+- Connected scan API calls to the shared scan workflow/service logic.
+- Improved response consistency and strengthened request validation for scan operations.
+
+
+### In-Progress Tasks 
+- Complete final integration/edge-case checks for scan API consumers.
+
 ## 2026-JAN-19 to 2026-JAN-25
 
 ### Type of Tasks Worked On
