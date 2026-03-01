@@ -1,4 +1,79 @@
 # Team Log - Team 16
+## Milestone: 2026-FEB-08 to 2026-MAR-01
+
+
+
+
+
+
+### Milestone Goals Recap
+- Be able to edit resumes and portfolios
+- Detect duplicate files and be able to add incremental information
+- Fully integrate API to backend and frontend
+- Create Milestone 2 presentation
+
+
+### Features in Project Plan
+- Recognize duplicate files and maintains only one in the system
+- Allow incremental information by adding another zipped folder of files for the same portfolio or résumé that incorporates additional information at a later point in time
+- Customize and save the wording of a project used for a résumé item
+- Customize and save information about a portfolio showcase project
+- Allow user to associate a portfolio image for a given project to use as the thumbnail
+- Use a FastAPI to faciliate the communication between the backend and the frontend
+- Create future plans for Milestone 2 presentation
+
+
+
+
+### Burnup Chart
+| Name | Username |
+|----------------|----------------|
+| Ethan Sturek | ethansturek |
+| La Wunn| LaWunn|
+| Amani |lugger33 |
+
+
+![Screenshot](<screenshots/Team16/BurnupW19.png>)
+
+
+### Completed Tasks Table
+![Screenshot](<screenshots/Team16/DoneTasksW19.png>)
+
+
+| User | Feature | Item Number  | Task Type (Code, Test, Team Work) | Notes |
+|------|------|-----|-------------------------------|-------|
+| Ethan Sturek | Recognize duplicate files and maintains only one in the system| [#224](https://github.com/COSC-499-W2025/capstone-project-team-16/issues/224)| Code | By hashing the project file, the system can now identify duplicate files |
+| Ethan Sturek | Allow incremental information by adding another zipped folder of files for the same portfolio or résumé that incorporates additional information at a later point in time | [#223](https://github.com/COSC-499-W2025/capstone-project-team-16/issues/223) | Code | The system now can add additional zip files to a scan, allowing users to build up evidence over time |
+| Ethan Sturek | Customize and save the wording of a project used for a résumé item | [#230](https://github.com/COSC-499-W2025/capstone-project-team-16/issues/230) | Code | Users can now edit certain parts of their resume within the CLI |
+| Ethan Sturek | Customize and save information about a portfolio showcase project | [#229](https://github.com/COSC-499-W2025/capstone-project-team-16/issues/229) | Code | Users can now edit certain parts of their portfolios within the CLI |
+| Ethan Sturek | Allow user to associate a portfolio image for a given project to use as the thumbnail | [#228](https://github.com/COSC-499-W2025/capstone-project-team-16/issues/228)| Code | Users can now upload a thumbnail image that will be used in milestone 3 |
+| Ethan Sturek |Use a FastAPI to faciliate the communication between the backend and the frontend| [#233](https://github.com/COSC-499-W2025/capstone-project-team-16/issues/233)| Code | The system now fully implements our API endpoints to communicate between front end and back end |
+| Ethan Sturek | Create future plans for Milestone 2 presentation| [#248](https://github.com/COSC-499-W2025/capstone-project-team-16/issues/248)| Team Work | Create mock designs and presentation for Milestone 2 |
+
+
+### In Progress Tasks Table
+![Screenshot](<screenshots/Team16/TasksW19.png>)
+| User | Feature | Item Number  | Task Type (Code, Test, Team Work) | Notes |
+|------|------|-----|-------------------------------|-------|
+
+
+
+
+### Test Report
+![Screenshot](<screenshots/Team16/Test1W17.png>)
+
+
+### Tests
+- Unit tests all passing. To see full breakdown, view PRs refrenced [here](https://github.com/COSC-499-W2025/capstone-project-team-16/pull/253)
+- Manual testing for Peer testing ready as well as portfolio generation.
+### Running Tests
+
+
+1.  Run `python -m venv venv` to create a virtual environment.
+2. On Windows run `venv/Scripts/activate`.
+3. On Mac run `venv/bin/activate`.
+4. Run `pip install -r requirements.txt`.
+5. In the root of the repositiory, enter `pytest` to run all tests.
 ## Milestone: 2026-JAN-25 to 2026-FEB-08
 
 
