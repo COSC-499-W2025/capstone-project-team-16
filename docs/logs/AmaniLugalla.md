@@ -1,19 +1,23 @@
 # Personal Log - Amani Lugalla
-## 2026-FEB-02 to 2026-FEB-08
+## 2026-FEB-10 to 2026-MAR-01
 
 ### Type of Tasks Worked On
-![Screenshot](<screenshots/Amani/Week19.png>)
+![Screenshot](<screenshots/Amani/Week20.png>)
 
 ### Recap of Week's Goals
 - Finalize Flask API endpoints for scan operations.
 - Connect backend scan routes to the shared scan workflow.
 - Improve API response structure and request validation for reliable CLI/frontend use.
+- Record and polish the project video demo for Milestone 2.
+- Prepare and deliver Milestone 2 presentation materials.
 
 
 ### Features Assigned (Project Plan)
 - Flask backend endpoint completion.
 - Scan workflow integration through API routes.
 - API validation and response consistency updates.
+- Video demo planning, recording, and refinement.
+- Milestone 2 slide prep and presentation delivery.
   
 ### Tasks from Project Board
 | Feature | Task | Status (Completed/In Progress) | Notes |
@@ -21,16 +25,62 @@
 | Flask backend | Finalize app setup and scan routes | Completed | Completed endpoint wiring for scan-related actions |
 | Scan integration | Hook scan endpoints to scan workflow/service layer | Completed | Routes now trigger shared scan logic and return structured output |
 | API quality | Add request validation and standardized responses | Completed | Improved handling of invalid input and consistent response payload shape |
+| Milestone 2 demo | Record and finalize project video demo | Completed | Captured walkthrough of end-to-end scan flow and polished final demo output |
+| Milestone 2 presentation | Build and present milestone slide deck | Completed | Prepared slide content/talking points and contributed to team presentation delivery |
 | Integration | Validate backend flow with CLI/consumer expectations | In Progress | Final integration checks and edge-case validation ongoing |
 
 ### Completed Tasks (Last 2 Weeks)
 - Finalized Flask scan endpoints and route wiring.
 - Connected scan API calls to the shared scan workflow/service logic.
 - Improved response consistency and strengthened request validation for scan operations.
+- Recorded and refined the Milestone 2 video demo showcasing the scan workflow and results.
+- Prepared Milestone 2 presentation content and delivered presentation contributions.
 
 
 ### In-Progress Tasks 
 - Complete final integration/edge-case checks for scan API consumers.
+
+## 2026-FEB-02 to 2026-FEB-09 (Detailed API Update)
+
+### Type of Tasks Worked On
+![Screenshot](<screenshots/Amani/Week19.png>)
+
+### Recap of Week's Goals
+- Harden and complete the Flask scan API surface beyond basic create flow.
+- Add scan management endpoints for listing, fetching, and deleting saved scans.
+- Improve request validation, error handling, and response consistency for reliable CLI/frontend consumers.
+- Expand automated API endpoint coverage to validate success/error paths before integration handoff.
+
+
+### Features Assigned (Project Plan)
+- Flask backend endpoint completion and scan route expansion.
+- Scan workflow integration through API routes (`POST /scans`) and DB-backed scan management routes.
+- API validation, response consistency, and server-side error logging hardening.
+- API test coverage expansion for scan endpoint success/failure scenarios.
+  
+### Tasks from Project Board
+| Feature | Task | Status (Completed/In Progress) | Notes |
+|------|------|-------------------------------|-------|
+| Flask backend | Expand scan API endpoints (`GET /scans`, `GET /scans/<id>`, `DELETE /scans/<id>`) | Completed | Added scan management routes and DB function integration for list/fetch/delete flows |
+| Scan integration | Finalize `POST /scans` workflow path and multipart upload handling | Completed | Connected route to shared `run_scan`, supported JSON `zip_path` + multipart uploads, and returned `201` on success |
+| API quality | Harden validation + response/error behavior | Completed | Added strict `analysis_mode` parsing, validated `advanced_options` keys/boolean values, blocked advanced options in basic mode, and cleaned temp zip files after upload |
+| API reliability | Add exception logging and safe failure responses | Completed | Wrapped create/list/get/delete flows with server-side logging while returning safe `4xx/5xx` JSON errors |
+| Testing/coverage | Expand API endpoint test coverage | Completed | Added `tests/test_api.py` coverage for health, create validations, multipart uploads, invalid zip, scan failures, list/get/delete success + not-found paths (commit notes full suite passing: 84 tests) |
+
+### Completed Tasks (Last 2 Weeks)
+- Completed Flask API hardening pass for scan endpoints in `src/api.py`.
+- Added scan management endpoints: list scans, get scan by ID, and delete scan by ID.
+- Finalized `POST /scans` behavior with proper `201` status, JSON-safe response payloads, and multipart upload support.
+- Implemented strict request validation for `analysis_mode` (`basic`/`advanced`) and `advanced_options` (allowed keys + boolean values only).
+- Added guardrail to reject `advanced_options` when running in `basic` mode.
+- Added server-side exception logging for create/list/get/delete scan flows with safe generic client-facing error messages.
+- Ensured temporary uploaded ZIP files are cleaned up after processing.
+- Added comprehensive API tests in `tests/test_api.py` covering endpoint success and error scenarios.
+
+
+### In-Progress Tasks 
+- Continue end-to-end CLI/frontend consumer validation against the hardened scan API routes.
+- Add follow-up integration coverage for persistence-heavy/DB state scenarios beyond mocked API tests.
 
 ## 2026-JAN-19 to 2026-JAN-25
 
