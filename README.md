@@ -29,20 +29,25 @@ These users can utilize the system to:
 
 Programming Language: Python
 
-Future Additions: REST API and front-end (Term 2)
+Interface Modes: CLI (existing) and FastAPI backend endpoints (current milestone work)
 
 Output Format (Milestone 1): Text-based (CSV, JSON, or plain text)
 
 ## How to Run
 
-In the repository root after cloning, run the following commands in your command line:
+The system is designed to run as a single interactive application. The client (`api_main.py`) will automatically start the backend API server for you. As some of our processes are not integrated into our api, there are additional features such as project manipulation that can be ran locally by running (`main.py`).
+
+### Option 1: Docker (Recommended)
+
+Run the following commands to build and launch the interactive client inside a container:
 
 ```bash
 docker compose build
-docker compose run --rm skillscope
+docker compose run --rm -it skillscope python api_main.py
 ```
 
 Alternatively, if you have issues with Docker, you can run the project locally.
+### Option 2: Locally
 
 First, install the dependencies from `requirements.txt`:
 ```bash
@@ -53,21 +58,32 @@ Then, run the application from the project root:
 python src/main.py
 ```
 
+### Option 3: Connected to API
+
+First, install the dependencies from `requirements.txt`:
+```bash
+pip install -r requirements.txt
+```
+Then, run the application from the project root:
+```bash
+python src/api_main.py
+```
+
 ## Test File
 
 Due to GitHub file size limits, the full stress-test ZIP archive is not committed
 to the repository.
 
-This dataset was used for manual and performance testing of:
+This dataset: "test-data" was used for manual and performance testing of:
 - ZIP validation
 - File parsing
 - Repository analysis
 - Contributor scoring
 
-# Download link
- https://drive.google.com/file/d/1-9tQJhX9-cK3kk-2KdwOifr74SMqY5RG/view?usp=sharing
+### Download link
+ https://drive.google.com/drive/folders/1K9jEAVZZHkq8jLEDl1A_qwPXS5rYTDQw?usp=sharing
 
-# Notes
+### Notes
 - This file is **not required** to run tests.
 
 
@@ -285,5 +301,3 @@ Be sure to keep your docs and README.md up-to-date.
 
 
 <img width="1380" height="761" alt="arch" src="https://github.com/user-attachments/assets/c7413025-ea89-48c3-b1a4-22cf30c396cd" />
-
-

@@ -49,7 +49,8 @@ def test_save_full_scan_creates_tables_and_inserts_data(db_path):
         "resume_summaries": ["Bullet 1"],
         "skills_chronological": [],
         "projects_chronological": [],
-        "contributor_profiles": {"user1": {"skills": ["Python"]}}
+        "contributor_profiles": {"user1": {"skills": ["Python"]}},
+        "zip_hash": "abc123hash"
     }
 
     # Action
@@ -63,6 +64,7 @@ def test_save_full_scan_creates_tables_and_inserts_data(db_path):
     table_names = [t[0] for t in tables]
     assert "full_scan_summaries" in table_names
     assert "user_config" in table_names
+    assert "scan_hashes" in table_names
 
     # Verify data insertion
     rows = _fetch_all(
@@ -89,6 +91,14 @@ def test_save_full_scan_creates_tables_and_inserts_data(db_path):
     
     # Verify other fields
     assert data["contributor_profiles"]["user1"]["skills"] == ["Python"]
+
+    # Verify scan_hashes table population
+    hash_rows = _fetch_all(
+        db_path,
+        "SELECT file_hash FROM scan_hashes"
+    )
+    assert len(hash_rows) == 1
+    assert hash_rows[0][0] == "abc123hash"
 
 
 def test_list_full_scans_returns_lightweight_metadata(db_path):
@@ -199,3 +209,51 @@ def test_list_full_scans_ordering(db_path):
     # Should be ordered by timestamp DESC (newest first)
     assert scans[0]["analysis_mode"] == "advanced"
     assert scans[1]["analysis_mode"] == "basic"
+
+def test_update_full_scan(db_path):
+    """
+    SCENARIO: An existing scan is updated with new merged data.
+    EXPECTED: The JSON blob in the DB is updated, datetimes are serialized, and hashes table is updated.
+    """
+    # 1. Save initial scan
+    initial_data = {
+        "project_summaries": [{"project": "OldProject", "score": 10}],
+        "contributor_profiles": {"dev1": {"skills": ["Python"]}},
+        "timestamp": datetime.now().isoformat(),
+        "analysis_mode": "basic",
+        "user_consent": "Yes",
+        "source_hashes": ["hash1"]
+    }
+    db.save_full_scan(initial_data, "basic", True, db_path=db_path)
+    
+    # Get ID
+    scans = db.list_full_scans(db_path=db_path)
+    summary_id = scans[0]["summary_id"]
+
+    # 2. Prepare merged data (simulating what merge_scans would return)
+    # Include a datetime object to test serialization inside update_full_scan
+    updated_data = initial_data.copy()
+    updated_data["project_summaries"].append({
+        "project": "NewProject", 
+        "score": 20,
+        "first_modified": datetime(2024, 1, 1, 12, 0, 0),
+        "last_modified": datetime(2024, 2, 1, 12, 0, 0)
+    })
+    updated_data["source_hashes"] = ["hash1", "hash2"]
+
+    # 3. Call update
+    db.update_full_scan(summary_id, updated_data, db_path=db_path)
+
+    # 4. Verify
+    row = db.get_full_scan_by_id(summary_id, db_path=db_path)
+    scan_data = row["scan_data"]
+    
+    assert len(scan_data["project_summaries"]) == 2
+    assert scan_data["project_summaries"][1]["project"] == "NewProject"
+    # Verify datetime was serialized to string
+    assert scan_data["project_summaries"][1]["first_modified"] == "2024-01-01T12:00:00"
+    
+    # Verify hashes table update
+    hash_rows = _fetch_all(db_path, "SELECT file_hash FROM scan_hashes WHERE summary_id = ?", (summary_id,))
+    hashes = sorted([r[0] for r in hash_rows])
+    assert hashes == ["hash1", "hash2"]

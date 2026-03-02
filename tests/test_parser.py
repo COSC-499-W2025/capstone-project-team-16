@@ -121,7 +121,8 @@ def test_valid_zip_file():
         zip_file = os.path.join(tmpdir, "project.zip")
         create_dummy_zip(zip_file, {"a.txt": b"1", "b.txt": b"2"})
 
-        file_tree = check_file_validity(zip_file)
+        result = check_file_validity(zip_file)
+        file_tree, zip_hash = result
         assert isinstance(file_tree, list)
         assert len(file_tree) == 2
         assert all("filename" in f for f in file_tree)

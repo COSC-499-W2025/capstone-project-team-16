@@ -56,3 +56,53 @@ def run_scan(
     if results and persist:
         save_scan(results, analysis_mode, consent)
     return results
+
+
+def merge_scans(existing_data: Mapping[str, Any], new_data: Mapping[str, Any]) -> Mapping[str, Any]:
+    """
+    Merges new scan results into an existing scan dataset.
+    Used for incremental updates to a portfolio.
+    """
+    merged = dict(existing_data)  # Shallow copy
+
+    # 1. Merge Project Summaries (Append)
+    existing_projects = merged.get("project_summaries", [])
+    new_projects = new_data.get("project_summaries", [])
+    merged["project_summaries"] = existing_projects + new_projects
+
+    # 2. Merge Resume Summaries (Append)
+    merged["resume_summaries"] = merged.get("resume_summaries", []) + new_data.get("resume_summaries", [])
+
+    # 3. Merge Skills Chronological (Append)
+    merged["skills_chronological"] = merged.get("skills_chronological", []) + new_data.get("skills_chronological", [])
+
+    # 4. Merge Projects Chronological (Append)
+    merged["projects_chronological"] = merged.get("projects_chronological", []) + new_data.get("projects_chronological", [])
+
+    # 5. Merge Contributor Profiles (Union Skills)
+    existing_profiles = dict(merged.get("contributor_profiles", {}))
+    new_profiles = new_data.get("contributor_profiles", {})
+
+    for user, info in new_profiles.items():
+        if user in existing_profiles:
+            # Merge skills for existing user
+            old_skills = set(existing_profiles[user].get("skills", []))
+            new_skills = set(info.get("skills", []))
+            existing_profiles[user]["skills"] = list(old_skills.union(new_skills))
+            
+            # Merge projects list if present
+            old_projs = existing_profiles[user].get("projects", [])
+            new_projs = info.get("projects", [])
+            existing_profiles[user]["projects"] = old_projs + new_projs
+        else:
+            # New user
+            existing_profiles[user] = info
+    
+    merged["contributor_profiles"] = existing_profiles
+
+    # 6. Merge Source Hashes
+    existing_hashes = set(merged.get("source_hashes", []))
+    existing_hashes.update(new_data.get("source_hashes", []))
+    merged["source_hashes"] = list(existing_hashes)
+    
+    return merged

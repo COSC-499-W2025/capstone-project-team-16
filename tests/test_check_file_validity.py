@@ -101,8 +101,9 @@ def test_zip_extension_case_insensitive(capsys):
         
         # ASSERT
         assert result is not None
-        assert isinstance(result, list)
-        assert len(result) == 1
+        file_tree, zip_hash = result
+        assert isinstance(file_tree, list)
+        assert len(file_tree) == 1
 
 def test_valid_zip_with_files(capsys):
     """
@@ -147,18 +148,19 @@ def test_valid_zip_with_files(capsys):
 
         # ASSERT
         assert result is not None
-        assert isinstance(result, list)
-        assert len(result) == 2
+        file_tree, zip_hash = result
+        assert isinstance(file_tree, list)
+        assert len(file_tree) == 2
 
         # Check first file
-        assert result[0]["filename"].endswith("readme.txt")
-        assert result[0]["size"] == 1024
-        assert result[0]["last_modified"] == (2024, 1, 1, 12, 0, 0)
+        assert file_tree[0]["filename"].endswith("readme.txt")
+        assert file_tree[0]["size"] == 1024
+        assert file_tree[0]["last_modified"] == (2024, 1, 1, 12, 0, 0)
 
         # Check second file
-        assert result[1]["filename"].endswith("src/main.py")
-        assert result[1]["size"] == 2048
-        assert result[1]["last_modified"] == (2024, 1, 2, 13, 30, 0)
+        assert file_tree[1]["filename"].endswith("src/main.py")
+        assert file_tree[1]["size"] == 2048
+        assert file_tree[1]["last_modified"] == (2024, 1, 2, 13, 30, 0)
 
 
 """

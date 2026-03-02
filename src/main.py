@@ -8,7 +8,8 @@ from user_config import UserConfig
 from permission_manager import (
     get_user_consent,
     get_analysis_mode,
-    get_advanced_options
+    get_advanced_options,
+    get_yes_no
 )
 from file_parser import get_input_file_path
 from services.scan_service import analyze_scan, save_scan
@@ -80,6 +81,9 @@ def initialize_app():
     if config is None:
         config = UserConfig()
 
+    if initial_choice == "3":
+        return config, initial_choice
+
     # Ensure consent exists
     if not config.consent:
         consent = get_user_consent()
@@ -141,13 +145,23 @@ def orchestrator(config):
         advanced_options = get_advanced_options()
 
     # Step 3: Select project files
-    file_list = get_input_file_path()
-    if not file_list:
+    result = get_input_file_path()
+    if not result:
         print(_center_text("No files selected. Returning to home."))
         return
+    
+    file_list, zip_hash = result
+
+    # Check for duplicates
+    from db import scan_exists
+    if scan_exists(zip_hash):
+        print(_center_text("Warning: This project has already been scanned."))
+        if not get_yes_no("Do you want to scan it again?"):
+            return
 
     # Step 4: Run analysis on the extracted metadata and save data to DB
     analysis_results = analyze_scan(file_list, analysis_mode, advanced_options)
+    analysis_results["zip_hash"] = zip_hash
 
     try:
         save_scan(analysis_results, analysis_mode, config.consent)

@@ -6,7 +6,7 @@ import os
 import shutil
 from datetime import datetime
 from analysis_utils import center_text, to_datetime
-from classification import detect_activity, detect_framework, skill_from_ext
+from classification import detect_activity, detect_framework, get_skill
 from contributor_utils import apply_contributor_breakdown
 from scoring_utils import compute_project_score
 
@@ -192,7 +192,12 @@ def analyze_projects(extracted_data, filters, advanced_options, detailed_data=No
 
             if advanced_options.get("skills_gen", True):
                 # skills
-                s = skill_from_ext(ext)
+                s = get_skill(
+                    ext=ext,
+                    lang=lang,
+                    skill_map=filters.get("skills"),
+                    ext_map=filters.get("languages")
+                )
                 if s:
                     skills.add(s)
 
@@ -352,7 +357,7 @@ def analyze_projects(extracted_data, filters, advanced_options, detailed_data=No
             project_meta=project_meta,
             contributor_profiles=contributor_profiles,
             detect_activity=detect_activity,
-            skill_from_ext=skill_from_ext,
+            get_skill=get_skill,
 )
 
 
@@ -488,6 +493,7 @@ def analyze_projects(extracted_data, filters, advanced_options, detailed_data=No
     # OUTPUT PART 5: Per-Contributor Rankings (per person)
     # --------------------------------------------------------
     print_contributor_stats(project_summaries)
+    # print_contributor_stats(project_summaries)
     
 
 
@@ -540,7 +546,9 @@ def analyze_projects(extracted_data, filters, advanced_options, detailed_data=No
                             for p in project_summaries]
                     )
 
-                print(center_text(f"saved file to {out_path}"))
+                print()
+                print(center_text("Project contribution summary CSV saved to:"))
+                print(center_text(out_path))
                 break
             except PermissionError:
                 print()

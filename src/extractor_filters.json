@@ -1,7 +1,7 @@
 {
   "categories": {
     "source_code": [
-      ".py", ".js", ".ts", ".java", ".cpp", ".c", ".cs", ".rb", ".go", ".rs", ".swift", ".kt"
+      ".py", ".js", ".ts", ".java", ".cpp", ".c", ".cs", ".rb", ".go", ".rs", ".swift", ".kt", ".pl"
     ],
     "web_code": [
       ".html", ".htm", ".css", ".scss", ".sass", ".less", ".jsx", ".tsx", ".vue", ".php"
@@ -61,7 +61,16 @@
   ".sass": "Cass",
   ".less": "Less",
   ".vue": "Vue",
-  ".php": "Php"
+  ".php": "Php",
+  ".pl": "Perl",
+  ".ipynb": "Jupyter Notebook",
+  ".tf": "Terraform",
+  ".md": "Markdown",
+  ".markdown": "Markdown",
+  ".rst": "ReStructuredText",
+  ".txt": "Plain Text",
+  ".pdf": "PDF",
+  ".docx": "Word Document"
 },
 
 "frameworks": [
@@ -86,6 +95,33 @@
     "docker-compose.yml",
     "composer.json",
     "composer.lock"
-]
-
+] ,
+"skills": {
+    "python": "Python Development",
+    "javascript": "JavaScript Development",
+    "typescript": "TypeScript Development",
+    "html": "HTML / Web Markup",
+    "css": "CSS / Web Styling",
+    "java": "Java Development",
+    "kotlin": "Kotlin Development",
+    "scala": "Scala Development",
+    "c": "C Programming",
+    "c++": "C++ Programming",
+    "c#": "C# / .NET Development",
+    "go": "Go Programming",
+    "rust": "Rust Systems Programming",
+    "php": "PHP Development",
+    "ruby": "Ruby Development",
+    "lua": "Lua Scripting",
+    "sql": "SQL / Database Management",
+    "shell": "Shell Scripting & Automation",
+    "perl": "Perl Scripting",
+    "jupyter notebook": "Data Science (Jupyter)",
+    "terraform": "Terraform / IaC",
+    "markdown": "Technical Documentation",
+    "restructuredtext": "Technical Documentation",
+    "plain text": "Technical Documentation",
+    "pdf": "Technical Documentation",
+    "word document": "Technical Documentation"
+  }
 }

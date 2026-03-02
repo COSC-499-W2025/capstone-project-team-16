@@ -2,7 +2,7 @@ import sqlite3
 import json
 import os
 from datetime import datetime
-from typing import Any, Mapping
+from typing import Any, Mapping, Optional
 
 # Default DB file name
 DEFAULT_DB_FILENAME = "skillscope.db"
@@ -47,6 +47,15 @@ CREATE TABLE IF NOT EXISTS full_scan_summaries (
 )
 """
 
+# Table to store file hashes for deduplication (One-to-Many relationship)
+CREATE_SCAN_HASHES_TABLE_SQL = """
+CREATE TABLE IF NOT EXISTS scan_hashes (
+    hash_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    summary_id INTEGER NOT NULL,
+    file_hash TEXT NOT NULL,
+    FOREIGN KEY(summary_id) REFERENCES full_scan_summaries(summary_id)
+)
+"""
 
 # ----------------------
 # Initialization
@@ -61,6 +70,7 @@ def ensure_db_initialized(conn: sqlite3.Connection) -> None:
     conn.execute(USER_CONFIG_TABLE_SQL)
     # Ensure the table for full scans exists.
     conn.execute(CREATE_FULL_SCAN_TABLE_SQL)
+    conn.execute(CREATE_SCAN_HASHES_TABLE_SQL)
 
 # ----------------------
 # Save results
@@ -90,13 +100,13 @@ def save_full_scan(
     analysis_mode: str,
     user_consent: bool,
     db_path: str = DB_NAME
-) -> None:
+) -> Optional[int]:
     """
     Save a full scan, including summaries, resume bullets, skills over time, and chronological projects.
     The complex nested structure is serialized into a single JSON blob.
     """
     if not analysis_results or "project_summaries" not in analysis_results:
-        return
+        return None
 
     # Serialize datetime fields in projects
     def _serialize_project(p): 
@@ -119,12 +129,13 @@ def save_full_scan(
         "contributor_profiles": analysis_results.get("contributor_profiles", {}),
         "analysis_mode": analysis_mode,
         "user_consent": "Yes" if user_consent else "No",
+        "source_hashes": [analysis_results.get("zip_hash")] if analysis_results.get("zip_hash") else [],
         "timestamp": datetime.now().isoformat()
     }
-
+    
     with sqlite3.connect(db_path) as conn:
         ensure_db_initialized(conn)
-        conn.execute(
+        cursor = conn.execute(
             """
             INSERT INTO full_scan_summaries (timestamp, analysis_mode, user_consent, project_summaries_json)
             VALUES (?, ?, ?, ?)
@@ -136,6 +147,52 @@ def save_full_scan(
                 json.dumps(full_scan_data, ensure_ascii=False, default=str),
             )
         )
+        summary_id = cursor.lastrowid
+
+        # Save hashes to the lookup table for fast deduplication
+        hashes = full_scan_data.get("source_hashes", [])
+        if hashes:
+            conn.executemany(
+                "INSERT INTO scan_hashes (summary_id, file_hash) VALUES (?, ?)",
+                [(summary_id, h) for h in hashes]
+            )
+        conn.commit()
+        return summary_id
+
+def update_full_scan(summary_id, merged_data, db_path=DB_NAME):
+    """
+    Updates the JSON data for an existing scan record.
+    Used when adding incremental information to a portfolio.
+    """
+    # Helper to serialize datetimes (similar to save_full_scan)
+    def _serialize_project(p): 
+        p_copy = p.copy()
+        for key in ["first_modified", "last_modified"]:
+            if key in p_copy and isinstance(p_copy[key], datetime):
+                p_copy[key] = p_copy[key].isoformat()
+        return p_copy
+
+    if "project_summaries" in merged_data:
+        merged_data["project_summaries"] = [
+            _serialize_project(p) for p in merged_data["project_summaries"]
+        ]
+
+    with sqlite3.connect(db_path) as conn:
+        ensure_db_initialized(conn)
+        conn.execute(
+            "UPDATE full_scan_summaries SET project_summaries_json = ? WHERE summary_id = ?",
+            (json.dumps(merged_data, ensure_ascii=False, default=str), summary_id)
+        )
+        
+        # Update hashes table: Remove old entries and re-insert the current list
+        conn.execute("DELETE FROM scan_hashes WHERE summary_id = ?", (summary_id,))
+        
+        hashes = merged_data.get("source_hashes", [])
+        if hashes:
+            conn.executemany(
+                "INSERT INTO scan_hashes (summary_id, file_hash) VALUES (?, ?)",
+                [(summary_id, h) for h in hashes]
+            )
         conn.commit()
 
 def get_full_scan_by_id(summary_id, db_path=DB_NAME):
@@ -168,5 +225,15 @@ def delete_full_scan_by_id(summary_id, db_path=DB_NAME):
     with sqlite3.connect(db_path) as conn:
         ensure_db_initialized(conn)
         cursor = conn.execute("DELETE FROM full_scan_summaries WHERE summary_id = ?", (summary_id,))
+        conn.execute("DELETE FROM scan_hashes WHERE summary_id = ?", (summary_id,))
         conn.commit()
     return cursor.rowcount > 0
+
+def scan_exists(zip_hash, db_path=DB_NAME):
+    """Checks if a scan with the given zip_hash already exists."""
+    if not zip_hash:
+        return False
+    with sqlite3.connect(db_path) as conn:
+        ensure_db_initialized(conn)
+        row = conn.execute("SELECT 1 FROM scan_hashes WHERE file_hash = ?", (zip_hash,)).fetchone()
+        return row is not None

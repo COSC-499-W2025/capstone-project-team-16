@@ -2,6 +2,13 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "type": "java",
+            "name": "Debug using Hotswap Agent",
+            "request": "launch",
+            "javaExec": "/Users/amani/.vaadin/jdk/jbrsdk-25-osx-aarch64-b176.4/Contents/Home/bin/java",
+            "vmArgs": "--add-opens java.base/sun.nio.ch=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.lang.reflect=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED --add-opens java.base/sun.security.action=ALL-UNNAMED --add-opens java.desktop/java.beans=ALL-UNNAMED --add-opens java.desktop/com.sun.beans=ALL-UNNAMED --add-opens java.desktop/com.sun.beans.introspect=ALL-UNNAMED --add-opens java.desktop/com.sun.beans.util=ALL-UNNAMED --add-opens java.base/jdk.internal.loader=ALL-UNNAMED -XX:+AllowEnhancedClassRedefinition -XX:+ClassUnloading -javaagent:/Users/amani/.vaadin/vscode-plugin/hotswap-agent.jar"
+        },
+        {
             "name": "Debug Main",
             "type": "debugpy",
             "request": "launch",

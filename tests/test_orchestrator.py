@@ -1,6 +1,7 @@
 from unittest.mock import MagicMock
 
 import main
+import db
 
 
 def test_orchestrator_basic_mode(monkeypatch):
@@ -11,7 +12,8 @@ def test_orchestrator_basic_mode(monkeypatch):
     monkeypatch.setattr(main, "get_analysis_mode", lambda: "basic")
     mock_advanced = MagicMock()
     monkeypatch.setattr(main, "get_advanced_options", mock_advanced)
-    monkeypatch.setattr(main, "get_input_file_path", lambda: ["fake/path/project.zip"])
+    monkeypatch.setattr(main, "get_input_file_path", lambda: (["fake/path/project.zip"], "fake_hash"))
+    monkeypatch.setattr(db, "scan_exists", lambda h: False)
 
     mock_analyze = MagicMock(return_value={"project_summaries": []})
     mock_save = MagicMock()
@@ -35,7 +37,8 @@ def test_orchestrator_advanced_mode(monkeypatch):
     monkeypatch.setattr(main, "get_analysis_mode", lambda: "advanced")
     mock_advanced = MagicMock(return_value={"programming_scan": True})
     monkeypatch.setattr(main, "get_advanced_options", mock_advanced)
-    monkeypatch.setattr(main, "get_input_file_path", lambda: ["fake/path/project.zip"])
+    monkeypatch.setattr(main, "get_input_file_path", lambda: (["fake/path/project.zip"], "fake_hash"))
+    monkeypatch.setattr(db, "scan_exists", lambda h: False)
 
     mock_analyze = MagicMock(return_value={"project_summaries": []})
     mock_save = MagicMock()
