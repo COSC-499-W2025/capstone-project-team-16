@@ -621,3 +621,47 @@ For requirement 24, I am looking at how to better represent the user’s individ
 
 Overall, this week I mostly worked on those two requirements. It is currently in progress and will be finished soon. Just a bunch of stuff I need to fix which will take a bit more time.
 
+
+## 2026-Feb-08 to 2026-Mar-01
+
+### Type of Tasks Worked On
+
+
+<img width="982" height="589" alt="Screenshot 2026-03-01 at 11 39 37 PM" src="https://github.com/user-attachments/assets/8d3de8e9-4341-4b20-ae4e-473243f44b48" />
+
+
+
+
+### Recap of Week's Goals
+
+- Completing Milestone 2 stuff
+
+
+### Features Assigned (Project Plan)
+- Allow users to choose which information is represented (re-ranking of projects, corrections to chronology, attributes for project comparison, skills to highlight, projects selected for showcase)
+- Incorporate a key role of the user in a given project
+
+
+### Tasks from Project Board
+| Feature | Task | Status (Completed/In Progress) | Notes |
+|------|------|-------------------------------|-------|
+| Allow users to choose which information is represented | Completed | … |
+| Incorporate a key role of the user in a given project | Completed | … |
+
+
+### Completed/In-Progress Tasks (Last 2 Weeks)
+- Allow users to choose which information is represented
+- Re-ranking of projects
+- Corrections to chronology
+- Attributes for project comparison
+- Skills to highlight
+- Projects selected for showcase
+- Incorporate a key role of the user in a given project
+- Video demo
+
+### Additional Context (Optional)
+
+- This week focus was on completing Milestone requirements. The list of features I added are re-ranking of projects, corrections to chronology, attributes for project comparison, skills to highlight, projects selected for showcase and adding key roles of users. So basically a lot of custimizations features have now been added to our system. Also I rewrote some of the features so that they could work better.
+
+Overall, I think we have completed all the requirement we need together as a team for Milestone 2. I was mainly responsible for adding new functions we needed for milestone so that's what I mainly worked on.
+
