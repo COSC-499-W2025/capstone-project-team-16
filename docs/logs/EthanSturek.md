@@ -1,4 +1,58 @@
 # Personal Log - Ethan Sturek
+## 2026-FEB-08 to 2026-MAR-01
+
+
+
+
+### Type of Tasks Worked On
+![Screenshot](<screenshots/Ethan/Week 19.png>)
+
+### Recap of Week's Goals
+- Be able to edit resumes and portfolios
+- Detect duplicate files and be able to add incremental information
+- Fully integrate API to backend and frontend
+- Create Milestone 2 presentation
+
+### Features Assigned (Project Plan)
+- Recognize duplicate files and maintains only one in the system
+- Allow incremental information by adding another zipped folder of files for the same portfolio or résumé that incorporates additional information at a later point in time
+- Customize and save the wording of a project used for a résumé item
+- Customize and save information about a portfolio showcase project
+- Allow user to associate a portfolio image for a given project to use as the thumbnail
+- Use a FastAPI to faciliate the communication between the backend and the frontend
+- Create future plans for Milestone 2 presentation
+  
+### Project Board 
+| Feature | Item Number | Status (Completed/In Progress) | Task Type (Code, Test, Team Work) | Notes |
+|------|------|-----|-------------------------------|-------|
+| Recognize duplicate files and maintains only one in the system| [#224](https://github.com/COSC-499-W2025/capstone-project-team-16/issues/224)| Completed | Code | By hashing the project file, the system can now identify duplicate files |
+| Allow incremental information by adding another zipped folder of files for the same portfolio or résumé that incorporates additional information at a later point in time | [#223](https://github.com/COSC-499-W2025/capstone-project-team-16/issues/223)| Completed | Code | The system now can add additional zip files to a scan, allowing users to build up evidence over time |
+| Customize and save the wording of a project used for a résumé item | [#230](https://github.com/COSC-499-W2025/capstone-project-team-16/issues/230)| Completed | Code | Users can now edit certain parts of their resume within the CLI | 
+| Customize and save information about a portfolio showcase project | [#229](https://github.com/COSC-499-W2025/capstone-project-team-16/issues/229)| Completed | Code | Users can now edit certain parts of their portfolios within the CLI | 
+Allow user to associate a portfolio image for a given project to use as the thumbnail | [#228](https://github.com/COSC-499-W2025/capstone-project-team-16/issues/228)| Completed | Code | Users can now upload a thumbnail image that will be used in milestone 3 |
+Use a FastAPI to faciliate the communication between the backend and the frontend| [#233](https://github.com/COSC-499-W2025/capstone-project-team-16/issues/233)| Completed | Code | The system now fully implements our API endpoints to communicate between front end and back end |
+Create future plans for Milestone 2 presentation| [#248](https://github.com/COSC-499-W2025/capstone-project-team-16/issues/248)| Completed | Team Work | Create mock designs and presentation for Milestone 2 |
+
+  
+  
+
+
+
+
+
+### Completed Tasks (Last 2 Weeks)
+- Recognize duplicate files and maintains only one in the system
+- Allow incremental information by adding another zipped folder of files for the same portfolio or résumé that incorporates additional information at a later point in time
+- Customize and save the wording of a project used for a résumé item
+- Customize and save information about a portfolio showcase project
+- Allow user to associate a portfolio image for a given project to use as the thumbnail
+- Use a FastAPI to faciliate the communication between the backend and the frontend
+- Create future plans for Milestone 2 presentation
+
+### Next Week's Goals
+- Add Milestone 3 work items to board
+
+
 ## 2026-JAN-25 to 2026-FEB-08
 
 
