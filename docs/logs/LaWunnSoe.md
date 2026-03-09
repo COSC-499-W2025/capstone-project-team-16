@@ -665,3 +665,43 @@ Overall, this week I mostly worked on those two requirements. It is currently in
 
 Overall, I think we have completed all the requirement we need together as a team for Milestone 2. I was mainly responsible for adding new functions we needed for milestone so that's what I mainly worked on.
 
+## 2026-Mar-02 to 2026-Mar-08
+
+### Type of Tasks Worked On
+
+
+<img width="967" height="565" alt="Screenshot 2026-03-08 at 7 30 44 PM" src="https://github.com/user-attachments/assets/e08e4818-a2f2-4d32-afe2-62ca66da21bd" />
+
+
+
+
+### Recap of Week's Goals
+
+- Cleaning up Milestone 2 stuff
+
+
+### Features Assigned (Project Plan)
+- Fixing/Connecting (Allow users to choose which information is represented) to show up in portfolio and resume
+
+
+### Tasks from Project Board
+| Feature | Task | Status (Completed/In Progress) | Notes |
+|------|------|-------------------------------|-------|
+| Fixing/Connecting new features from last week with portfolio and resume | In Progress | … |
+
+
+
+### Completed/In-Progress Tasks (Last 2 Weeks)
+- Allow users to choose which information is represented
+- Re-ranking of projects
+- Corrections to chronology
+- Attributes for project comparison
+- Skills to highlight
+- Projects selected for showcase
+- Incorporate a key role of the user in a given project
+- Video demo
+
+### Additional Context (Optional)
+
+- This week focus was on fixing/connecting some bugs from last week features that were implemented. I wasn't able to get a lot done this week however this is work in progress. It need some changes to the whole flow (since the custimaztion features need to overwrite our current flow, so I need a way to keep best of both worlds from our original flow and new flow that will be implemented) and so need to rewrite some pipeline so need a lot of work done.
+
