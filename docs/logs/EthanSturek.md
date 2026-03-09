@@ -1,4 +1,34 @@
 # Personal Log - Ethan Sturek
+## 2026-MAR-01 to 2026-MAR-08
+
+
+
+
+### Type of Tasks Worked On
+![Screenshot](<screenshots/Ethan/Week 20.png>)
+
+### Recap of Week's Goals
+- Decide on Project Priorities
+- Setup Electron
+
+### Features Assigned (Project Plan)
+- Electron Environment Setup
+  
+### Project Board 
+| Feature | Item Number | Status (Completed/In Progress) | Task Type (Code, Test, Team Work) | Notes |
+|------|------|-----|-------------------------------|-------|
+| Electron Environment Setup | [#262](https://github.com/COSC-499-W2025/capstone-project-team-16/issues/262)| Completed | Code | Electron environment up and running. Mock home page has been built as well |
+
+
+
+
+### Completed Tasks (Last 2 Weeks)
+- Electron Environment Setup
+
+
+### Next Week's Goals
+- Add Milestone 3 work items to board
+  
 ## 2026-FEB-08 to 2026-MAR-01
 
 
