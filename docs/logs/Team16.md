@@ -1,4 +1,67 @@
 # Team Log - Team 16
+## Milestone: 2026-Mar-01 to 2026-MAR-08
+
+
+
+
+
+
+### Milestone Goals Recap
+- Decide on Project Priorities
+- Setup Electron
+
+### Features in Project Plan
+- Add Milestone 3 work items
+- Setup Electron
+
+
+
+### Burnup Chart
+| Name | Username |
+|----------------|----------------|
+| Ethan Sturek | ethansturek |
+| La Wunn| LaWunn|
+| Amani |lugger33 |
+
+
+![Screenshot](<screenshots/Team16/BurnupW20.png>)
+
+
+### Completed Tasks Table
+![Screenshot](<screenshots/Team16/DoneTasksW20.png>)
+
+
+| User | Feature | Item Number  | Task Type (Code, Test, Team Work) | Notes |
+|------|------|-----|-------------------------------|-------|
+|Ethan Sturek| Electron Environment Setup | [#262](https://github.com/COSC-499-W2025/capstone-project-team-16/issues/262)| Code | Electron environment up and running. Mock home page has been built as well |
+
+
+
+### In Progress Tasks Table
+![Screenshot](<screenshots/Team16/TasksW20.png>)
+| User | Feature | Item Number  | Task Type (Code, Test, Team Work) | Notes |
+|------|------|-----|-------------------------------|-------|
+|Ethan Sturek| Add Milestone 3 work items  | [#263](https://github.com/COSC-499-W2025/capstone-project-team-16/issues/263)| Code | Electron environment up and running. Mock home page has been built as well |
+
+
+
+### Test Report
+![Screenshot](<screenshots/Team16/Test1W17.png>)
+
+
+### Tests
+- Unit tests all passing (https://github.com/COSC-499-W2025/capstone-project-team-16/pull/253)
+- Manual testing of electron environment using dev server
+- ![Screenshot](<screenshots/Team16/Skill Scope UI.png>)
+### Running Tests
+
+
+1.  Run `python -m venv venv` to create a virtual environment.
+2. On Windows run `venv/Scripts/activate`.
+3. On Mac run `venv/bin/activate`.
+4. Run `pip install -r requirements.txt`.
+5. In the root of the repositiory, enter `pytest` to run all tests.
+
 ## Milestone: 2026-FEB-08 to 2026-MAR-01
 
 
