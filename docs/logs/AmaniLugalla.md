@@ -1,4 +1,40 @@
 # Personal Log - Amani Lugalla
+## 2026-MAR-02 to 2026-MAR-08
+
+### Type of Tasks Worked On
+![Screenshot](<screenshots/Amani/Week21.png>)
+
+### Recap of Week's Goals
+- Complete UI work needed for scan upload and results viewing.
+- Connect UI interactions to Flask API endpoints and stabilize request/response behavior.
+- Improve user-facing feedback for loading, success, and error states.
+- Keep weekly logs current and clean branch noise from generated files.
+
+### Features Assigned (Project Plan)
+- UI polish and scan workflow screens.
+- Frontend integration with Flask scan endpoints.
+- Error-handling/validation alignment between frontend and API.
+- Weekly documentation updates.
+  
+### Tasks from Project Board
+| Feature | Task | Status (Completed/In Progress) | Notes |
+|------|------|-------------------------------|-------|
+| UI implementation | Finalize scan upload and action flow in the frontend | Completed | Updated UI flow for submitting scans and moving through the analysis process |
+| UI/UX quality | Improve status and error messaging in the interface | Completed | Added clearer feedback for loading, validation failures, and API errors |
+| Frontend integration | Connect UI scan actions to backend API endpoints | Completed | Wired frontend calls to scan routes and aligned payload/response usage |
+| Results display | Refine results presentation in the UI | Completed | Improved structure/readability of result sections for easier interpretation |
+| Integration hardening | Validate frontend behavior against edge-case API responses | In Progress | Ongoing checks for fallback handling and API contract edge cases |
+| Weekly logs | Update personal weekly documentation | Completed | Added this week summary and task breakdown |
+
+### Completed Tasks (Last 2 Weeks)
+- Completed UI updates for scan submission and results viewing flow.
+- Connected frontend scan actions to Flask API endpoints with aligned request/response handling.
+- Improved UI feedback for loading and error states to make scan outcomes clearer.
+- Refined results presentation for better readability in the frontend.
+
+### In-Progress Tasks 
+- Finish edge-case integration checks between UI state handling and backend error responses.
+
 ## 2026-FEB-10 to 2026-MAR-01
 
 ### Type of Tasks Worked On
