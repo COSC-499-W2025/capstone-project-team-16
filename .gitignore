@@ -16,6 +16,12 @@ __pycache__/
 .pytest_cache/
 .pytest-tmp/
 
+# Node / frontend
+node_modules/
+src/ui/node_modules/
+dist/
+src/ui/dist/
+
 
 #Scan results
 output

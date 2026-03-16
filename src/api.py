@@ -14,6 +14,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from fastapi import FastAPI, HTTPException, Path, Query, Request, UploadFile, File
 from fastapi.concurrency import run_in_threadpool
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, FileResponse
 from pydantic import BaseModel, Field
 
@@ -84,6 +85,10 @@ class ContributorProjectEdit(BaseModel):
     custom_description: Optional[str] = None
     custom_skills: Optional[List[str]] = None
     reset_custom_skills: bool = False
+    custom_portfolio_description: Optional[str] = None
+    custom_portfolio_tech_stack: Optional[List[str]] = None
+    reset_custom_portfolio_tech_stack: bool = False
+    custom_portfolio_project_description: Optional[str] = None
 
 
 class ContributorProfileEditPayload(BaseModel):
@@ -92,6 +97,11 @@ class ContributorProfileEditPayload(BaseModel):
     custom_summary: Optional[str] = None
     project_updates: Optional[Dict[str, ContributorProjectEdit]] = None
     reset_profile: bool = False
+
+
+class MergeContributorsPayload(BaseModel):
+    primary_contributor: str
+    contributors_to_merge: List[str]
 
 
 class ResumeGeneratePayload(BaseModel):
@@ -406,6 +416,12 @@ def _project_to_portfolio_item(project: Dict[str, Any], contributor_id: Optional
     # New granular fields
     proj_desc = project.get("custom_portfolio_project_description")
     role_desc = project.get("custom_portfolio_description")
+    
+    if user_stats and user_stats.get("custom_portfolio_project_description"):
+        proj_desc = user_stats.get("custom_portfolio_project_description")
+
+    if user_stats and user_stats.get("custom_portfolio_description"):
+        role_desc = user_stats.get("custom_portfolio_description")
 
     role = project.get("role")
     evidence = project.get("evidence_of_success")
@@ -418,6 +434,8 @@ def _project_to_portfolio_item(project: Dict[str, Any], contributor_id: Optional
         if role:
             text_parts.append(f"role: {role}")
         skills = project.get("highlighted_skills") or project.get("skills") or []
+        if isinstance(skills, str):
+            skills = [s.strip() for s in skills.split(",") if s.strip()]
         if skills:
             text_parts.append(f"skills: {', '.join(map(str, skills[:6]))}")
         if evidence:
@@ -426,6 +444,9 @@ def _project_to_portfolio_item(project: Dict[str, Any], contributor_id: Optional
 
     # Determine tech stack (custom > highlighted > auto-detected)
     tech_stack = project.get("custom_portfolio_tech_stack")
+    if user_stats and "custom_portfolio_tech_stack" in user_stats:
+        tech_stack = user_stats.get("custom_portfolio_tech_stack")
+        
     if not tech_stack:
         # Try to combine languages and frameworks for a richer stack
         langs = data.get("languages", [])
@@ -437,6 +458,8 @@ def _project_to_portfolio_item(project: Dict[str, Any], contributor_id: Optional
             tech_stack = [t for t in combined if t and str(t).upper() not in ("NA", "NONE", "UNKNOWN")]
         else:
             tech_stack = project.get("highlighted_skills") or project.get("skills") or []
+            if isinstance(tech_stack, str):
+                tech_stack = [s.strip() for s in tech_stack.split(",") if s.strip()]
 
     # Contribution Stats
     contribution_display = None
@@ -444,6 +467,7 @@ def _project_to_portfolio_item(project: Dict[str, Any], contributor_id: Optional
     lines_added = data.get("lines_added")
     lines_removed = data.get("lines_removed")
     file_breakdown = data.get("extension_counts")
+    daily_commits = {}
     
     if contributor_id:
         pcts = data.get("per_contributor_pct", {})
@@ -456,6 +480,7 @@ def _project_to_portfolio_item(project: Dict[str, Any], contributor_id: Optional
             commits = user_stats.get("commit_count", 0)
             lines_added = user_stats.get("insertions", 0)
             lines_removed = user_stats.get("deletions", 0)
+            daily_commits = user_stats.get("daily_commits", {})
             
             files_list = user_stats.get("files_list", [])
             if files_list:
@@ -493,7 +518,10 @@ def _project_to_portfolio_item(project: Dict[str, Any], contributor_id: Optional
         "contribution_display": contribution_display,
         "impact_score": data.get("score"),
         "duration_days": data.get("duration_days"),
+        "first_modified": data.get("first_modified"),
+        "last_modified": data.get("last_modified"),
         "commits": commits,
+        "daily_commits": daily_commits,
         "lines_added": lines_added,
         "lines_removed": lines_removed,
         "file_breakdown": file_breakdown,
@@ -745,6 +773,13 @@ def create_app() -> FastAPI:
         version="0.2.0",
         description="FastAPI endpoints for project upload, portfolio, and resume workflows.",
     )
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
     @app.exception_handler(HTTPException)
     def _http_exception_handler(_request: Request, exc: HTTPException):
@@ -903,6 +938,65 @@ def create_app() -> FastAPI:
         
         return {"project_id": project_id, "thumbnail": filename, "customization": _json_safe(saved)}
 
+    @app.post("/scans/{summary_id}/contributors/merge")
+    def merge_contributors(
+        payload: MergeContributorsPayload,
+        summary_id: int = Path(..., ge=1)
+    ):
+        """
+        Merges one or more secondary contributor identities into a primary contributor profile.
+        """
+        scan = get_full_scan_by_id(summary_id)
+        if not scan:
+            raise HTTPException(status_code=404, detail="scan not found")
+            
+        data = scan.get("scan_data", {})
+        profiles = data.get("contributor_profiles", {})
+        
+        primary = payload.primary_contributor
+        secondaries = [s for s in payload.contributors_to_merge if s in profiles and s != primary]
+        
+        if primary not in profiles or not secondaries:
+            return {"status": "no_action"}
+            
+        # 1. Merge the main contributor profiles
+        prim_prof = profiles[primary]
+        for sec in secondaries:
+            sec_prof = profiles[sec]
+            prim_prof["skills"] = sorted(list(set(prim_prof.get("skills", []) + sec_prof.get("skills", []))))
+            
+            prim_proj_map = {p["name"]: p for p in prim_prof.get("projects", [])}
+            for sp in sec_prof.get("projects", []):
+                pname = sp.get("name")
+                if pname in prim_proj_map:
+                    pp = prim_proj_map[pname]
+                    pp["pct"] = pp.get("pct", 0) + sp.get("pct", 0)
+                    pp["score"] = pp.get("score", 0) + sp.get("score", 0)
+                    pp["files_worked"] = pp.get("files_worked", 0) + sp.get("files_worked", 0)
+                    pp["insertions"] = pp.get("insertions", 0) + sp.get("insertions", 0)
+                    pp["deletions"] = pp.get("deletions", 0) + sp.get("deletions", 0)
+                    pp["commit_count"] = pp.get("commit_count", 0) + sp.get("commit_count", 0)
+                    
+                    if "daily_commits" not in pp: pp["daily_commits"] = {}
+                    for d, cnt in sp.get("daily_commits", {}).items():
+                        pp["daily_commits"][d] = pp["daily_commits"].get(d, 0) + cnt
+                        
+                    pp["files_list"] = sorted(list(set(pp.get("files_list", []) + sp.get("files_list", []))))
+                else:
+                    prim_prof["projects"].append(sp)
+            del profiles[sec]
+            
+        # 2. Merge stats inside project_summaries
+        for proj in data.get("project_summaries", []):
+            for key in ["per_contributor_pct", "per_contributor_commits", "per_contributor_commit_counts", "per_contributor_additions", "per_contributor_lines_added", "per_contributor_deletions", "per_contributor_lines_removed"]:
+                sub = proj.get(key)
+                if isinstance(sub, dict):
+                    for sec in secondaries:
+                        if sec in sub: sub[primary] = sub.get(primary, 0) + sub.pop(sec)
+                        
+        update_full_scan(summary_id, data)
+        return {"status": "merged"}
+
     @app.post("/scans/{summary_id}/contributors/{contributor_id:path}")
     def update_contributor_profile(
         payload: ContributorProfileEditPayload,
@@ -959,6 +1053,19 @@ def create_app() -> FastAPI:
                             target.pop("custom_skills", None)
                         elif p_edit.custom_skills is not None:
                             target["custom_skills"] = p_edit.custom_skills
+                            
+                        if p_edit.custom_portfolio_project_description is not None:
+                            target["custom_portfolio_project_description"] = p_edit.custom_portfolio_project_description if p_edit.custom_portfolio_project_description else None
+                            if target["custom_portfolio_project_description"] is None: target.pop("custom_portfolio_project_description", None)
+                            
+                        if p_edit.custom_portfolio_description is not None:
+                            target["custom_portfolio_description"] = p_edit.custom_portfolio_description if p_edit.custom_portfolio_description else None
+                            if target["custom_portfolio_description"] is None: target.pop("custom_portfolio_description", None)
+                        
+                        if p_edit.reset_custom_portfolio_tech_stack:
+                            target.pop("custom_portfolio_tech_stack", None)
+                        elif p_edit.custom_portfolio_tech_stack is not None:
+                            target["custom_portfolio_tech_stack"] = p_edit.custom_portfolio_tech_stack
 
         update_full_scan(summary_id, data)
         return {"status": "updated", "contributor_id": contributor_id}

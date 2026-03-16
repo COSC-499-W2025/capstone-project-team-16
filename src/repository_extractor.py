@@ -49,10 +49,16 @@ def analyze_repo_type(repo_path):
             author_files = defaultdict(set)
             # author -> extension -> {insertions, deletions}
             author_loc = defaultdict(lambda: defaultdict(lambda: {"insertions": 0, "deletions": 0}))
+            # author -> YYYY-MM-DD -> count
+            author_daily_commits = defaultdict(Counter)
 
             for c in commits:
                 email = c.author.email
                 author_counts[email] += 1
+                
+                c_date = datetime.fromtimestamp(c.committed_date).strftime('%Y-%m-%d')
+                author_daily_commits[email][c_date] += 1
+
                 try:
                     # c.stats.files provides a dict of changed files
                     stats = c.stats.files
@@ -83,7 +89,8 @@ def analyze_repo_type(repo_path):
                     "files_edited": sorted(list(author_files[author])),
                     "insertions": total_insertions,
                     "deletions": total_deletions,
-                    "loc_by_type": dict(author_loc[author])
+                    "loc_by_type": dict(author_loc[author]),
+                    "daily_commits": dict(author_daily_commits[author])
                 })
 
             # Branch list for repo-level metadata
@@ -107,9 +114,13 @@ def analyze_repo_type(repo_path):
                 duration_weeks = max(duration_days / 7, 1)  # avoid division by zero
                 commits_per_week = total_commits / duration_weeks
                 commit_frequency = f"{commits_per_week:.1f} commits/week"
+                first_modified = first_commit.isoformat()
+                last_modified = last_commit.isoformat()
             else:
                 duration_days = 0
                 commit_frequency = "0 commits/week"
+                first_modified = None
+                last_modified = None
 
             # Return full project metadata block mapped into the entry during detailed extraction
             return {
@@ -122,7 +133,9 @@ def analyze_repo_type(repo_path):
                 "has_merges": has_merges,
                 "project_type": project_type,
                 "duration_days": duration_days,            
-                "commit_frequency": commit_frequency       
+                "commit_frequency": commit_frequency,
+                "first_modified": first_modified,
+                "last_modified": last_modified
             }
         except Exception as e:
             # TODO: add error to logs

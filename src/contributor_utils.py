@@ -110,6 +110,7 @@ def apply_contributor_breakdown(
                     "insertions": c.get("insertions", 0),
                     "deletions": c.get("deletions", 0),
                     "commit_count": c.get("commit_count", 0),
+                    "daily_commits": c.get("daily_commits", {}),
                 }
             )
 
