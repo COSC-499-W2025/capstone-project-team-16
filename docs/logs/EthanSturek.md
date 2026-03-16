@@ -1,4 +1,38 @@
 # Personal Log - Ethan Sturek
+## 2026-MAR-08 to 2026-MAR-15
+
+
+
+
+### Type of Tasks Worked On
+![Screenshot](<screenshots/Ethan/Week 21.png>)
+
+### Recap of Week's Goals
+- Rework portfolio generation to follow milestone 2 requirements
+- Rework UI to follow milestone 2
+
+### Features Assigned (Project Plan)
+- UI Rework
+- Portfolio generation rework
+  
+### Project Board 
+| Feature | Item Number | Status (Completed/In Progress) | Task Type (Code, Test, Team Work) | Notes |
+|------|------|-----|-------------------------------|-------|
+| UI Rework | [#271](https://github.com/COSC-499-W2025/capstone-project-team-16/issues/271)| Completed | Code | Reworked the UI so it more follows our milestone 2 features and data flow. |
+| Portfolio generation rework | [#272](https://github.com/COSC-499-W2025/capstone-project-team-16/issues/272)| Completed | Code | Reworked the portfolio generation to match our milestone 2 requirements. Also added heatmap generation and a visual timeline on a contributor basis|
+
+
+
+
+### Completed Tasks (Last 2 Weeks)
+- UI Rework
+- Portfolio generation rework
+
+### Next Week's Goals
+- Resume generation rework
+- Milestone 3 ready
+  
+
 ## 2026-MAR-01 to 2026-MAR-08
 
 
@@ -28,7 +62,8 @@
 
 ### Next Week's Goals
 - Add Milestone 3 work items to board
-  
+
+
 ## 2026-FEB-08 to 2026-MAR-01
 
 
