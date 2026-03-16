@@ -47,13 +47,16 @@
 
 
 ### Test Report
-![Screenshot](<screenshots/Team16/Test1W17.png>)
+![Screenshot](<screenshots/Team16/Test1W21.png>)
 
 
 ### Tests
-- Unit tests all passing (https://github.com/COSC-499-W2025/capstone-project-team-16/pull/253)
+- Unit tests all passing 
 - Manual testing of electron environment using dev server
-- ![Screenshot](<screenshots/Team16/Skill Scope UI.png>)
+- ![Screenshot](<screenshots/Team16/Skill Scope UI3.png>)
+- - ![Screenshot](<screenshots/Team16/Skill Scope UI4.png>)
+- - ![Screenshot](<screenshots/Team16/Skill Scope UI1.png>)
+- - ![Screenshot](<screenshots/Team16/Skill Scope UI2.png>)
 ### Running Tests
 
 
