@@ -1,4 +1,72 @@
 # Team Log - Team 16
+## Milestone: 2026-MAR-08 to 2026-MAR-15
+
+
+
+
+
+
+### Milestone Goals Recap
+- Rework portfolio generation to follow milestone 2 requirements
+- Rework UI to follow milestone 2
+
+### Features in Project Plan
+- UI Rework
+- Portfolio generation rework
+
+
+### Burnup Chart
+| Name | Username |
+|----------------|----------------|
+| Ethan Sturek | ethansturek |
+| La Wunn| LaWunn|
+| Amani |lugger33 |
+
+
+![Screenshot](<screenshots/Team16/BurnupW21.png>)
+
+
+### Completed Tasks Table
+![Screenshot](<screenshots/Team16/DoneTasksW21.png>)
+
+
+| User | Feature | Item Number  | Task Type (Code, Test, Team Work) | Notes |
+|------|------|-----|-------------------------------|-------|
+| Ethan Sturek | UI Rework | [#271](https://github.com/COSC-499-W2025/capstone-project-team-16/issues/271)| Code | Reworked the UI so it more follows our milestone 2 features and data flow. |
+| Ethan Sturek | Portfolio generation rework | [#272](https://github.com/COSC-499-W2025/capstone-project-team-16/issues/272)| Code | Reworked the portfolio generation to match our milestone 2 requirements. Also added heatmap generation and a visual timeline on a contributor basis|
+
+
+
+### In Progress Tasks Table
+![Screenshot](<screenshots/Team16/TasksW20.png>)
+| User | Feature | Item Number  | Task Type (Code, Test, Team Work) | Notes |
+|------|------|-----|-------------------------------|-------|
+| Ethan Sturek | Resume generation rework| [#273](https://github.com/COSC-499-W2025/capstone-project-team-16/issues/273)| Code | The resume generation needs to be aligned with our milestone 2 work |
+| Ethan Sturek | Milestone 3 ready | [#274](https://github.com/COSC-499-W2025/capstone-project-team-16/issues/274)| Code | Milestone 3 bug testing and fixing|
+
+
+
+### Test Report
+![Screenshot](<screenshots/Team16/Test1W21.png>)
+
+
+### Tests
+- Unit tests all passing 
+- Manual testing of electron environment using dev server
+- ![Screenshot](<screenshots/Team16/Skill Scope UI3.png>)
+- - ![Screenshot](<screenshots/Team16/Skill Scope UI4.png>)
+- - ![Screenshot](<screenshots/Team16/Skill Scope UI1.png>)
+- - ![Screenshot](<screenshots/Team16/Skill Scope UI2.png>)
+### Running Tests
+
+
+1.  Run `python -m venv venv` to create a virtual environment.
+2. On Windows run `venv/Scripts/activate`.
+3. On Mac run `venv/bin/activate`.
+4. Run `pip install -r requirements.txt`.
+5. In the root of the repositiory, enter `pytest` to run all tests.
+
+
 ## Milestone: 2026-Mar-01 to 2026-MAR-08
 
 
