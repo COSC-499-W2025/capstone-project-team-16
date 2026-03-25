@@ -115,6 +115,13 @@ export default function ScanManager({ isActive, scans, selectedScanId, setSelect
                 <div style={{ display: "flex", gap: "0.5rem" }}>
                   <button
                     type="button"
+                    className="btn btn-ghost"
+                    onClick={() => setActiveTab("scan-report")}
+                  >
+                    Full Report
+                  </button>
+                  <button
+                    type="button"
                     className="btn btn-primary"
                     onClick={() => setActiveTab("resume")}
                   >

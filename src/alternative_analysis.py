@@ -41,6 +41,46 @@ def _project_name(filename: str) -> str:
     return parts[0]
 
 
+def _fallback_project_root(files: list[dict], fallback_name: str) -> str:
+    """Build a stable archive-relative root for non-Git scans."""
+    logical_paths = []
+    for row in files:
+        path = (row.get("logical_path") or row.get("filename") or "").replace("\\", "/").strip("/")
+        if path:
+            logical_paths.append(path)
+
+    if not logical_paths:
+        return fallback_name
+
+    first_components = []
+    for path in logical_paths:
+        parts = [part for part in path.split("/") if part]
+        if parts:
+            first_components.append(parts[0])
+
+    if first_components and len(set(first_components)) == 1:
+        return first_components[0]
+
+    return fallback_name
+
+
+def _has_collaboration_signal(files: list[dict]) -> bool:
+    """Heuristic fallback when Git metadata is unavailable."""
+    signal_terms = (
+        "contributor",
+        "contributors",
+        "author",
+        "authors",
+        "team",
+        "collaborat",
+    )
+    for row in files:
+        name = os.path.basename((row.get("logical_path") or row.get("filename") or "")).lower()
+        if any(term in name for term in signal_terms):
+            return True
+    return False
+
+
 
 
 
@@ -264,9 +304,12 @@ def analyze_projects(extracted_data, filters, advanced_options, detailed_data=No
         doc_files = activity_counts["documentation"]
         design_files = activity_counts["design"]
 
+        fallback_root = _fallback_project_root(clean_files, proj_name)
+        collaboration_signal = _has_collaboration_signal(clean_files)
+
         # pick some "main" values from the aggregated repo info
         repo_name = next(iter(repo_names), proj_name)
-        repo_root = next(iter(repo_roots), "")
+        repo_root = next(iter(repo_roots), fallback_root)
         branch_count = max(branch_counts) if branch_counts else 0
         has_merges = (
             "Yes"
@@ -275,7 +318,6 @@ def analyze_projects(extracted_data, filters, advanced_options, detailed_data=No
             if has_merges_flags
             else "Unknown"
         )
-        project_type = next(iter(project_types), "Unknown")
         repo_duration_days = (
             max(repo_duration_vals) if repo_duration_vals else duration_days
         )
@@ -290,6 +332,10 @@ def analyze_projects(extracted_data, filters, advanced_options, detailed_data=No
             any(".git" in f["filename"] for f in files)
             or len(repo_authors) > 1
             or len(repo_contributors) > 1
+        )
+        project_type = next(
+            iter(project_types),
+            "collaborative" if (collaboration_signal or is_collab) else "individual",
         )
 
         # ----------------------------------------------------

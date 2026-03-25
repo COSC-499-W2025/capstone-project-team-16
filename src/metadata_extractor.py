@@ -103,6 +103,7 @@ def base_extraction(file_list, filters):
             size = f["size"]
             last_modified = f["last_modified"]
             is_file = f["isFile"]
+            logical_path = f.get("logical_path")
             language = ""
 
             
@@ -140,6 +141,7 @@ def base_extraction(file_list, filters):
             extracted_data.append(
                 {
                     "filename": filename,
+                    "logical_path": logical_path,
                     "size": size,
                     "last_modified": last_modified,
                     "extension": ext,

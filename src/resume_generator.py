@@ -715,27 +715,48 @@ def render_resume_artifact(artifact_data: dict, output_path: str) -> None:
     if user_title:
         doc.add_paragraph(user_title).bold = True
 
-    doc.add_paragraph(f"Generated on {datetime.now().strftime('%B %d, %Y')}")
-
     # Summary
     user_summary = artifact_data.get("user_summary")
     if user_summary:
         doc.add_heading("Professional Summary", level=1)
         doc.add_paragraph(user_summary)
 
-    # Skills
-    skills = artifact_data.get("skills", [])
-    if skills:
+    # Skills by expertise level
+    skills_by_level = artifact_data.get("skills_by_level") or {}
+    if any(skills_by_level.get(level) for level in ("Advanced", "Intermediate", "Familiar")):
         doc.add_heading("Technical Skills", level=1)
-        p = doc.add_paragraph()
-        p.add_run("Languages & Technologies: ").bold = True
-        p.add_run(", ".join(skills))
+        for level in ("Advanced", "Intermediate", "Familiar"):
+            level_skills = skills_by_level.get(level) or []
+            if not level_skills:
+                continue
+            p = doc.add_paragraph(style="List Bullet")
+            p.add_run(f"{level}: ").bold = True
+            p.add_run(", ".join(level_skills))
+    else:
+        skills = artifact_data.get("skills", [])
+        if skills:
+            doc.add_heading("Technical Skills", level=1)
+            p = doc.add_paragraph()
+            p.add_run("Languages & Technologies: ").bold = True
+            p.add_run(", ".join(skills))
+
+    education = artifact_data.get("education", [])
+    if education:
+        doc.add_heading("Education", level=1)
+        for entry in education[:2]:
+            doc.add_paragraph(entry, style="List Bullet")
+
+    awards = artifact_data.get("awards", [])
+    if awards:
+        doc.add_heading("Awards", level=1)
+        for entry in awards[:2]:
+            doc.add_paragraph(entry, style="List Bullet")
 
     # Projects
     items = artifact_data.get("items", [])
     if items:
         doc.add_heading("Project Experience", level=1)
-        for item in items:
+        for item in items[:3]:
             p_name = item.get("project_name", "Unknown Project")
             date_str = item.get("date_str", "")
             text = item.get("text", "")
@@ -756,7 +777,5 @@ def render_resume_artifact(artifact_data: dict, output_path: str) -> None:
                 s_p = doc.add_paragraph(style="List Bullet")
                 s_p.add_run("Skills: ").bold = True
                 s_p.add_run(", ".join(item_skills))
-            
-            doc.add_paragraph()
     
     doc.save(output_path)

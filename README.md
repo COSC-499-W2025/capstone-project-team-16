@@ -69,6 +69,90 @@ Then, run the application from the project root:
 python src/api_main.py
 ```
 
+## Milestone 3 Development Installation Guide
+
+This section is intended for a future development team working on the current Milestone 3 codebase rather than the original Milestone 1 CLI-only flow.
+
+### Local Development Prerequisites
+
+- Python environment with the project dependencies from `requirements.txt`
+- Node.js with `npm` for the React/Electron frontend in `src/ui`
+- A writable local `venv` is recommended because the documented commands below assume `venv/bin/python`
+
+### Backend Setup
+
+From the project root:
+
+```bash
+python -m venv venv
+venv/bin/python -m pip install -r requirements.txt
+```
+
+Run the FastAPI backend:
+
+```bash
+venv/bin/python src/api.py
+```
+
+Notes:
+
+- The local default API port is `5001`
+- Health check endpoint: `http://127.0.0.1:5001/health`
+- If you are using the legacy connected CLI client instead of the React UI, run:
+
+```bash
+venv/bin/python src/api_main.py
+```
+
+### Frontend Setup
+
+From the UI directory:
+
+```bash
+cd src/ui
+npm install
+```
+
+For day-to-day frontend development:
+
+```bash
+npm run dev
+```
+
+This starts Vite and attempts to open the Electron shell after the dev server is ready.
+
+For a more stable local demo path, use the production preview flow:
+
+```bash
+npm run build
+npm run preview
+```
+
+Notes:
+
+- The frontend defaults to `http://127.0.0.1:5001` for API calls
+- If Electron does not appear during `npm run dev`, open the Vite URL shown in the terminal, usually `http://localhost:5173`
+- `npm run preview` is often the fastest way to validate the UI before a demo
+
+### Recommended Developer Workflow
+
+1. Start the backend from the project root with `venv/bin/python src/api.py`
+2. Start the frontend from `src/ui` with `npm run dev` or `npm run preview`
+3. Upload a test ZIP through the UI using `advanced` mode when validating résumé or portfolio generation
+4. Use `Scan Manager` and `Full Report` to inspect saved scan data
+5. Re-run automated tests after backend changes and run `npm run build` after frontend changes
+
+### Docker Path
+
+The repository still includes a Docker path for the older interactive client:
+
+```bash
+docker compose build
+docker compose run --rm -it skillscope python api_main.py
+```
+
+This is useful for legacy CLI validation, but most Milestone 3 frontend work is easier to iterate on locally with the backend and UI started separately.
+
 ## Test File
 
 Due to GitHub file size limits, the full stress-test ZIP archive is not committed
@@ -85,6 +169,75 @@ This dataset: "test-data" was used for manual and performance testing of:
 
 ### Notes
 - This file is **not required** to run tests.
+
+## Milestone 3 Test Report
+
+This section lists the main automated test files and the strategies they cover for the current system.
+
+### Automated Test Command
+
+From the project root:
+
+```bash
+venv/bin/python -m pytest -q
+```
+
+Frontend verification command:
+
+```bash
+cd src/ui
+npm run build
+```
+
+### Test Strategy Summary
+
+- Unit tests validate isolated helpers such as parsing, classification, deduplication, language detection, and scan-service merge logic
+- API tests validate upload flows, persistence, résumé generation, portfolio generation, editing endpoints, and compatibility routes
+- Database tests validate CRUD behavior and stored scan updates
+- Analysis tests validate project scoring, repo metadata extraction, framework detection, contributor handling, and fallback metadata behavior
+- Manual UI testing is used for end-to-end validation of scan upload, scan manager navigation, résumé export, portfolio private/public mode behavior, and full report rendering
+
+### Test Files and Coverage
+
+- `tests/test_api.py`: FastAPI upload, scan persistence, resume endpoints, portfolio endpoints, legacy route behavior, duplicate handling, and incremental merge behavior
+- `tests/test_api_fixtures.py`: API fixture support and test scaffolding behavior
+- `tests/test_db.py`: persistence layer behavior for scans, artifacts, and updates
+- `tests/test_scan_service.py`: scan execution orchestration and scan merge logic
+- `tests/test_check_file_validity.py`: ZIP validation and extraction behavior
+- `tests/test_parser.py`: parsing behavior for uploaded project structures
+- `tests/test_extractor.py`: metadata extraction behavior across categorized files
+- `tests/test_detailed_analysis.py`: advanced project summary and scoring behavior
+- `tests/test_framework_analysis.py`: dependency/framework detection paths
+- `tests/test_repo_extraction.py`: repository metadata extraction behavior for valid and invalid Git repos
+- `tests/test_project_metadata_fallbacks.py`: non-Git fallback naming, root-path, and project-type behavior
+- `tests/test_real_git_fixture_metadata.py`: regression test intended to validate Git-backed fixture metadata end to end
+- `tests/test_portfolio_generator.py`: portfolio content generation and export shaping
+- `tests/test_resume_editing.py`: resume editing and artifact update flows
+- `tests/test_resume_generator.py`: placeholder for resume generator coverage; currently minimal and should be expanded
+- `tests/test_classification.py`: activity and framework classification helpers
+- `tests/test_language_detector.py`: content-based language detection behavior
+- `tests/test_deduplication.py`: duplicate ZIP recognition behavior
+- `tests/test_thumbnail.py`: thumbnail and preview support behavior
+- `tests/test_orchestrator.py`: high-level orchestration flow coverage
+- `tests/test_spoof_advanced.py`: advanced-analysis related regression coverage
+
+### Manual Regression Checklist
+
+- Upload a ZIP in `basic` and `advanced` mode through the UI
+- Confirm scans appear in `Scan Manager`
+- Open `Full Report` and verify project-level metrics render
+- Build a one-page résumé with education and awards and export the DOCX
+- Build a portfolio in `Private Mode`, publish to `Public Mode`, and verify search/filter behavior
+- Export the portfolio markdown artifact
+
+## Known Bugs and Limitations
+
+- Git-derived scan details are not yet reliable for uploaded ZIP archives that embed a `.git` directory. In affected scans, `commit_frequency`, `branch_count`, `has_merges`, contributor share, contributor impact score, and contributor skills may remain empty or show `Unknown`.
+- Existing scans saved before the archive-relative path fix may still show incorrect project names such as `var`. Those scans must be deleted and rescanned to pick up the corrected naming behavior.
+- `project_type` may still show `Unknown` when the uploaded project has no usable Git metadata and no clear collaboration signal file such as `CONTRIBUTORS.md`.
+- The one-page résumé layout is enforced through content constraints, not strict document pagination logic. Very long manually entered summaries, education entries, or awards can still push the exported DOCX beyond one page.
+- Portfolio thumbnails currently depend on available project imagery or fallback badges; not every project will have a meaningful visual thumbnail.
+- The architecture and DFD sections in this README still need a full Milestone 3 update. The current diagrams largely reflect earlier milestone structure.
 
 
 ## System Functionality — Milestone 1

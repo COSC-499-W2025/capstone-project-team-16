@@ -154,11 +154,13 @@ def test_valid_zip_with_files(capsys):
 
         # Check first file
         assert file_tree[0]["filename"].endswith("readme.txt")
+        assert file_tree[0]["logical_path"] == "readme.txt"
         assert file_tree[0]["size"] == 1024
         assert file_tree[0]["last_modified"] == (2024, 1, 1, 12, 0, 0)
 
         # Check second file
         assert file_tree[1]["filename"].endswith("src/main.py")
+        assert file_tree[1]["logical_path"] == "src/main.py"
         assert file_tree[1]["size"] == 2048
         assert file_tree[1]["last_modified"] == (2024, 1, 2, 13, 30, 0)
 

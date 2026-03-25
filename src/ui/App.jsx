@@ -4,10 +4,11 @@ import "./App.css";
 import Home from "./components/Home";
 import RunScan from "./components/RunScan";
 import ScanManager from "./components/ScanManager";
+import ScanReport from "./components/ScanReport";
 import ResumeBuilder from "./components/ResumeBuilder";
 import PortfolioDashboard from "./components/PortfolioDashboard";
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:5000";
+const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:5001";
 
 function App() {
   const [activeTab, setActiveTab] = useState("home");
@@ -245,6 +246,15 @@ function App() {
         >
           Scan Manager
         </button>
+        {(selectedScanId || activeTab === "scan-report") && (
+          <button
+            type="button"
+            className={`tab ${activeTab === "scan-report" ? "active" : ""}`}
+            onClick={() => setActiveTab("scan-report")}
+          >
+            Full Scan Report
+          </button>
+        )}
       </nav>
 
       <main className="content-grid">
@@ -275,6 +285,16 @@ function App() {
             isNoise={isNoise}
             setActiveTab={setActiveTab}
             formatTimestamp={formatTimestamp}
+          />
+        </div>
+        <div style={{ display: activeTab === "scan-report" ? "block" : "none" }}>
+          <ScanReport
+            isActive={activeTab === "scan-report"}
+            selectedScanId={selectedScanId}
+            fetchJson={fetchJson}
+            setActiveTab={setActiveTab}
+            formatTimestamp={formatTimestamp}
+            isNoise={isNoise}
           />
         </div>
         <div style={{ display: activeTab === "resume" ? "block" : "none" }}>
