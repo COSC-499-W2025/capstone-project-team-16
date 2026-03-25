@@ -26,3 +26,6 @@ src/ui/dist/
 #Scan results
 output
 skillscope.db
+
+# Local scan fixtures / generated test archives
+input/test-data/
