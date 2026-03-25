@@ -2,6 +2,11 @@ import React, { useState, useEffect } from "react";
 
 export default function ResumeBuilder({ isActive, scans, selectedScanId, fetchJson, downloadArtifact, loadProjectsForScan, setActiveTab, formatTimestamp }) {
   const [resumeTitle, setResumeTitle] = useState("Generated Resume");
+  const [candidateName, setCandidateName] = useState("");
+  const [candidateHeadline, setCandidateHeadline] = useState("");
+  const [candidateSummary, setCandidateSummary] = useState("");
+  const [educationText, setEducationText] = useState("");
+  const [awardsText, setAwardsText] = useState("");
   const [resumeScanId, setResumeScanId] = useState("");
   const [resumeProjects, setResumeProjects] = useState([]);
   const [resumeSelectedProjectIds, setResumeSelectedProjectIds] = useState([]);
@@ -27,6 +32,11 @@ export default function ResumeBuilder({ isActive, scans, selectedScanId, fetchJs
   useEffect(() => {
     setResumeArtifact(null);
     setResumeError("");
+    setCandidateName("");
+    setCandidateHeadline("");
+    setCandidateSummary("");
+    setEducationText("");
+    setAwardsText("");
     setResumeSelectedProjectIds([]);
     setResumeProjects([]);
   }, [resumeScanId]);
@@ -42,9 +52,17 @@ export default function ResumeBuilder({ isActive, scans, selectedScanId, fetchJs
   }, [resumeScanId, loadProjectsForScan]);
 
   const toggleResumeProject = (projectId) => {
+    setResumeError("");
     setResumeSelectedProjectIds((prev) => {
       const validPrev = prev.filter(id => resumeProjects.some(p => p.project_id === id));
-      return validPrev.includes(projectId) ? validPrev.filter((id) => id !== projectId) : [...validPrev, projectId];
+      if (validPrev.includes(projectId)) {
+        return validPrev.filter((id) => id !== projectId);
+      }
+      if (validPrev.length >= 3) {
+        setResumeError("One-page resume export is limited to 3 projects.");
+        return validPrev;
+      }
+      return [...validPrev, projectId];
     });
   };
 
@@ -61,6 +79,11 @@ export default function ResumeBuilder({ isActive, scans, selectedScanId, fetchJs
         title: resumeTitle.trim() || "Generated Resume",
         selected_project_ids: resumeSelectedProjectIds,
         project_order: resumeSelectedProjectIds,
+        user_name: candidateName.trim() || undefined,
+        user_title: candidateHeadline.trim() || undefined,
+        user_summary: candidateSummary.trim() || undefined,
+        education: educationText.split("\n").map((line) => line.trim()).filter(Boolean),
+        awards: awardsText.split("\n").map((line) => line.trim()).filter(Boolean),
       };
       const data = await fetchJson("/resume/generate", {
         method: "POST",
@@ -113,8 +136,13 @@ export default function ResumeBuilder({ isActive, scans, selectedScanId, fetchJs
           </select>
         </label>
         <label className="field"><span>Resume title</span><input value={resumeTitle} onChange={(e) => setResumeTitle(e.target.value)} /></label>
+        <label className="field"><span>Candidate name</span><input value={candidateName} onChange={(e) => setCandidateName(e.target.value)} placeholder="Jane Doe" /></label>
+        <label className="field"><span>Professional headline</span><input value={candidateHeadline} onChange={(e) => setCandidateHeadline(e.target.value)} placeholder="Software Developer" /></label>
+        <label className="field"><span>Professional summary</span><textarea value={candidateSummary} onChange={(e) => setCandidateSummary(e.target.value)} rows={3} placeholder="Short one-paragraph summary for the one-page resume." /></label>
+        <label className="field"><span>Education (one item per line)</span><textarea value={educationText} onChange={(e) => setEducationText(e.target.value)} rows={3} placeholder={"BSc Computer Science, UBC\nDean's List, 2025"} /></label>
+        <label className="field"><span>Awards (one item per line)</span><textarea value={awardsText} onChange={(e) => setAwardsText(e.target.value)} rows={3} placeholder={"Undergraduate Research Award\nHackathon Finalist"} /></label>
         <div className="field">
-          <span>Projects for this resume</span>
+          <span>Projects for this one-page resume</span>
           {resumeLoadingProjects ? (<p>Loading projects...</p>) : resumeProjects.length === 0 ? (<p>No projects for this scan.</p>) : (
             <ul className="project-list">
               {resumeProjects.map((project) => (
@@ -134,6 +162,28 @@ export default function ResumeBuilder({ isActive, scans, selectedScanId, fetchJs
           <div className="result-card">
             <h3>Resume Artifact #{resumeArtifact.resume_id}</h3>
             <p>Selected projects: {(resumeArtifact.data?.selected_project_ids || []).length}</p>
+            {resumeArtifact.data?.skills_by_level && (
+              <div>
+                <p><strong>Skill levels</strong></p>
+                <ul className="simple-list">
+                  {Object.entries(resumeArtifact.data.skills_by_level).filter(([, skills]) => skills?.length > 0).map(([level, skills]) => (
+                    <li key={level}><strong>{level}:</strong> {skills.join(", ")}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {resumeArtifact.data?.education?.length > 0 && (
+              <div>
+                <p><strong>Education</strong></p>
+                <ul className="simple-list">{resumeArtifact.data.education.map((entry) => (<li key={entry}>{entry}</li>))}</ul>
+              </div>
+            )}
+            {resumeArtifact.data?.awards?.length > 0 && (
+              <div>
+                <p><strong>Awards</strong></p>
+                <ul className="simple-list">{resumeArtifact.data.awards.map((entry) => (<li key={entry}>{entry}</li>))}</ul>
+              </div>
+            )}
             <ul className="simple-list">{(resumeArtifact.data?.items || []).map((item) => (<li key={item.project_id}><strong>{item.project_name}</strong><p>{item.text}</p></li>))}</ul>
             <button type="button" className="btn btn-secondary" onClick={handleExportResume} disabled={resumeExporting}>{resumeExporting ? "Exporting..." : "Export DOCX"}</button>
           </div>

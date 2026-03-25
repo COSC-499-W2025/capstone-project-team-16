@@ -111,12 +111,20 @@ class ResumeGeneratePayload(BaseModel):
     title: str = "Generated Resume"
     selected_project_ids: List[str] = Field(default_factory=list)
     project_order: List[str] = Field(default_factory=list)
+    user_name: Optional[str] = None
+    user_title: Optional[str] = None
+    user_summary: Optional[str] = None
+    education: List[str] = Field(default_factory=list)
+    awards: List[str] = Field(default_factory=list)
 
 
 class ResumeEditPayload(BaseModel):
     user_name: Optional[str] = None
     user_title: Optional[str] = None
     user_summary: Optional[str] = None
+    education: Optional[List[str]] = None
+    awards: Optional[List[str]] = None
+    skills_by_level: Optional[Dict[str, List[str]]] = None
     title: Optional[str] = None
     project_order: Optional[List[str]] = None
     selected_project_ids: Optional[List[str]] = None
@@ -333,36 +341,159 @@ def _project_sort_key(project: Dict[str, Any]) -> Tuple[int, Any, str]:
     return (1, date_str, project["project_id"])
 
 
+def _normalize_string_list(value: Any) -> List[str]:
+    if isinstance(value, list):
+        return [str(item).strip() for item in value if str(item).strip()]
+    if isinstance(value, str):
+        return [item.strip() for item in value.split(",") if item.strip()]
+    return []
+
+
+def _extract_resume_skills(
+    project: Dict[str, Any],
+    user_stats: Optional[Dict[str, Any]] = None,
+    contributor_id: Optional[str] = None,
+) -> List[str]:
+    skills_raw = None
+
+    if user_stats and user_stats.get("custom_skills"):
+        skills_raw = user_stats.get("custom_skills")
+
+    if not skills_raw:
+        skills_raw = project.get("highlighted_skills")
+
+    if not skills_raw and contributor_id:
+        pcs = project.get("data", {}).get("per_contributor_skills", {})
+        skills_raw = pcs.get(contributor_id)
+
+    if not skills_raw:
+        skills_raw = project.get("skills") or []
+
+    return _normalize_string_list(skills_raw)
+
+
+def _bucket_skill(score: int) -> str:
+    if score >= 5:
+        return "Advanced"
+    if score >= 3:
+        return "Intermediate"
+    return "Familiar"
+
+
+def _build_expertise_groups(
+    selected_projects: List[Dict[str, Any]],
+    contributor_id: Optional[str] = None,
+    user_project_stats: Optional[Dict[str, Dict[str, Any]]] = None,
+) -> Dict[str, List[str]]:
+    user_project_stats = user_project_stats or {}
+    metrics: Dict[str, Dict[str, float]] = {}
+
+    for project in selected_projects:
+        project_name = project.get("project_name")
+        user_stats = user_project_stats.get(project_name, {})
+        skills = _extract_resume_skills(project, user_stats=user_stats, contributor_id=contributor_id)
+        duration_days = project.get("data", {}).get("duration_days") or 0
+        contribution_pct = 0.0
+
+        if contributor_id:
+            if user_stats:
+                contribution_pct = float(user_stats.get("pct", 0.0) or 0.0)
+            else:
+                contribution_pct = float(project.get("data", {}).get("per_contributor_pct", {}).get(contributor_id, 0.0) or 0.0)
+
+        for skill in skills:
+            entry = metrics.setdefault(skill, {"count": 0, "duration": 0.0, "pct": 0.0})
+            entry["count"] += 1
+            entry["duration"] += float(duration_days or 0)
+            entry["pct"] = max(entry["pct"], contribution_pct)
+
+    grouped = {"Advanced": [], "Intermediate": [], "Familiar": []}
+    for skill, info in metrics.items():
+        score = int(info["count"]) * 2
+        if info["duration"] >= 120:
+            score += 2
+        elif info["duration"] >= 45:
+            score += 1
+        if info["pct"] >= 50:
+            score += 2
+        elif info["pct"] >= 20:
+            score += 1
+        grouped[_bucket_skill(score)].append(skill)
+
+    for key in grouped:
+        grouped[key] = sorted(grouped[key])
+    return grouped
+
+
+def _build_portfolio_skills_timeline(
+    scan: Optional[Dict[str, Any]],
+    selected_projects: List[Dict[str, Any]],
+    contributor_id: Optional[str] = None,
+    user_project_stats: Optional[Dict[str, Dict[str, Any]]] = None,
+) -> List[Dict[str, Any]]:
+    user_project_stats = user_project_stats or {}
+    expertise_groups = _build_expertise_groups(
+        selected_projects,
+        contributor_id=contributor_id,
+        user_project_stats=user_project_stats,
+    )
+    expertise_lookup = {
+        skill: level for level, skills in expertise_groups.items() for skill in skills
+    }
+    relevant_skills = set(expertise_lookup.keys())
+    if not relevant_skills:
+        return []
+
+    timeline: Dict[str, Dict[str, Any]] = {}
+    scan_rows = ((scan or {}).get("scan_data") or {}).get("skills_chronological", [])
+    for row in scan_rows:
+        skill = str(row.get("skill", "")).strip()
+        if not skill or skill not in relevant_skills:
+            continue
+        first_used = str(row.get("first_used", "")).strip()
+        last_used = str(row.get("last_used", "")).strip()
+        timeline[skill] = {
+            "skill": skill,
+            "first_used": first_used,
+            "last_used": last_used,
+            "expertise_level": expertise_lookup.get(skill, "Familiar"),
+        }
+
+    for project in selected_projects:
+        project_name = project.get("project_name")
+        user_stats = user_project_stats.get(project_name, {})
+        skills = _extract_resume_skills(project, user_stats=user_stats, contributor_id=contributor_id)
+        start = _fmt_date(project.get("data", {}).get("first_modified"))
+        end = _fmt_date(project.get("data", {}).get("last_modified"))
+        for skill in skills:
+            if skill not in relevant_skills:
+                continue
+            existing = timeline.get(skill)
+            if not existing:
+                timeline[skill] = {
+                    "skill": skill,
+                    "first_used": start,
+                    "last_used": end,
+                    "expertise_level": expertise_lookup.get(skill, "Familiar"),
+                }
+                continue
+            if start and (not existing["first_used"] or start < existing["first_used"]):
+                existing["first_used"] = start
+            if end and (not existing["last_used"] or end > existing["last_used"]):
+                existing["last_used"] = end
+
+    return sorted(
+        timeline.values(),
+        key=lambda row: (row.get("first_used") or "9999-12-31", row.get("skill") or ""),
+    )
+
+
 def _project_to_resume_item(project: Dict[str, Any], user_stats: Optional[Dict[str, Any]] = None, contributor_id: Optional[str] = None) -> Dict[str, Any]:
     custom_text = project.get("resume_wording")
     project_name = project.get("project_name", "Unnamed Project")
     role = project.get("role")
     evidence = project.get("evidence_of_success")
-    
-    # Determine skills source
-    skills_raw = None
-    
-    # 1. Contributor custom skills (Highest priority for contributor resumes)
-    if user_stats and user_stats.get("custom_skills"):
-        skills_raw = user_stats.get("custom_skills")
-
-    # 2. Custom overrides (highlighted_skills) - Project level
-    if not skills_raw:
-        skills_raw = project.get("highlighted_skills")
-    
-    # 3. Contributor-specific skills (auto-detected)
-    if not skills_raw and contributor_id:
-        pcs = project.get("data", {}).get("per_contributor_skills", {})
-        skills_raw = pcs.get(contributor_id)
-    
-    # 4. Fallback to project-wide skills
-    if not skills_raw:
-        skills_raw = project.get("skills") or []
-
-    if isinstance(skills_raw, str):
-        skills = [s.strip() for s in skills_raw.split(",") if s.strip()]
-    else:
-        skills = skills_raw
+    skills = _extract_resume_skills(project, user_stats=user_stats, contributor_id=contributor_id)
 
     # Format dates
     data = project.get("data", {})
@@ -512,6 +643,7 @@ def _project_to_portfolio_item(project: Dict[str, Any], contributor_id: Optional
         "evidence_of_success": evidence,
         "thumbnail": thumbnail,
         "comparison_attributes": project.get("comparison_attributes", {}),
+        "project_type": project.get("project_type") or data.get("project_type"),
         "project_description": proj_desc,
         "role_description": role_desc,
         "tech_stack": tech_stack,
@@ -542,6 +674,16 @@ def _ordered_project_ids(candidates: List[Dict[str, Any]], explicit_order: Optio
         if pid not in seen:
             ordered.append(pid)
     return ordered
+
+
+def _limit_resume_projects(
+    projects: List[Dict[str, Any]],
+    ordered_ids: List[str],
+    max_projects: int = 3,
+) -> Tuple[List[Dict[str, Any]], List[str]]:
+    limited_projects = projects[:max_projects]
+    limited_ids = [p["project_id"] for p in limited_projects]
+    return limited_projects, [pid for pid in ordered_ids if pid in limited_ids]
 
 
 async def _parse_upload_inputs(request: Request) -> Dict[str, Any]:
@@ -1108,6 +1250,8 @@ def create_app() -> FastAPI:
                     filtered_projects.append(p)
             selected_projects = filtered_projects
 
+        selected_projects, ordered_ids = _limit_resume_projects(selected_projects, ordered_ids)
+
         # Resolve user header info if contributor_id is provided
         user_header = {}
         user_project_stats = {}
@@ -1154,17 +1298,35 @@ def create_app() -> FastAPI:
                         if p_entry.get("name"):
                             user_project_stats[p_entry["name"]] = p_entry
 
+        if payload.user_name:
+            user_header["user_name"] = payload.user_name.strip()
+        if payload.user_title:
+            user_header["user_title"] = payload.user_title.strip()
+        if payload.user_summary:
+            user_header["user_summary"] = payload.user_summary.strip()
+
+        expertise_groups = _build_expertise_groups(
+            selected_projects,
+            contributor_id=payload.contributor_id,
+            user_project_stats=user_project_stats,
+        )
+
         items = [_project_to_resume_item(p, user_project_stats.get(p.get("project_name")), payload.contributor_id) for p in selected_projects]
         artifact_data = {
             "kind": "resume",
             "items": items,
             "selected_project_ids": [p["project_id"] for p in selected_projects],
             "project_order": ordered_ids,
+            "one_page": True,
+            "contributor_id": payload.contributor_id,
             # Header fields
             "user_name": user_header.get("user_name"),
             "user_title": user_header.get("user_title"),
             "user_summary": user_header.get("user_summary"),
             "skills": user_header.get("skills", []),
+            "skills_by_level": expertise_groups,
+            "education": _normalize_string_list(payload.education),
+            "awards": _normalize_string_list(payload.awards),
         }
         saved = create_resume_artifact(artifact_data, scan_summary_id=scan_id, title=payload.title)
         return {"resume": _json_safe(saved)}
@@ -1199,10 +1361,36 @@ def create_app() -> FastAPI:
             ordered_ids = payload.project_order or artifact["data"].get("project_order", [])
             selected_projects = [_get_project_by_id(pid) for pid in selected_ids]
             ordered_ids = _ordered_project_ids(selected_projects, explicit_order=ordered_ids)
+            selected_projects, ordered_ids = _limit_resume_projects(selected_projects, ordered_ids)
             project_map = {p["project_id"]: p for p in selected_projects}
-            patch["items"] = [_project_to_resume_item(project_map[pid]) for pid in ordered_ids if pid in project_map]
-            patch["selected_project_ids"] = selected_ids
+            contributor_id = artifact["data"].get("contributor_id")
+            user_project_stats = {}
+            scan_id = artifact.get("scan_summary_id")
+            if scan_id and contributor_id:
+                scan = get_full_scan_by_id(scan_id)
+                if scan:
+                    profiles = scan.get("scan_data", {}).get("contributor_profiles", {})
+                    profile = profiles.get(contributor_id)
+                    if profile:
+                        for p_entry in profile.get("projects", []):
+                            if p_entry.get("name"):
+                                user_project_stats[p_entry["name"]] = p_entry
+            patch["items"] = [
+                _project_to_resume_item(
+                    project_map[pid],
+                    user_project_stats.get(project_map[pid].get("project_name")),
+                    contributor_id,
+                )
+                for pid in ordered_ids
+                if pid in project_map
+            ]
+            patch["selected_project_ids"] = [p["project_id"] for p in selected_projects]
             patch["project_order"] = ordered_ids
+            patch["skills_by_level"] = _build_expertise_groups(
+                selected_projects,
+                contributor_id=contributor_id,
+                user_project_stats=user_project_stats,
+            )
 
         saved = update_resume_artifact(resume_id, patch)
         return {"resume": _json_safe(saved)}
@@ -1274,6 +1462,8 @@ def create_app() -> FastAPI:
                     for p_entry in profile.get("projects", []):
                         if p_entry.get("name"):
                             user_project_stats_map[p_entry["name"]] = p_entry
+        else:
+            scan = get_full_scan_by_id(scan_id) if scan_id else None
 
         items = [_project_to_portfolio_item(p, contributor_id=payload.contributor_id, user_stats=user_project_stats_map.get(p.get("project_name"))) for p in selected_projects]
         
@@ -1294,6 +1484,12 @@ def create_app() -> FastAPI:
             "project_order": ordered_ids,
             "contributor_id": payload.contributor_id,
             "global_skills": global_skills,
+            "skills_timeline": _build_portfolio_skills_timeline(
+                scan,
+                selected_projects,
+                contributor_id=payload.contributor_id,
+                user_project_stats=user_project_stats_map,
+            ),
         }
         saved = create_portfolio_artifact(artifact_data, scan_summary_id=scan_id, title=payload.title)
         return {"portfolio": _json_safe(saved)}
@@ -1347,6 +1543,12 @@ def create_app() -> FastAPI:
             patch["items"] = [_project_to_portfolio_item(project_map[pid], contributor_id=contributor_id, user_stats=user_project_stats_map.get(project_map[pid].get("project_name"))) for pid in ordered_ids if pid in project_map]
             patch["selected_project_ids"] = selected_ids
             patch["project_order"] = ordered_ids
+            patch["skills_timeline"] = _build_portfolio_skills_timeline(
+                get_full_scan_by_id(scan_id) if scan_id else None,
+                selected_projects,
+                contributor_id=contributor_id,
+                user_project_stats=user_project_stats_map,
+            )
 
         saved = update_portfolio_artifact(portfolio_id, patch)
         return {"portfolio": _json_safe(saved)}
@@ -1386,6 +1588,14 @@ def create_app() -> FastAPI:
                 lines.append(f"**{', '.join(data['global_skills'])}**")
                 lines.append("")
 
+            if data.get("skills_timeline"):
+                lines.append("## Skills Timeline")
+                for entry in data["skills_timeline"]:
+                    lines.append(
+                        f"- **{entry.get('skill', 'Unknown')}**: {entry.get('first_used', 'Unknown')} to {entry.get('last_used', 'Unknown')} ({entry.get('expertise_level', 'Familiar')})"
+                    )
+                lines.append("")
+
             lines.append("## Project Showcase")
             lines.append("")
             
@@ -1407,6 +1617,9 @@ def create_app() -> FastAPI:
                 if tech:
                     val = ", ".join(str(t) for t in tech) if isinstance(tech, list) else str(tech)
                     lines.append(f"- **Tech Stack:** {val}")
+
+                if item.get("project_type"):
+                    lines.append(f"- **Project Type:** {item['project_type']}")
                 
                 if item.get("impact_score") is not None:
                     lines.append(f"- **Impact Score:** {item['impact_score']}")
@@ -1453,4 +1666,4 @@ if __name__ == "__main__":
     except ImportError:  # pragma: no cover
         raise SystemExit("Install uvicorn to run the FastAPI app directly")
 
-    uvicorn.run("api:app", host="0.0.0.0", port=5000, reload=True)
+    uvicorn.run("api:app", host="0.0.0.0", port=5001, reload=True)

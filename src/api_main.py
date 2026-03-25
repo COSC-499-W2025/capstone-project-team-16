@@ -35,7 +35,7 @@ from resume_generator import _build_personal_project_description
 from portfolio_generator import _get_default_tech_stack
 
 # Configuration constants
-API_URL = os.getenv("SKILLSCOPE_API_URL", "http://127.0.0.1:5000")
+API_URL = os.getenv("SKILLSCOPE_API_URL", "http://127.0.0.1:5001")
 INPUT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "input"))
 
 API_PROCESS = None

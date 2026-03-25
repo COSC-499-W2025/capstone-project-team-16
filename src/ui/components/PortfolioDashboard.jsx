@@ -10,14 +10,17 @@ export default function PortfolioDashboard({ isActive, scans, selectedScanId, fe
   const [portfolioArtifact, setPortfolioArtifact] = useState(null);
   const [portfolioError, setPortfolioError] = useState("");
   const [portfolioExporting, setPortfolioExporting] = useState(false);
-  const [portfolioViewMode, setPortfolioViewMode] = useState("edit");
+  const [portfolioViewMode, setPortfolioViewMode] = useState("private");
   const [contributors, setContributors] = useState([]);
   const [contributorProfiles, setContributorProfiles] = useState({});
   const [selectedContributor, setSelectedContributor] = useState("");
-  const [activeViewProjectId, setActiveViewProjectId] = useState(null);
   const [contributorSelections, setContributorSelections] = useState({});
   const [contributorProjectEdits, setContributorProjectEdits] = useState({});
   const [artifactsByContributor, setArtifactsByContributor] = useState({});
+  const [publicSearch, setPublicSearch] = useState("");
+  const [publicSkillFilter, setPublicSkillFilter] = useState("all");
+  const [publicTypeFilter, setPublicTypeFilter] = useState("all");
+  const [publicFocusProjectId, setPublicFocusProjectId] = useState("");
 
   useEffect(() => {
     if (selectedScanId) {
@@ -29,9 +32,8 @@ export default function PortfolioDashboard({ isActive, scans, selectedScanId, fe
     if (!isActive) {
       setPortfolioArtifact(null);
       setPortfolioError("");
-      setActiveViewProjectId(null);
     } else {
-      setPortfolioViewMode("edit");
+      setPortfolioViewMode("private");
     }
   }, [isActive]);
 
@@ -41,15 +43,17 @@ export default function PortfolioDashboard({ isActive, scans, selectedScanId, fe
     setContributorProjectEdits({});
     setPortfolioArtifact(null);
     setPortfolioError("");
-    setActiveViewProjectId(null);
     setPortfolioSelectedProjectIds([]);
     setPortfolioProjects([]);
-    setPortfolioViewMode("edit");
+    setPortfolioViewMode("private");
+    setPublicSearch("");
+    setPublicSkillFilter("all");
+    setPublicTypeFilter("all");
+    setPublicFocusProjectId("");
   }, [portfolioScanId]);
 
   useEffect(() => {
     setPortfolioError("");
-    setActiveViewProjectId(null);
     setPortfolioArtifact(artifactsByContributor[selectedContributor] || null);
   }, [selectedContributor]); // Intentionally omitting artifactsByContributor so it only runs on switch
 
@@ -215,7 +219,11 @@ export default function PortfolioDashboard({ isActive, scans, selectedScanId, fe
       if (selectedContributor) {
         setArtifactsByContributor((prev) => ({ ...prev, [selectedContributor]: artifact }));
       }
-      setPortfolioViewMode("view");
+      setPublicSearch("");
+      setPublicSkillFilter("all");
+      setPublicTypeFilter("all");
+      setPublicFocusProjectId(artifact?.data?.items?.[0]?.project_id || "");
+      setPortfolioViewMode("public");
     } catch (error) {
       setPortfolioError(error.message);
     } finally {
@@ -237,73 +245,84 @@ export default function PortfolioDashboard({ isActive, scans, selectedScanId, fe
   };
 
   const visiblePortfolioItems = portfolioArtifact?.data?.items || [];
-  const activeViewItem = visiblePortfolioItems.find(i => i.project_id === activeViewProjectId) || visiblePortfolioItems[0];
+  const publicSkillOptions = useMemo(() => {
+    const options = new Set();
+    visiblePortfolioItems.forEach((item) => {
+      const stack = Array.isArray(item.tech_stack) ? item.tech_stack : [item.tech_stack];
+      stack.filter(Boolean).forEach((entry) => options.add(String(entry)));
+    });
+    return Array.from(options).sort();
+  }, [visiblePortfolioItems]);
 
-  const renderTimeline = () => {
-    const times = visiblePortfolioItems.map((item) => {
-      const hasGlobalDates = item.first_modified && item.last_modified;
-      const dates = Object.keys(item.daily_commits || {}).sort();
-      
-      if (!hasGlobalDates && dates.length === 0) return null;
+  const publicTypeOptions = useMemo(() => {
+    const options = new Set();
+    visiblePortfolioItems.forEach((item) => {
+      if (item.project_type) options.add(String(item.project_type));
+    });
+    return Array.from(options).sort();
+  }, [visiblePortfolioItems]);
 
-      const globalStart = hasGlobalDates ? new Date(item.first_modified).getTime() : new Date(dates[0]).getTime();
-      const globalEnd = hasGlobalDates ? new Date(item.last_modified).getTime() : new Date(dates[dates.length - 1]).getTime();
+  const filteredPortfolioItems = useMemo(() => {
+    const query = publicSearch.trim().toLowerCase();
+    return visiblePortfolioItems.filter((item) => {
+      if (publicSkillFilter !== "all") {
+        const stack = Array.isArray(item.tech_stack) ? item.tech_stack : [item.tech_stack];
+        if (!stack.filter(Boolean).map((entry) => String(entry)).includes(publicSkillFilter)) {
+          return false;
+        }
+      }
+      if (publicTypeFilter !== "all" && item.project_type !== publicTypeFilter) {
+        return false;
+      }
+      if (!query) {
+        return true;
+      }
+      const haystack = [
+        item.project_name,
+        item.project_description,
+        item.text,
+        ...(Array.isArray(item.tech_stack) ? item.tech_stack : [item.tech_stack]),
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+      return haystack.includes(query);
+    });
+  }, [publicSearch, publicSkillFilter, publicTypeFilter, visiblePortfolioItems]);
 
-      const userStart = dates.length > 0 ? new Date(dates[0]).getTime() : globalStart;
-      const userEnd = dates.length > 0 ? new Date(dates[dates.length - 1]).getTime() : globalEnd;
+  useEffect(() => {
+    if (filteredPortfolioItems.length === 0) {
+      setPublicFocusProjectId("");
+      return;
+    }
+    const stillVisible = filteredPortfolioItems.some((item) => item.project_id === publicFocusProjectId);
+    if (!stillVisible) {
+      setPublicFocusProjectId(filteredPortfolioItems[0].project_id);
+    }
+  }, [filteredPortfolioItems, publicFocusProjectId]);
 
-      return { 
-        id: item.project_id, 
-        name: item.project_name, 
-        globalStart, 
-        globalEnd, 
-        userStart, 
-        userEnd 
-      };
-    }).filter(Boolean);
+  const activeViewItem =
+    filteredPortfolioItems.find((item) => item.project_id === publicFocusProjectId) ||
+    filteredPortfolioItems[0] ||
+    null;
 
-    if (times.length === 0) {
-      return <p className="muted" style={{ textAlign: "center", margin: 0 }}>No date data available for selected projects.</p>;
+  const renderSkillsTimeline = () => {
+    const timeline = portfolioArtifact?.data?.skills_timeline || [];
+    if (timeline.length === 0) {
+      return <p className="muted" style={{ textAlign: "center", margin: 0 }}>No skill timeline available for this portfolio yet.</p>;
     }
 
-    const minT = Math.min(...times.map((t) => Math.min(t.globalStart, t.userStart)));
-    const maxT = Math.max(...times.map((t) => Math.max(t.globalEnd, t.userEnd)));
-    const range = maxT - minT || 86400000; // default 1 day if instant
-
     return (
-      <div style={{ display: "flex", flexDirection: "column", gap: "18px", width: "100%", marginTop: "10px" }}>
-        {times.map((t) => {
-          let globalLeft = ((t.globalStart - minT) / range) * 100;
-          let globalWidth = Math.max(((t.globalEnd - t.globalStart) / range) * 100, 1);
-          if (globalLeft + globalWidth > 100) {
-            globalLeft = Math.min(globalLeft, 99);
-            globalWidth = 100 - globalLeft;
-          }
-          
-          let userLeft = ((t.userStart - minT) / range) * 100;
-          let userWidth = Math.max(((t.userEnd - t.userStart) / range) * 100, 1);
-          if (userLeft + userWidth > 100) {
-            userLeft = Math.min(userLeft, 99);
-            userWidth = 100 - userLeft;
-          }
-
-          const isActive = t.id === activeViewItem?.project_id;
-          
-          return (
-            <div key={t.id} style={{ display: "flex", alignItems: "center", gap: "12px", fontSize: "0.85rem", cursor: "pointer" }} onClick={() => setActiveViewProjectId(t.id)}>
-              <div style={{ width: "120px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", opacity: isActive ? 1 : 0.6, fontWeight: isActive ? "700" : "500", color: "var(--ink-900)" }} title={t.name}>
-                {t.name}
-              </div>
-              <div style={{ flex: 1, height: "18px", background: "transparent", borderBottom: "1px dashed rgba(70, 98, 130, 0.25)", position: "relative" }}>
-                {/* Global Duration Bar (Faded Background) */}
-                <div style={{ position: "absolute", left: `${globalLeft}%`, width: `${globalWidth}%`, height: "100%", background: isActive ? "rgba(240, 122, 74, 0.2)" : "rgba(36, 179, 154, 0.2)", borderRadius: "8px", transition: "all 0.3s ease" }} title={`Project Lifetime: ${new Date(t.globalStart).toLocaleDateString()} to ${new Date(t.globalEnd).toLocaleDateString()}`} />
-                
-                {/* Contributor Duration Bar (Dark Foreground) */}
-                <div style={{ position: "absolute", left: `${userLeft}%`, width: `${userWidth}%`, height: "100%", background: isActive ? "var(--peach-500)" : "var(--mint-500)", borderRadius: "8px", transition: "all 0.3s ease", boxShadow: isActive ? "0 2px 8px rgba(240, 122, 74, 0.4)" : "none" }} title={`Contributor Active: ${new Date(t.userStart).toLocaleDateString()} to ${new Date(t.userEnd).toLocaleDateString()}`} />
-              </div>
-            </div>
-          );
-        })}
+      <div style={{ display: "flex", flexDirection: "column", gap: "0.9rem" }}>
+        {timeline.map((entry) => (
+          <div key={entry.skill} style={{ display: "grid", gridTemplateColumns: "minmax(120px, 160px) 1fr auto", gap: "0.75rem", alignItems: "center", padding: "0.75rem 0.85rem", background: "white", borderRadius: "10px", border: "1px solid rgba(70, 98, 130, 0.16)" }}>
+            <strong style={{ color: "var(--ink-900)" }}>{entry.skill}</strong>
+            <span className="muted" style={{ margin: 0 }}>{entry.first_used || "Unknown"} to {entry.last_used || "Unknown"}</span>
+            <span className="tag" style={{ backgroundColor: entry.expertise_level === "Advanced" ? "#dcfce7" : entry.expertise_level === "Intermediate" ? "#dbeafe" : "#f3f4f6", borderColor: "transparent" }}>
+              {entry.expertise_level || "Familiar"}
+            </span>
+          </div>
+        ))}
       </div>
     );
   };
@@ -371,22 +390,23 @@ export default function PortfolioDashboard({ isActive, scans, selectedScanId, fe
         <div className="inline-options" style={{ background: "#f3f4f6", padding: "4px", borderRadius: "8px" }}>
           <button 
             type="button"
-            className={`btn ${portfolioViewMode === 'edit' ? 'btn-primary' : 'btn-ghost'}`} 
-            onClick={() => setPortfolioViewMode('edit')}
+            className={`btn ${portfolioViewMode === 'private' ? 'btn-primary' : 'btn-ghost'}`} 
+            onClick={() => setPortfolioViewMode('private')}
             style={{ margin: 0, padding: "6px 12px", borderRadius: "6px", fontSize: "0.9rem" }}>
-            ✏️ Edit Mode
+            Private Mode
           </button>
           <button 
             type="button"
-            className={`btn ${portfolioViewMode === 'view' ? 'btn-primary' : 'btn-ghost'}`} 
-            onClick={() => setPortfolioViewMode('view')}
+            className={`btn ${portfolioViewMode === 'public' ? 'btn-primary' : 'btn-ghost'}`} 
+            onClick={() => setPortfolioViewMode('public')}
+            disabled={!portfolioArtifact}
             style={{ margin: 0, padding: "6px 12px", borderRadius: "6px", fontSize: "0.9rem" }}>
-            👁️ View Mode
+            Public Mode
           </button>
         </div>
       </div>
 
-      {portfolioViewMode === "edit" && (
+      {portfolioViewMode === "private" && (
         <div className="grid-form">
           {contributors.length > 0 && (
             <label className="field">
@@ -441,12 +461,12 @@ export default function PortfolioDashboard({ isActive, scans, selectedScanId, fe
             );
           })}
 
-          <button type="button" className="btn btn-primary" onClick={handleGeneratePortfolio} disabled={portfolioGenerating}>{portfolioGenerating ? "Saving & Generating..." : "Save & Generate"}</button>
+          <button type="button" className="btn btn-primary" onClick={handleGeneratePortfolio} disabled={portfolioGenerating}>{portfolioGenerating ? "Saving & Publishing..." : "Publish to Public Mode"}</button>
           {portfolioError && <p className="error-text">{portfolioError}</p>}
         </div>
       )}
 
-      {portfolioViewMode === "view" && (
+      {portfolioViewMode === "public" && (
         <div className="portfolio-showroom">
           {portfolioArtifact ? (
             <>
@@ -463,29 +483,73 @@ export default function PortfolioDashboard({ isActive, scans, selectedScanId, fe
                 )}
               </div>
 
+              <div className="result-card" style={{ marginBottom: "2rem" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "1rem" }}>
+                  <label className="field" style={{ margin: 0 }}>
+                    <span>Search</span>
+                    <input value={publicSearch} onChange={(e) => setPublicSearch(e.target.value)} placeholder="Search projects or skills" />
+                  </label>
+                  <label className="field" style={{ margin: 0 }}>
+                    <span>Skill filter</span>
+                    <select value={publicSkillFilter} onChange={(e) => setPublicSkillFilter(e.target.value)}>
+                      <option value="all">All skills</option>
+                      {publicSkillOptions.map((skill) => (
+                        <option key={skill} value={skill}>{skill}</option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="field" style={{ margin: 0 }}>
+                    <span>Project type</span>
+                    <select value={publicTypeFilter} onChange={(e) => setPublicTypeFilter(e.target.value)}>
+                      <option value="all">All project types</option>
+                      {publicTypeOptions.map((type) => (
+                        <option key={type} value={type}>{type}</option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="field" style={{ margin: 0 }}>
+                    <span>Focused project</span>
+                    <select value={publicFocusProjectId} onChange={(e) => setPublicFocusProjectId(e.target.value)} disabled={filteredPortfolioItems.length === 0}>
+                      {filteredPortfolioItems.length === 0 ? (
+                        <option value="">No matching projects</option>
+                      ) : (
+                        filteredPortfolioItems.map((item) => (
+                          <option key={item.project_id} value={item.project_id}>{item.project_name}</option>
+                        ))
+                      )}
+                    </select>
+                  </label>
+                </div>
+              </div>
+
               <div style={{ display: "flex", gap: "2rem", alignItems: "flex-start", flexWrap: "wrap" }}>
-                {/* Left Column: Interactive Project List */}
                 <div style={{ flex: "1 1 350px" }}>
                   <h3 style={{ marginTop: 0, marginBottom: "1rem", fontSize: "1.5rem" }}>Project Showcase</h3>
                   <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-                    {visiblePortfolioItems.map((item) => {
+                    {filteredPortfolioItems.map((item) => {
                       const isActiveCard = activeViewItem?.project_id === item.project_id;
                       return (
                         <article 
                           className="portfolio-card" 
                           key={item.project_id}
-                          onClick={() => setActiveViewProjectId(item.project_id)}
                           style={{
-                            cursor: "pointer",
                             transition: "all 0.2s ease",
                             border: isActiveCard ? "2px solid var(--peach-500)" : "1px solid rgba(70, 98, 130, 0.25)",
                             boxShadow: isActiveCard ? "0 4px 12px rgba(240, 122, 74, 0.15)" : "none",
                             margin: 0
                           }}
                         >
-                          <div style={{ height: "140px", background: "#e5e7eb", borderRadius: "8px", marginBottom: "1rem", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                            <p className="muted">🖼️ Thumbnail Placeholder</p>
-                          </div>
+                          {item.thumbnail ? (
+                            <div style={{ height: "140px", background: "#e5e7eb", borderRadius: "8px", marginBottom: "1rem", overflow: "hidden" }}>
+                              <img src={item.thumbnail} alt={`${item.project_name} thumbnail`} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                            </div>
+                          ) : (
+                            <div style={{ height: "140px", background: "linear-gradient(135deg, #dbeafe, #fef3c7)", borderRadius: "8px", marginBottom: "1rem", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                              <span style={{ fontSize: "3rem", fontWeight: 700, color: "var(--ink-900)" }}>
+                                {String(item.project_name || "?").charAt(0).toUpperCase()}
+                              </span>
+                            </div>
+                          )}
                           <h4 style={{ fontSize: "1.25rem", marginBottom: "0.5rem" }}>{item.project_name}</h4>
                           <p style={{ lineHeight: "1.5" }}>{item.project_description || item.text}</p>
                           
@@ -499,6 +563,9 @@ export default function PortfolioDashboard({ isActive, scans, selectedScanId, fe
 
                           {item.tech_stack?.length > 0 && (
                             <p className="muted"><strong>Tech Stack:</strong> {Array.isArray(item.tech_stack) ? item.tech_stack.join(", ") : item.tech_stack}</p>
+                          )}
+                          {item.project_type && (
+                            <p className="muted"><strong>Project Type:</strong> {item.project_type}</p>
                           )}
                           
                           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem", marginTop: "1rem", background: "#f3f4f6", padding: "10px", borderRadius: "8px" }}>
@@ -528,9 +595,13 @@ export default function PortfolioDashboard({ isActive, scans, selectedScanId, fe
                       );
                     })}
                   </div>
+                  {filteredPortfolioItems.length === 0 && (
+                    <div className="result-card" style={{ textAlign: "center" }}>
+                      <p className="muted">No projects match the current public search and filter settings.</p>
+                    </div>
+                  )}
                 </div>
 
-                {/* Right Column: Visuals (Sticky) */}
                 <div style={{ flex: "2 1 500px", position: "sticky", top: "2rem" }}>
                   {activeViewItem ? (
                     <>
@@ -546,18 +617,18 @@ export default function PortfolioDashboard({ isActive, scans, selectedScanId, fe
                       </div>
 
                       <div className="result-card" style={{ marginBottom: "2rem" }}>
-                        <h3 style={{ marginTop: 0, marginBottom: "1rem" }}>Project Timeline</h3>
+                        <h3 style={{ marginTop: 0, marginBottom: "1rem" }}>Skills Timeline</h3>
                         <div style={{ background: "#f9fafb", border: "1px solid #e5e7eb", padding: "1.5rem", borderRadius: "8px" }}>
                           <div style={{ marginBottom: "1rem" }}>
-                            <span className="muted" style={{ margin: 0 }}>Relative durations for showcase projects</span>
+                            <span className="muted" style={{ margin: 0 }}>Skill progression and expertise depth for the published portfolio</span>
                           </div>
-                          {renderTimeline()}
+                          {renderSkillsTimeline()}
                         </div>
                       </div>
                     </>
                   ) : (
                     <div className="result-card" style={{ textAlign: "center", padding: "3rem 1rem" }}>
-                      <p className="muted">Select a project to view its visuals.</p>
+                      <p className="muted">Adjust the public search and filters to focus the portfolio.</p>
                     </div>
                   )}
                 </div>
@@ -572,8 +643,8 @@ export default function PortfolioDashboard({ isActive, scans, selectedScanId, fe
           ) : (
             <div className="result-card" style={{ textAlign: "center", padding: "4rem 2rem" }}>
               <h3 style={{ fontSize: "1.5rem", marginBottom: "1rem" }}>No Portfolio Generated</h3>
-              <p className="muted" style={{ marginBottom: "2rem", fontSize: "1.1rem" }}>Go to Edit Mode, select your projects, and generate the portfolio to see the preview here.</p>
-              <button className="btn btn-primary" onClick={() => setPortfolioViewMode('edit')}>Switch to Edit Mode</button>
+              <p className="muted" style={{ marginBottom: "2rem", fontSize: "1.1rem" }}>Go to Private Mode, customize your showcase, and publish the portfolio to preview it here.</p>
+              <button className="btn btn-primary" onClick={() => setPortfolioViewMode('private')}>Switch to Private Mode</button>
             </div>
           )}
         </div>

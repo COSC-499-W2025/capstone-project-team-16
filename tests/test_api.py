@@ -15,6 +15,9 @@ def _sample_analysis_results(project_suffix="A", zip_hash=None):
                 "languages": ["Python"],
                 "score": 90,
                 "project_type": "collaborative",
+                "duration_days": 90,
+                "first_modified": "2024-01-01T00:00:00",
+                "last_modified": "2024-03-31T00:00:00",
             },
             {
                 "project": f"Beta-{project_suffix}",
@@ -23,10 +26,17 @@ def _sample_analysis_results(project_suffix="A", zip_hash=None):
                 "languages": ["Markdown"],
                 "score": 50,
                 "project_type": "individual",
+                "duration_days": 20,
+                "first_modified": "2024-04-01T00:00:00",
+                "last_modified": "2024-04-20T00:00:00",
             },
         ],
         "resume_summaries": [],
-        "skills_chronological": [],
+        "skills_chronological": [
+            {"skill": "Python", "first_used": "2024-01-01", "last_used": "2024-03-31"},
+            {"skill": "Testing", "first_used": "2024-01-15", "last_used": "2024-03-31"},
+            {"skill": "Docs", "first_used": "2024-04-01", "last_used": "2024-04-20"},
+        ],
         "projects_chronological": [],
         "contributor_profiles": {},
     }
@@ -347,11 +357,26 @@ def test_resume_generate_get_and_edit(monkeypatch):
     client, _state = _client(monkeypatch)
     client.post("/projects/upload", json={"zip_path": "/tmp/sample.zip"})
 
-    gen_resp = client.post("/resume/generate", json={"scan_id": 1, "title": "My Resume"})
+    gen_resp = client.post(
+        "/resume/generate",
+        json={
+            "scan_id": 1,
+            "title": "My Resume",
+            "user_name": "Jane Developer",
+            "user_title": "Software Developer",
+            "user_summary": "Builds polished full-stack products.",
+            "education": ["BSc Computer Science, UBC"],
+            "awards": ["Dean's List"],
+        },
+    )
     assert gen_resp.status_code == 200
     resume = gen_resp.json()["resume"]
     assert resume["resume_id"] == 1
     assert len(resume["data"]["items"]) == 2
+    assert resume["data"]["user_name"] == "Jane Developer"
+    assert resume["data"]["education"] == ["BSc Computer Science, UBC"]
+    assert resume["data"]["awards"] == ["Dean's List"]
+    assert set(resume["data"]["skills_by_level"].keys()) == {"Advanced", "Intermediate", "Familiar"}
 
     get_resp = client.get("/resume/1")
     assert get_resp.status_code == 200
@@ -382,6 +407,8 @@ def test_portfolio_generate_get_and_edit_with_project_customizations(monkeypatch
     portfolio = gen_resp.json()["portfolio"]
     assert portfolio["portfolio_id"] == 1
     assert len(portfolio["data"]["items"]) >= 1
+    assert portfolio["data"]["skills_timeline"]
+    assert portfolio["data"]["items"][0]["project_type"] in {"collaborative", "individual"}
 
     edit_resp = client.post(
         "/portfolio/1/edit",

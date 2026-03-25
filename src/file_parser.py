@@ -1,5 +1,6 @@
 import os
 import shutil
+import subprocess
 import tempfile
 import zipfile
 import hashlib
@@ -148,6 +149,7 @@ def check_file_validity(zip_path):
 
                 file_tree.append({
                     "filename": full_path,
+                    "logical_path": info.filename,
                     "size": info.file_size,
                     "last_modified": info.date_time,
                     "isFile": is_file
@@ -173,10 +175,19 @@ def extract_zip_to_temp(zip_path, zip_ref=None):
     For performance, if an already-open ZipFile object is provided via
     zip_ref, it will be used instead of reopening the archive.
     """
-    temp_dir = tempfile.mkdtemp()
+    preferred_root = "/tmp" if os.path.isdir("/tmp") and os.access("/tmp", os.W_OK) else None
+    temp_dir = tempfile.mkdtemp(dir=preferred_root)
+
+    unzip_cmd = shutil.which("unzip")
+    if unzip_cmd:
+        try:
+            subprocess.run([unzip_cmd, "-q", zip_path, "-d", temp_dir], check=True)
+            return temp_dir
+        except Exception:
+            pass
 
     if zip_ref is not None:
-        # Use the existing open handle (no extra open or central directory read)
+        # Use the existing open handle if shell unzip is unavailable.
         zip_ref.extractall(temp_dir)
     else:
         # Backward-compatible usage if called elsewhere with only zip_path
