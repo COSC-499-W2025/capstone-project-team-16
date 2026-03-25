@@ -33,40 +33,34 @@ Interface Modes: CLI (existing) and FastAPI backend endpoints (current milestone
 
 Output Format (Milestone 1): Text-based (CSV, JSON, or plain text)
 
-## How to Run
+## How to Run (For Testing / Evaluation)
 
-The system is designed to run as a single interactive application. The client (`api_main.py`) will automatically start the backend API server for you. As some of our processes are not integrated into our api, there are additional features such as project manipulation that can be ran locally by running (`main.py`).
+To run the full application (FastAPI backend + React/Electron frontend), you will need to open **two separate terminal windows**.
 
-### Option 1: Docker (Recommended)
-
-Run the following commands to build and launch the interactive client inside a container:
+### Step 1: Start the Backend API
+Open your first terminal in the root directory of the project and run the following commands:
 
 ```bash
-docker compose build
-docker compose run --rm -it skillscope python api_main.py
-```
-
-Alternatively, if you have issues with Docker, you can run the project locally.
-### Option 2: Locally
-
-First, install the dependencies from `requirements.txt`:
-```bash
+# Install Python dependencies (only needed once)
 pip install -r requirements.txt
-```
-Then, run the application from the project root:
-```bash
-python src/main.py
-```
 
-### Option 3: Connected to API
-
-First, install the dependencies from `requirements.txt`:
-```bash
-pip install -r requirements.txt
+# Start the FastAPI server
+python src/api.py
 ```
-Then, run the application from the project root:
+*Leave this terminal open and running in the background.*
+
+### Step 2: Start the Frontend UI
+Open a **second terminal** from the root directory of the project, navigate to the UI folder, and launch the app:
+
 ```bash
-python src/api_main.py
+# Navigate to the frontend directory
+cd src/ui
+
+# Install Node dependencies (only needed once)
+npm install
+
+# Launch the React/Electron application
+npm run dev
 ```
 
 ## Test File
