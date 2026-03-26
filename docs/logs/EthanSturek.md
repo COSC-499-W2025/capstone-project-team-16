@@ -1,4 +1,45 @@
 # Personal Log - Ethan Sturek
+
+# [THIS WEEKS LOG](#2026-mar-15-to-2026-mar-26)
+
+## 2026-MAR-15 to 2026-MAR-26
+
+
+
+
+### Type of Tasks Worked On
+![Screenshot](<screenshots/Ethan/Week 22.png>)
+
+### Recap of Week's Goals
+- Create launch capability for project
+- Finish up Milestone 3
+
+### Features Assigned (Project Plan)
+- Milestone 3 ready
+- Add thumbnails to portfolio export
+- Resume generation rework
+- Launching Script
+  
+### Project Board 
+| Feature | Item Number | Status (Completed/In Progress) | Task Type (Code, Test, Team Work) | Notes |
+|------|------|-----|-------------------------------|-------|
+| Milestone 3 ready | [#274](https://github.com/COSC-499-W2025/capstone-project-team-16/issues/274)| Completed | Code | All identified bugs have been fixed. Front end automated testing using Jest has been made. All tests pass.|
+| Resume generation rework| [#273](https://github.com/COSC-499-W2025/capstone-project-team-16/issues/273)| Completed | Code | Resume generation now reflects our Milestone 2 requirements. |
+| Add thumbnails to portfolio export| [#282](https://github.com/COSC-499-W2025/capstone-project-team-16/issues/282)| Completed | Code | The portfolio now exports thumbnails. |
+| Launching Script | [#281](https://github.com/COSC-499-W2025/capstone-project-team-16/issues/281)| Completed | Code | Added README instructions for installation. Added runtime scripts for Mac and PC. |
+
+
+
+
+### Completed Tasks (Last 2 Weeks)
+- Milestone 3 ready
+- Thumbnail to portfolio export
+- Resume generation rework
+
+### Next Week's Goals
+  - Graduate
+
+
 ## 2026-MAR-08 to 2026-MAR-15
 
 
