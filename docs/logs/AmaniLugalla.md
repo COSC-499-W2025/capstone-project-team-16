@@ -1,4 +1,46 @@
 # Personal Log - Amani Lugalla
+## 2026-MAR-23 to 2026-MAR-29
+
+### Type of Tasks Worked On
+![Screenshot](<screenshots/Amani/Week23.png>)
+
+### Recap of Week's Goals
+- Finish the testing documents for the project, including a test report and known bugs list.
+- Find and fix any active test failures before final submission.
+- Update the GitHub README so it reflects the final product.
+- Clean up local validation files so they do not keep showing up in the repo.
+
+### Features Assigned (Project Plan)
+- Final testing documentation.
+- Resume feature stability.
+- Final README updates and documentation links.
+- Cleanup for local validation files.
+  
+### Tasks from Project Board
+| Feature | Task | Status (Completed/In Progress) | Notes |
+|------|------|-------------------------------|-------|
+| Testing documentation | Create a test report for the current system | Completed | Documented active test files, coverage areas, test strategies, and current suite status |
+| Defect reporting | Write a known bugs list with clear examples | Completed | Recorded specific bugs, affected files, impact, and evidence |
+| Resume reliability | Investigate and fix the failing resume generation path | Completed | Fixed the metadata type issue in resume text generation and removed the failing pytest case |
+| Regression coverage | Add tests so the resume bug does not come back | Completed | Added unit tests for the resume helpers and rechecked the API resume flow |
+| Final documentation | Rewrite the main README for the final product | Completed | Replaced old milestone content with clearer setup, usage, persistence, testing, and documentation sections |
+| Repo maintenance | Ignore local validation fixture directories | Completed | Added `.gitignore` rules so manual validation repos under `input/test-data` do not show up as untracked files |
+| Documentation polish | Update README with demo and API usage details | Completed | Added the video demo link and updated README references for current API usage details |
+
+### Completed Tasks (Last 2 Weeks)
+- Created a test report in `docs/testing/test-report.md` that explains the active tests, testing strategies, and suite status.
+- Created a known bugs document in `docs/testing/known-bugs.md` with clear and reproducible bug descriptions.
+- Investigated the failing resume-generation API test and found that the crash came from assuming metadata values were always strings.
+- Fixed resume text generation so it can safely handle list-based `languages`, `skills`, and `frameworks` values.
+- Added regression tests in `tests/test_resume_generator.py` and confirmed the previously failing API resume test now passes.
+- Re-ran the full Python test suite and confirmed all tests are passing.
+- Rewrote the main `README.md` so the GitHub page now reflects the final product, setup steps, run options, persistence details, testing docs, and related links.
+- Added a video demo section to the README and updated the API port references in the documentation.
+- Updated `.gitignore` to ignore local/manual validation repositories under `input/test-data` without affecting committed test fixtures.
+
+### In-Progress Tasks 
+- Continue final documentation checks across the README, API docs, and any merge-related updates.
+
 ## 2026-MAR-02 to 2026-MAR-08
 
 ### Type of Tasks Worked On
