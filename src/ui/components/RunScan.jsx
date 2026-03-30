@@ -1,6 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 export default function RunScan({ fetchJson, loadScans, setSelectedScanId, isNoise, setActiveTab }) {
+  const [scanAction, setScanAction] = useState("new");
+  const [mergeScanId, setMergeScanId] = useState("");
+  const [availableScans, setAvailableScans] = useState([]);
   const [scanZipFile, setScanZipFile] = useState(null);
   const [scanMode, setScanMode] = useState("basic");
   const [advancedOptions, setAdvancedOptions] = useState({
@@ -13,6 +16,14 @@ export default function RunScan({ fetchJson, loadScans, setSelectedScanId, isNoi
   const [scanResult, setScanResult] = useState(null);
   const [scanError, setScanError] = useState("");
 
+  useEffect(() => {
+    if (scanAction === "merge") {
+      fetchJson("/scans")
+        .then((data) => setAvailableScans(data.scans || []))
+        .catch(console.error);
+    }
+  }, [scanAction, fetchJson]);
+
   const handleAdvancedOptionToggle = (key) => {
     setAdvancedOptions((prev) => ({ ...prev, [key]: !prev[key] }));
   };
@@ -24,6 +35,11 @@ export default function RunScan({ fetchJson, loadScans, setSelectedScanId, isNoi
 
     if (!scanZipFile) {
       setScanError("Select a .zip file before scanning.");
+      return;
+    }
+
+    if (scanAction === "merge" && !mergeScanId) {
+      setScanError("Please select an existing scan to merge into.");
       return;
     }
 
@@ -48,14 +64,21 @@ export default function RunScan({ fetchJson, loadScans, setSelectedScanId, isNoi
 
       const formData = new FormData();
       formData.append("zip", scanZipFile);
-      formData.append("analysis_mode", scanMode);
       formData.append("consent", "true");
       formData.append("persist", "true");
       formData.append("allow_duplicate", allowDuplicate);
-      formData.append("incremental", "false");
 
-      if (scanMode === "advanced") {
-        formData.append("advanced_options", JSON.stringify(advancedOptions));
+      if (scanAction === "merge") {
+        formData.append("incremental", "true");
+        formData.append("existing_scan_id", mergeScanId);
+        const targetScan = availableScans.find(s => String(s.summary_id) === mergeScanId);
+        formData.append("analysis_mode", targetScan?.analysis_mode || "basic");
+      } else {
+        formData.append("incremental", "false");
+        formData.append("analysis_mode", scanMode);
+        if (scanMode === "advanced") {
+          formData.append("advanced_options", JSON.stringify(advancedOptions));
+        }
       }
 
       const result = await fetchJson("/projects/upload", {
@@ -77,8 +100,16 @@ export default function RunScan({ fetchJson, loadScans, setSelectedScanId, isNoi
 
   return (
     <section className="panel">
-      <h2>Run New Scan</h2>
+      <h2>{scanAction === "new" ? "Run New Scan" : "Merge Project into Scan"}</h2>
       <form className="grid-form" onSubmit={handleRunScan}>
+        <div className="field">
+          <span>Action</span>
+          <div className="inline-options">
+            <label><input type="radio" value="new" checked={scanAction === "new"} onChange={() => setScanAction("new")} /> Start new scan</label>
+            <label><input type="radio" value="merge" checked={scanAction === "merge"} onChange={() => setScanAction("merge")} /> Add to existing scan (Merge)</label>
+          </div>
+        </div>
+
         <label className="field">
           <span>Zip file</span>
           <input
@@ -88,15 +119,30 @@ export default function RunScan({ fetchJson, loadScans, setSelectedScanId, isNoi
           />
         </label>
 
-        <div className="field">
-          <span>Analysis mode</span>
-          <div className="inline-options">
-            <label><input type="radio" value="basic" checked={scanMode === "basic"} onChange={() => setScanMode("basic")} /> Basic</label>
-            <label><input type="radio" value="advanced" checked={scanMode === "advanced"} onChange={() => setScanMode("advanced")} /> Advanced</label>
-          </div>
-        </div>
+        {scanAction === "merge" && (
+          <label className="field">
+            <span>Target scan</span>
+            <select value={mergeScanId} onChange={(e) => setMergeScanId(e.target.value)}>
+              <option value="">Select a scan...</option>
+              {availableScans.map((s) => {
+                const ts = s.timestamp ? new Date(s.timestamp.replace("Z", "+00:00")).toLocaleString() : "";
+                return <option key={s.summary_id} value={s.summary_id}>Scan {s.summary_id} - {ts} ({s.analysis_mode})</option>;
+              })}
+            </select>
+          </label>
+        )}
 
-        {scanMode === "advanced" && (
+        {scanAction === "new" && (
+          <>
+            <div className="field">
+              <span>Analysis mode</span>
+              <div className="inline-options">
+                <label><input type="radio" value="basic" checked={scanMode === "basic"} onChange={() => setScanMode("basic")} /> Basic</label>
+                <label><input type="radio" value="advanced" checked={scanMode === "advanced"} onChange={() => setScanMode("advanced")} /> Advanced</label>
+              </div>
+            </div>
+
+            {scanMode === "advanced" && (
           <div className="field">
             <span>Advanced options</span>
             <div className="inline-options wrap">
@@ -110,6 +156,8 @@ export default function RunScan({ fetchJson, loadScans, setSelectedScanId, isNoi
               ))}
             </div>
           </div>
+        )}
+          </>
         )}
 
         <button 

@@ -31,7 +31,7 @@ def _print_line(text: str, file=None) -> None:
 def is_noise(name: str) -> bool:
     """Returns True if the contributor name looks like a bot or system account."""
     n = (name or "").lower()
-    return "bot" in n or "noreply" in n or "github-classroom" in n
+    return "dependabot" in n or "github-actions" in n or "github-classroom" in n or "[bot]" in n
 
 def _role_from_pct(pct: float) -> str:
     """

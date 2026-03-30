@@ -23,7 +23,7 @@ def _fmt_date(val):
     if isinstance(val, datetime):
         return val.date().isoformat()
     if isinstance(val, str):
-        return val.split("T")[0]
+        return val.split("T")[0].split(" ")[0]
     return ""
 
 
@@ -43,6 +43,19 @@ def _save_doc(doc, path):
             return None
 
 
+def _normalize_display_list(value, fallback):
+    """Converts list-like project metadata into a readable string."""
+    if value is None:
+        return fallback
+    if isinstance(value, str):
+        cleaned = value.strip()
+        return cleaned or fallback
+    if isinstance(value, (list, tuple, set)):
+        cleaned_parts = [str(part).strip() for part in value if str(part).strip()]
+        return ", ".join(cleaned_parts) if cleaned_parts else fallback
+    return str(value).strip() or fallback
+
+
 # -------------------------------------------------------------------------
 # 1. GENERAL PROJECT RESUME (Summary of all projects)
 # -------------------------------------------------------------------------
@@ -54,9 +67,9 @@ def build_project_line(p: dict) -> str:
     Used for the full resume summary.
     """
     name = p.get("project", "Unknown")
-    langs = p.get("languages", "Unknown")
-    skills = p.get("skills", "NA")
-    frameworks = p.get("frameworks", "None")
+    langs = _normalize_display_list(p.get("languages", "Unknown"), "Unknown")
+    skills = _normalize_display_list(p.get("skills", "NA"), "NA")
+    frameworks = _normalize_display_list(p.get("frameworks", "None"), "None")
     duration = p.get("duration_days", 0)
     code_files = p.get("code_files", 0)
     test_files = p.get("test_files", 0)
@@ -177,9 +190,9 @@ def _build_personal_project_description(project_name, project_context, user_stat
     Constructs a sentence describing the user's specific contribution to a project.
     """
     # Context from the project as a whole
-    langs = project_context.get("languages", "Unknown")
-    skills = project_context.get("skills", "NA")
-    frameworks = project_context.get("frameworks", "None")
+    langs = _normalize_display_list(project_context.get("languages", "Unknown"), "Unknown")
+    skills = _normalize_display_list(project_context.get("skills", "NA"), "NA")
+    frameworks = _normalize_display_list(project_context.get("frameworks", "None"), "None")
     
     # User specific stats
     u_files = user_stats.get("files_worked", 0)
@@ -239,7 +252,7 @@ def generate_contributor_portfolio(
         return None
 
     safe_name = "".join(c for c in contributor_name if c.isalnum() or c in (' ', '_', '-')).strip()
-    docx_path = os.path.join(RESUME_DIR, f"Resume_{safe_name}.docx")
+    docx_path = os.path.join(RESUME_DIR, f"{safe_name} Resume.docx")
     
     doc = Document()
     
@@ -707,7 +720,7 @@ def render_resume_artifact(artifact_data: dict, output_path: str) -> None:
     doc = Document()
 
     # Header
-    user_name = artifact_data.get("user_name") or "Resume"
+    user_name = artifact_data.get("user_name") or "Project Portfolio Resume"
     title = doc.add_heading(user_name, level=0)
     title.runs[0].font.size = Pt(24)
     
@@ -734,7 +747,10 @@ def render_resume_artifact(artifact_data: dict, output_path: str) -> None:
     # Projects
     items = artifact_data.get("items", [])
     if items:
-        doc.add_heading("Project Experience", level=1)
+        if artifact_data.get("user_summary"):
+            doc.add_heading("Project Experience", level=1)
+        else:
+            doc.add_heading("Top Projects", level=1)
         for item in items:
             p_name = item.get("project_name", "Unknown Project")
             date_str = item.get("date_str", "")
@@ -758,5 +774,31 @@ def render_resume_artifact(artifact_data: dict, output_path: str) -> None:
                 s_p.add_run(", ".join(item_skills))
             
             doc.add_paragraph()
+
+    # Timeline
+    projects_chrono = artifact_data.get("projects_chronological")
+    if projects_chrono:
+        doc.add_heading("Project Timeline", level=1)
+        for p in projects_chrono:
+            para = doc.add_paragraph(style="List Bullet")
+            para.add_run(p["name"]).bold = True
+            para.add_run(f" – {p['first_used']} → {p['last_used']}")
+        doc.add_paragraph()
+
+    # Skills over time
+    skills_chrono = artifact_data.get("skills_chronological")
+    if skills_chrono:
+        doc.add_heading("Skills Used Over Time", level=1)
+        table = doc.add_table(rows=1, cols=3)
+        hdr = table.rows[0].cells
+        hdr[0].text = "Skill"
+        hdr[1].text = "First Used"
+        hdr[2].text = "Last Used"
+        for row in skills_chrono:
+            cells = table.add_row().cells
+            cells[0].text = row["skill"]
+            cells[1].text = row["first_used"]
+            cells[2].text = row["last_used"]
+        doc.add_paragraph()
     
     doc.save(output_path)

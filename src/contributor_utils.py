@@ -69,13 +69,19 @@ def apply_contributor_breakdown(
             per_contributor_pct[key] = pct
             per_contributor_scores[key] = score * (pct / 100.0)
 
+            loc_by_skill = defaultdict(lambda: {"insertions": 0, "deletions": 0})
+
             # skills from loc_by_type
             loc_map = c.get("loc_by_type", {}) or {}
-            for ext in loc_map:
+            for ext, stats in loc_map.items():
                 s = get_skill(ext=ext, skill_map=skill_map, ext_map=lang_map)
+                if not s and ext.startswith('.'):
+                    s = get_skill(ext=ext.lstrip('.'), skill_map=skill_map, ext_map=lang_map)
                 if s:
                     contributor_profiles[key]["skills"].add(s)
                     per_contributor_skills[key].add(s)
+                    loc_by_skill[s]["insertions"] += stats.get("insertions", 0)
+                    loc_by_skill[s]["deletions"] += stats.get("deletions", 0)
 
             # detailed file stats (for resume generator / summary)
             files_edited: List[str] = c.get("files_edited", []) or []
@@ -111,6 +117,7 @@ def apply_contributor_breakdown(
                     "deletions": c.get("deletions", 0),
                     "commit_count": c.get("commit_count", 0),
                     "daily_commits": c.get("daily_commits", {}),
+                    "loc_by_skill": dict(loc_by_skill),
                 }
             )
 

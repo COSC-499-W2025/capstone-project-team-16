@@ -35,7 +35,7 @@ from resume_generator import _build_personal_project_description
 from portfolio_generator import _get_default_tech_stack
 
 # Configuration constants
-API_URL = os.getenv("SKILLSCOPE_API_URL", "http://127.0.0.1:5000")
+API_URL = os.getenv("SKILLSCOPE_API_URL", "http://127.0.0.1:8000")
 INPUT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "input"))
 
 API_PROCESS = None
@@ -578,7 +578,7 @@ def edit_contributor_resume_via_api(scan_id):
                     rid = r.json().get("resume", {}).get("resume_id")
                     exp = requests.get(f"{API_URL}/resume/{rid}/export")
                     if exp.status_code == 200:
-                        safe_title = "".join(c for c in payload["title"] if c.isalnum() or c in (' ', '_', '-')).strip().replace(' ', '_')
+                        safe_title = "".join(c for c in payload["title"] if c.isalnum() or c in (' ', '_', '-')).strip()
                         filename = f"{safe_title}.docx"
                         out_dir = os.path.join(OUTPUT_DIR, "resumes")
                         os.makedirs(out_dir, exist_ok=True)
@@ -806,7 +806,7 @@ def edit_portfolio_via_api(scan_id):
                     pid = r.json().get("portfolio", {}).get("portfolio_id")
                     exp = requests.get(f"{API_URL}/portfolio/{pid}/export")
                     if exp.status_code == 200:
-                        safe_title = f"Portfolio_{contributor_id}".replace(' ', '_')
+                        safe_title = "".join(c for c in payload["title"] if c.isalnum() or c in (' ', '_', '-')).strip()
                         filename = f"{safe_title}.md"
                         out_dir = os.path.join(OUTPUT_DIR, "portfolios")
                         os.makedirs(out_dir, exist_ok=True)
@@ -911,9 +911,12 @@ def generate_artifacts_via_api():
              continue
 
         if endpoint:
-            default_title = f"My {key.capitalize()}"
-            if "contributor_id" in payload:
-                default_title += f" - {payload['contributor_id']}"
+            default_title = f"Project Portfolio {key.capitalize()}"
+            if payload.get("contributor_id"):
+                cleanName = payload["contributor_id"]
+                if "@" in cleanName:
+                    cleanName = cleanName.split("@")[0].replace(".", " ").replace("_", " ").title()
+                default_title = f"{cleanName} {key.capitalize()}"
             
             print(_center_text(f"Generating {key} as '{default_title}'..."))
             payload["title"] = default_title
@@ -928,7 +931,7 @@ def generate_artifacts_via_api():
                         try:
                             export_resp = requests.get(f"{API_URL}/resume/{art_id}/export")
                             if export_resp.status_code == 200:
-                                safe_title = "".join(c for c in payload["title"] if c.isalnum() or c in (' ', '_', '-')).strip().replace(' ', '_')
+                                safe_title = "".join(c for c in payload["title"] if c.isalnum() or c in (' ', '_', '-')).strip()
                                 filename = f"{safe_title}.docx"
                                 out_dir = os.path.join(OUTPUT_DIR, "resumes")
                                 os.makedirs(out_dir, exist_ok=True)
@@ -946,7 +949,7 @@ def generate_artifacts_via_api():
                         try:
                             export_resp = requests.get(f"{API_URL}/portfolio/{art_id}/export")
                             if export_resp.status_code == 200:
-                                safe_title = "".join(c for c in payload["title"] if c.isalnum() or c in (' ', '_', '-')).strip().replace(' ', '_')
+                                safe_title = "".join(c for c in payload["title"] if c.isalnum() or c in (' ', '_', '-')).strip()
                                 filename = f"{safe_title}.md"
                                 out_dir = os.path.join(OUTPUT_DIR, "portfolios")
                                 os.makedirs(out_dir, exist_ok=True)

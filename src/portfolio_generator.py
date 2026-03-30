@@ -1,6 +1,8 @@
 from typing import List, Dict, Any
 from collections import Counter
 import os
+import base64
+import mimetypes
 
 from db import update_full_scan
 from print_utils import _center_text, is_noise
@@ -11,13 +13,14 @@ class Portfolio:
     """
     Represents a professional portfolio for a single contributor.
     """
-    def __init__(self, user_name: str, global_skills: List[str]):
+    def __init__(self, user_name: str, global_skills: List[str], skills_progression: List[Dict[str, Any]] = None):
         self.user_name = user_name
         self.global_skills = sorted(global_skills)
+        self.skills_progression = skills_progression or []
         self.projects = []
 
     def add_project(self, name: str, project_description: str, role_description: str, tech_stack: List[str], impact_score: float, duration_days: int,
-                    commits: int = 0, insertions: int = 0, deletions: int = 0, files_list: List[str] = None):
+                    commits: int = 0, insertions: int = 0, deletions: int = 0, files_list: List[str] = None, thumbnail: str = None):
         """Adds a project entry to the portfolio."""
         file_breakdown_str = ""
         if files_list:
@@ -36,7 +39,8 @@ class Portfolio:
             "Commits": commits,
             "Lines Added": insertions,
             "Lines Removed": deletions,
-            "File Breakdown": file_breakdown_str
+            "File Breakdown": file_breakdown_str,
+            "Thumbnail": thumbnail
         })
 
     def to_markdown(self) -> str:
@@ -49,12 +53,36 @@ class Portfolio:
         else:
             md += "No specific skills detected.\n\n"
             
+        if self.skills_progression:
+            md += "## Skills Progression & Depth\n\n"
+            md += "| Skill | First Used | Last Used | Projects | Lines Added | Lines Removed |\n"
+            md += "|-------|------------|-----------|----------|-------------|---------------|\n"
+            for sp in self.skills_progression:
+                f_used = sp.get('first_used') or 'Unknown'
+                l_used = sp.get('last_used') or 'Unknown'
+                ins_val = sp.get('insertions', 0)
+                del_val = sp.get('deletions', 0)
+                ins_str = f"+{ins_val}" if ins_val > 0 else "-"
+                del_str = f"-{del_val}" if del_val > 0 else "-"
+                md += f"| **{sp.get('skill', 'Unknown')}** | {f_used} | {l_used} | {sp.get('projects_count', 0)} | {ins_str} | {del_str} |\n"
+            md += "\n"
+            
         md += "## Project Showcase\n"
         if not self.projects:
             md += "No projects found.\n"
         
         for p in self.projects:
             md += f"### {p['Project Name']}\n"
+            
+            if p.get("Thumbnail"):
+                thumb_path = os.path.join(OUTPUT_DIR, "thumbnails", p["Thumbnail"])
+                if os.path.exists(thumb_path):
+                    mime_type, _ = mimetypes.guess_type(thumb_path)
+                    mime_type = mime_type or "image/png"
+                    with open(thumb_path, "rb") as f:
+                        b64 = base64.b64encode(f.read()).decode("utf-8")
+                    md += f'<img src="data:{mime_type};base64,{b64}" alt="{p["Project Name"]} thumbnail" width="500"/>\n\n'
+
             if p.get("Description"):
                 md += f"- **Description:** {p['Description']}\n"
             md += f"- **Role/Contribution:** {p['Role/Contribution']}\n"
@@ -397,9 +425,10 @@ def generate_portfolio_markdown(artifact_data: Dict[str, Any]) -> str:
     """
     user_name = artifact_data.get("contributor_id", "User")
     global_skills = artifact_data.get("global_skills", [])
+    skills_progression = artifact_data.get("skills_progression", [])
     
     # Create a Portfolio object to reuse its to_markdown method
-    p_obj = Portfolio(user_name, global_skills)
+    p_obj = Portfolio(user_name, global_skills, skills_progression)
     
     for item in artifact_data.get("items", []):
         # Reconstruct file breakdown string if needed
@@ -421,7 +450,8 @@ def generate_portfolio_markdown(artifact_data: Dict[str, Any]) -> str:
             "Commits": item.get("commits", 0),
             "Lines Added": item.get("lines_added", 0),
             "Lines Removed": item.get("lines_removed", 0),
-            "File Breakdown": fb_str
+            "File Breakdown": fb_str,
+            "Thumbnail": item.get("thumbnail")
         })
         
     return p_obj.to_markdown()

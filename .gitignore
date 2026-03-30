@@ -26,3 +26,8 @@ src/ui/dist/
 #Scan results
 output
 skillscope.db
+
+# Local validation and manual test-data repos
+input/test-data/full_project_detail_validation_repo/
+input/test-data/git_history_validation_repo/
+input/test-data/manual_git_check/
