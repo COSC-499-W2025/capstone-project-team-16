@@ -705,3 +705,49 @@ Overall, I think we have completed all the requirement we need together as a tea
 
 - This week focus was on fixing/connecting some bugs from last week features that were implemented. I wasn't able to get a lot done this week however this is work in progress. It need some changes to the whole flow (since the custimaztion features need to overwrite our current flow, so I need a way to keep best of both worlds from our original flow and new flow that will be implemented) and so need to rewrite some pipeline so need a lot of work done.
 
+## 2026-Mar-15 to 2026-Mar-29
+
+### Type of Tasks Worked On
+
+
+<img width="966" height="558" alt="Screenshot 2026-03-29 at 11 46 06 PM" src="https://github.com/user-attachments/assets/940399e7-b5f9-43d3-b999-9ca33baec3ff" />
+
+
+
+
+
+### Recap of Week's Goals
+
+- Cleaning up/ bug fixes
+- Read me
+- DFD diagram level 0
+- DFD diagram level 1
+
+
+### Features Assigned (Project Plan)
+- DFD diagrams
+- Bugs
+
+
+### Tasks from Project Board
+| Feature | Task | Status (Completed/In Progress) | Notes |
+|------|------|-------------------------------|-------|
+| DFD diagrams | Complete | … |
+
+
+
+### Completed/In-Progress Tasks (Last 2 Weeks)
+- Allow users to choose which information is represented
+- Re-ranking of projects
+- Corrections to chronology
+- Attributes for project comparison
+- Skills to highlight
+- Projects selected for showcase
+- Incorporate a key role of the user in a given project
+- Video demo
+- DFD diagrams
+
+### Additional Context (Optional)
+
+- This week focus was on fixing/connecting some bugs and working on our presenation. I also worked on the system as a whole and our DFD diagrams.
+
